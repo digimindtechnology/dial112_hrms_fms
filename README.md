@@ -1,4 +1,4 @@
-# Procure 10X — Back Office (Django)
+# DIAL-112 HRMS & FMS — Back Office (Django)
 
 Procurement back-office portal built on **Django 6.0.5** with Materio Bootstrap 5 theme. PostgreSQL backend, S3 file storage, SMS-based OTP authentication, role-based access control, and full CRUD with import/export.
 
