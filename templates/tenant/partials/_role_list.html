@@ -1,0 +1,40 @@
+ {% load static %}
+ {% load ui_filter_tags %}
+
+<div class="col-xl-4 col-lg-6 col-md-6">
+        <div class="card h-100">
+            <div class="row h-100">
+                <div class="col-sm-5">
+                    <div class="d-flex align-items-end h-100 justify-content-center mt-sm-0 mt-4">
+                        <img src="{% static 'assets/img/illustrations/add-new-roles.png' %}" class="img-fluid mt-sm-4 mt-md-0" alt="add-new-roles" width="83">
+                    </div>
+                </div>
+                <div class="col-sm-7">
+                    <div class="card-body text-sm-end text-center ps-sm-0">
+                        <button onclick="AddUpdateRoleFrom('0')" class="btn btn-sm btn-primary mb-4 text-nowrap add-new-role">Add New Role</button>
+                        <p class="mb-0"> Add new role, <br> if it doesn't exist.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% for r in roleList %}
+    <div class="col-xl-4 col-lg-6 col-md-6">
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                {{r.tenant_id|GetRoleWiseUserList:r.role_id}}
+            </div>
+            <div class="d-flex justify-content-between align-items-end">
+                <div class="role-heading">
+                    <h5 class="mb-1"><i class="ti tabler-user-check"></i> {{r.role_name}}</h5>
+                    <a href="#" onclick="AddUpdateRoleFrom('{{r.role_id}}')" class="role-edit-modal"><span><i class="menu-icon icon-base ti tabler-edit"></i>Edit Role</span></a>
+                </div>
+                <a title="copy" href="#" onclick="CopyRole({{r.role_id}})"><i class="menu-icon icon-base ti tabler-files"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+

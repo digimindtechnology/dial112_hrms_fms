@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="/static/assets/vendor/libs/select2/select2.css">
+<script src="/static/assets/vendor/libs/jquery/jquery.js"></script>
+<script src="/static/assets/vendor/libs/select2/select2.js"></script>
+
+<script>
+    initTenantSelect2();
+    function initTenantSelect2() {
+        if (!$.fn.select2) return;
+        $('.select2').each(function () {
+            var $this = $(this);
+            if ($this.hasClass('select2-hidden-accessible')) {
+                $this.select2('destroy');
+            }
+            if (!$this.parent().hasClass('position-relative')) {
+                $this.wrap('<div class="position-relative"></div>');
+            }
+            $this.select2({
+                placeholder: $this.find('option:first').text(),
+                dropdownParent: $this.parent()
+            });
+        });
+    }
+</script>

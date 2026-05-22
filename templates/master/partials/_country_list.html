@@ -1,0 +1,58 @@
+
+
+<div>
+    <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">Countries</h5>
+        <div class="d-flex gap-2">
+            <button class="btn btn-success btn-sm" onclick="showImportModal('Country')">
+                <i class="ti tabler-upload me-1"></i> Import
+            </button>
+            <div class="dropdown">
+                <button class="btn btn-info btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="ti tabler-download me-1"></i> Export
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'ExportCSV' 'Country' %}">CSV</a></li>
+                    <li><a class="dropdown-item" href="{% url 'ExportExcel' 'Country' %}">Excel</a></li>
+                </ul>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="openSetupForm('{% url 'AddUpdateCountry' %}')">
+                <i class="ti tabler-plus me-1"></i> Add Country
+            </button>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover" id="countryTable">
+            <thead class="border-top">
+            <tr>
+                <th>Sr.</th>
+                <th>Country Name</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for c in countries %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ c.country_name }}</td>
+                    <td><span
+                            class="badge bg-label-{% if c.is_active %}success{% else %}danger{% endif %}">{% if c.is_active %}
+                        Active{% else %}Inactive{% endif %}</span></td>
+                    <td>
+                        <button class="btn btn-icon btn-text-secondary waves-effect rounded-pill"
+                                onclick="openSetupForm('{% url 'AddUpdateCountry' c.country_id %}')">
+                            <i class="ti tabler-edit ti-md"></i>
+                        </button>
+                        <button class="btn btn-icon btn-text-danger waves-effect rounded-pill"
+                                onclick="deleteSetupItem('{% url 'DeleteCountry' %}', {{ c.country_id }}, 'country')">
+                            <i class="ti tabler-trash ti-md"></i>
+                        </button>
+                    </td>
+                </tr>
+            {% empty %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

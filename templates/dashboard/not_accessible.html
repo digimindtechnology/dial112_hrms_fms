@@ -1,0 +1,17 @@
+{% extends "layout/layout_base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-xxl container-p-y">
+    <div class="misc-wrapper text-center">
+      <h1 class="mb-2 mx-2" style="line-height: 6rem;font-size: 6rem;color: indianred;">401</h1>
+      <h4 class="mb-2 mx-2" style="color: red;">Access Denied....🔐</h4>
+      <p class="mb-1 mx-2">You don't have permission to access this page.</p>
+      <p class="mb-4 mx-2 text-body-secondary" style="font-size:0.9rem;">Contact your administrator for access.</p>
+      <div class="mt-1">
+        <img src="/static/assets/img/illustrations/wizard-create-deal-girl-with-laptop-dark.png" alt="page-misc-not-authorized" style="width: 250px;height: 110px;">
+      </div>
+          <a href="/dashboard/home/" class="btn btn-primary waves-effect waves-light">Back to home</a>
+    </div>
+  </div>
+{% endblock content %}

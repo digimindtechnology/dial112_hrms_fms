@@ -1,0 +1,252 @@
+{% extends "layout/layout_base.html" %}
+{% load static %}
+{% load ui_filter_tags %}
+
+{% block content %}
+    {% if profile %}
+        <!-- Header Banner -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-6">
+                    <div class="user-profile-header-banner">
+                        <img src="/static/assets/img/pages/profile-banner.png" alt="Banner image" class="rounded-top"
+                             style="width: 100%; height: 150px; object-fit: cover;"/>
+                    </div>
+                    <div class="user-profile-header d-flex flex-column flex-lg-row text-sm-start text-center mb-4">
+                        <div class="flex-shrink-0 mt-n2 mx-sm-0 mx-auto">
+                            <img src="{% if profile.profile_picture_s3_url %}{{ request.S3_URL }}{{ profile.profile_picture_s3_url }}{% else %}/static/assets/img/avatars/NA.png{% endif %}"
+                                 alt="user image" class="d-block h-auto ms-0 ms-sm-6 rounded user-profile-img"
+                                 style="width: 120px; height: 120px; border: 4px solid #fff; margin-top: -60px;">
+                        </div>
+                        <div class="flex-grow-1 mt-3 mt-lg-4">
+                            <div class="d-flex align-items-md-end align-items-sm-start align-items-center justify-content-md-between justify-content-start mx-5 flex-md-row flex-column gap-4">
+                                <div class="user-profile-info">
+                                    <h4 class="mb-2 mt-lg-2">{{ profile.user.first_name }} {{ profile.user.last_name }}</h4>
+                                    <ul class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-4 my-2">
+                                        <li class="list-inline-item d-flex gap-2 align-items-center">
+                                            <i class="icon-base ti tabler-crown icon-lg"></i>
+                                            <span class="fw-medium">{{ profile.role.role_name|default:"No Role" }}</span>
+                                        </li>
+                                        <li class="list-inline-item d-flex gap-2 align-items-center">
+                                            <i class="icon-base ti tabler-map-pin icon-lg"></i>
+                                            <span class="fw-medium">{{ profile.city|default:"Location N/A" }}</span>
+                                        </li>
+                                        <li class="list-inline-item d-flex gap-2 align-items-center">
+                                            <i class="icon-base ti tabler-calendar icon-lg"></i>
+                                            <span class="fw-medium">Joined: {{ date_joined|dyn_date:request.date_format_value }}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="d-flex gap-3">
+                                    <a href="{% url 'user-list' %}" class="btn btn-label-secondary">
+                                        <i class="ti tabler-arrow-left me-2"></i> Back
+                                    </a>
+                                    <a href="{% url 'user-update-form' profile.user.id %}" class="btn btn-primary">
+                                        <i class="ti tabler-edit me-2"></i> Edit Profile
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--/ Header -->
+    {% endif %}
+
+    <!-- Main Content Area - Two Column Layout -->
+    <div class="row g-6">
+        <!-- Left Column: Personal Information -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="ti tabler-user-circle me-2"></i> Personal Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="mb-4 col-md-6">
+                            <span class="text-muted d-block mb-1">First Name</span>
+                            <span class="fw-medium text-heading">{{ profile.user.first_name|default:"-" }}</span>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <span class="text-muted d-block mb-1">Last Name</span>
+                            <span class="fw-medium text-heading">{{ profile.user.last_name|default:"-" }}</span>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <span class="text-muted d-block mb-1">Email Address</span>
+                            <span class="fw-medium text-heading">{{ profile.user.email|default:"-" }}</span>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <span class="text-muted d-block mb-1">Mobile Number</span>
+                            <span class="fw-medium text-heading">{{ profile.mobile|default:"-" }}</span>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <span class="text-muted d-block mb-1">Gender</span>
+                            <span class="fw-medium text-heading">{{ profile.gender.gender_name|default:"-" }}</span>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <span class="text-muted d-block mb-1">Assigned Role</span>
+                            <span class="fw-medium text-heading">{{ profile.role.role_name|default:"-" }}</span>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <span class="text-muted d-block mb-1">Country</span>
+                            <span class="fw-medium text-heading">{{ profile.country.country_name|default:"-" }}</span>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <span class="text-muted d-block mb-1">State</span>
+                            <span class="fw-medium text-heading">{{ profile.state.state_name|default:"-" }}</span>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <span class="text-muted d-block mb-1">City</span>
+                            <span class="fw-medium text-heading">{{ profile.city|default:"-" }}</span>
+                        </div>
+                        <div class="mb-4 col-md-12">
+                            <span class="text-muted d-block mb-1">Address</span>
+                            <span class="fw-medium text-heading">{{ profile.address|default:"-" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Account Status & Security -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="ti tabler-shield-lock me-2"></i> Account Status & Security
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="mb-4 col-md-6">
+                            <span class="text-muted d-block mb-2">Profile Status</span>
+                            {% if profile.user.is_active %}
+                                <span class="badge bg-label-success fs-6">Active</span>
+                            {% else %}
+                                <span class="badge bg-label-danger fs-6">Inactive</span>
+                            {% endif %}
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <span class="text-muted d-block mb-2">OTP Authentication</span>
+                            {% if profile.is_login_with_otp %}
+                                <span class="badge bg-label-primary fs-6">Enabled</span>
+                            {% else %}
+                                <span class="badge bg-label-secondary fs-6">Disabled</span>
+                            {% endif %}
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <span class="text-muted d-block mb-1">Username / Login ID</span>
+                            <span class="fw-medium text-heading">{{ profile.user.username|default:"-" }}</span>
+                        </div>
+<!--                        <div class="mb-4 col-md-6">-->
+<!--                            <span class="text-muted d-block mb-1">Password Status</span>-->
+<!--                            {% if profile.is_system_assigned_password %}-->
+<!--                                <span class="badge bg-label-warning">System Assigned</span>-->
+<!--                            {% else %}-->
+<!--                                <span class="badge bg-label-success">Custom Password</span>-->
+<!--                            {% endif %}-->
+<!--                        </div>-->
+                        <div class="mb-4 col-md-6">
+                            <span class="text-muted d-block mb-1">Failed OTP Attempts</span>
+                            <span class="fw-medium text-heading">
+                                {% if profile.total_wrong_otp %}
+                                    <span class="text-danger">{{ profile.total_wrong_otp }}</span>
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <span class="text-muted d-block mb-1">Profile Completeness</span>
+                            <div class="d-flex align-items-center">
+                                <span class="fw-medium me-2">{% if is_profile_complete %}Complete{% else %}Incomplete{% endif %}</span>
+                                <i class="ti {% if is_profile_complete %}tabler-check-circle text-success{% else %}tabler-alert-circle text-warning{% endif %} icon-sm"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login History Section - Full Width Table -->
+    <div class="row mt-6">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="ti tabler-history me-2"></i> Recent Login History
+                    </h5>
+                    <span class="badge bg-label-secondary">{{ loginhistory|length }} recent records</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="text-truncate">Device / Browser</th>
+                                    <th class="text-truncate">IP / MAC Address</th>
+                                    <th class="text-truncate">Status</th>
+                                    <th class="text-truncate">Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for logininfo in loginhistory %}
+                                    <tr>
+                                        <td class="text-truncate">
+                                            <div class="d-flex align-items-center">
+                                                {% if logininfo.browser_os_info|lower == 'chrome' %}
+                                                    <i class='ti tabler-brand-chrome ti-md text-info me-2'></i>
+                                                {% elif logininfo.browser_os_info|lower == 'firefox' %}
+                                                    <i class='ti tabler-brand-firefox ti-md text-warning me-2'></i>
+                                                {% elif logininfo.browser_os_info|lower == 'safari' %}
+                                                    <i class='ti tabler-compass ti-md text-danger me-2'></i>
+                                                {% elif logininfo.browser_os_info|lower == 'edge' %}
+                                                    <i class='ti tabler-brand-edge ti-md text-primary me-2'></i>
+                                                {% else %}
+                                                    <i class='ti tabler-world-upload ti-md me-2'></i>
+                                                {% endif %}
+                                                <span class="fw-medium">{{ logininfo.browser_os_info|default:"Unknown"|capfirst }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-truncate">{{ logininfo.ip_or_mac|default:"-" }}</td>
+                                        <td>
+                                            {% if logininfo.is_active %}
+                                                <span class="badge bg-label-success">
+                                                    <i class="ti tabler-check me-1"></i> Success
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-label-danger">
+                                                    <i class="ti tabler-x me-1"></i> Failed
+                                                </span>
+                                            {% endif %}
+                                            {% if logininfo.message %}
+                                                <br><small class="text-muted">{{ logininfo.message|truncatechars:30 }}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-truncate">{{ logininfo.created_date|dyn_date:request.date_format_value }} {{ logininfo.created_date|dyn_time:request.time_format_value }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-5">
+                                            <i class="ti tabler-logout icon-lg mb-2 d-block"></i>
+                                            No login history available for this user.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% if loginhistory and loginhistory|length >= 10 %}
+                    <div class="card-footer text-center">
+                        <a href="#" class="text-muted">View full history <i class="ti tabler-arrow-right ms-1"></i></a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

@@ -1,0 +1,56 @@
+<div>
+    <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">Time Zones</h5>
+        <div class="d-flex gap-2">
+            <button class="btn btn-success btn-sm" onclick="showImportModal('TimeZone')">
+                <i class="ti tabler-upload me-1"></i> Import
+            </button>
+            <div class="dropdown">
+                <button class="btn btn-info btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="ti tabler-download me-1"></i> Export
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'ExportCSV' 'TimeZone' %}">CSV</a></li>
+                    <li><a class="dropdown-item" href="{% url 'ExportExcel' 'TimeZone' %}">Excel</a></li>
+                </ul>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="openSetupForm('{% url 'AddUpdateTimeZone' %}')">
+                <i class="ti tabler-plus me-1"></i> Add Time Zone
+            </button>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover" id="timezoneTable">
+            <thead class="border-top">
+                <tr>
+                      <th>Sr.</th>
+                    <th>Time Zone Name</th>
+                    <th>Display Label</th>
+                    <th>UTC Offset</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tz in timezones %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ tz.time_zone_name }}</td>
+                    <td>{{ tz.display_label }}</td>
+                    <td>{{ tz.utc_offset|default:'-' }}</td>
+                    <td><span class="badge bg-label-{% if tz.is_active %}success{% else %}danger{% endif %}">{% if tz.is_active %}Active{% else %}Inactive{% endif %}</span></td>
+                    <td>
+                        <button class="btn btn-icon btn-text-secondary waves-effect rounded-pill" onclick="openSetupForm('{% url 'AddUpdateTimeZone' tz.time_zone_id %}')">
+                            <i class="ti tabler-edit ti-md"></i>
+                        </button>
+                        <button class="btn btn-icon btn-text-danger waves-effect rounded-pill" onclick="deleteSetupItem('{% url 'DeleteTimeZone' %}', {{ tz.time_zone_id }}, 'time zone')">
+                            <i class="ti tabler-trash ti-md"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

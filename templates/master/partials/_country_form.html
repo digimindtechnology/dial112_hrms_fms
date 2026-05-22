@@ -1,0 +1,39 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">{% if country %}Edit Country{% else %}Add Country{% endif %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <form id="frm_Country" method="post" action="{% url 'AddUpdateCountry' %}{% if country %}{{ country.country_id }}/{% endif %}">
+        {% csrf_token %}
+        <div class="modal-body">
+            <div class="mb-4">
+                <label class="form-label">Country Name <span class="text-danger">*</span></label>
+                <input type="text" name="country_name" class="form-control" value="{{ country.country_name|default:'' }}" required placeholder="Enter country name">
+            </div>
+            <div class="mb-4">
+                <div class="form-check">
+                    <input type="checkbox" name="is_active" class="form-check-input" id="country_active" {% if country.is_active or not country %}checked{% endif %}>
+                    <label class="form-check-label" for="country_active">Active</label>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary loading_spinner">{% if country %}Update{% else %}Save{% endif %}</button>
+        </div>
+    </form>
+</div>
+<script>
+$('#frm_Country').on('submit', function(e) {
+    e.preventDefault();
+    $.post($(this).attr('action'), $(this).serialize(), function(response) {
+        if (response.success) {
+            $('#Modal_SetupForm').modal('hide');
+            $.get("{% url 'CountryList' %}", function(d) {
+                $('#div_CountryList').html(d);
+                initDataTable('#countryTable');
+            });
+        }
+    });
+});
+</script>

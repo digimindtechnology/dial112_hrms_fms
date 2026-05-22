@@ -1,0 +1,502 @@
+{% extends "layout/layout_base.html" %}
+{% load static %}
+
+
+{% block content %}
+
+    <!-- Navbar pills -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="nav-align-top">
+                <ul class="nav nav-pills flex-column flex-sm-row mb-6 gap-sm-0 gap-2" role="tablist">
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {% if active_tab == 'details' %}active{% endif %}"
+                                role="tab" data-bs-toggle="tab" data-bs-target="#navs-user-details"
+                                aria-selected="true">
+                            <i class="icon-base ti tabler-user-check icon-sm me-1_5"></i> User Details
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {% if active_tab == 'security' %}active{% endif %}"
+                                role="tab" data-bs-toggle="tab" data-bs-target="#navs-user-login" aria-selected="false">
+                            <i class="icon-base ti tabler-lock icon-sm me-1_5"></i> Login ID & Password
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {% if active_tab == 'logs' %}active{% endif %}" role="tab"
+                                data-bs-toggle="tab" data-bs-target="#navs-user-logs" aria-selected="false">
+                            <i class="icon-base ti tabler-device-laptop icon-sm me-1_5"></i> Login History
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!--/ Navbar pills -->
+
+    <!-- Tab Content -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-6">
+                <div class="card-body">
+                    <div class="tab-content p-0 border-0 shadow-none">
+
+                        <!-- TAB 1: User Details & Role -->
+                        <div class="tab-pane fade {% if active_tab == 'details' %}show active{% endif %}"
+                             id="navs-user-details" role="tabpanel">
+                            <form class="needs-validation" novalidate id="formUserDetails" method="POST"
+                                  enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ profile.user.id|default:'' }}">
+
+                                <h5 class="card-title mb-4">Personal Information & Role</h5>
+                                <hr>
+
+
+                                <!-- User Info Fields -->
+                                <div class="row">
+                                    <div class="mb-4 col-md-4">
+                                        <label class="form-label">First Name <span class="text-danger">*</span></label>
+                                        <input class="form-control" required type="text" id="userFirstName"
+                                               name="userFirstName" value="{{ profile.user.first_name|default:'' }}"
+                                               autofocus/>
+                                        <div class="invalid-feedback">Please enter a first name.</div>
+                                    </div>
+                                    <div class="mb-4 col-md-4">
+                                        <label class="form-label">Last Name <span class="text-danger">*</span></label>
+                                        <input class="form-control" required type="text" id="userLastName"
+                                               name="userLastName" value="{{ profile.user.last_name|default:'' }}"/>
+                                        <div class="invalid-feedback">Please enter a last name.</div>
+                                    </div>
+                                   <div class="mb-4 col-md-4">
+                                        <label class="form-label">Gender <span class="text-danger">*</span></label>
+                                        <select class="select2 form-select" id="usergender" name="gender" required>
+                                            <option value="">Select Gender</option>
+                                            {% for g in gender %}
+                                                <option value="{{ g.gender_id }}"
+                                                        {% if profile and g.gender_id == profile.gender_id %}selected{% endif %}>
+                                                    {{ g.gender_name|default:'' }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="invalid-feedback">Please select a gender.</div>
+                                    </div>
+                                    <div class="mb-4 col-md-8">
+                                        <label class="form-label">E-mail <span class="text-danger">*</span></label>
+                                        <input class="form-control" type="email" required id="userEmail"
+                                               name="userEmail" value="{{ profile.user.email|default:'' }}"
+                                               placeholder="john.doe@example.com"/>
+                                        <div class="invalid-feedback">Please enter a valid email.</div>
+                                    </div>
+                                    <div class="mb-4 col-md-4">
+                                        <label class="form-label">Mobile Number</label>
+                                        <input type="text" id="userPhone" name="userPhone" maxlength="15"
+                                               value="{{ profile.mobile|default:'' }}" class="form-control"
+                                               placeholder="202 555 0111"/>
+                                    </div>
+
+
+
+                                    <div class="mb-4 col-md-4">
+                                        <label class="form-label">Assigned Role <span
+                                                class="text-danger">*</span></label>
+                                        <select class="select2 form-select" id="userrole" name="role" required>
+                                            <option value="">Select Role</option>
+                                            {% for r in role %}
+                                                <option value="{{ r.role_id }}"
+                                                        {% if profile and r.role_id == profile.role_id %}selected{% endif %}>
+                                                    {{ r.role_name }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="invalid-feedback">Please select a role.</div>
+                                    </div>
+
+                                    <div class="mb-4 col-md-4">
+                                        <label class="form-label">Country <span class="text-danger">*</span></label>
+                                        <select class="select2 form-select" id="country_id" name="country_id" required>
+                                            <option value="">Please Select Country</option>
+                                            {% for entry in country %}
+                                                <option value="{{ entry.country_id }}"
+                                                        {% if profile and entry.country_id == profile.country_id %}
+                                                        selected {% endif %}>
+                                                    {{ entry.country_name }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="invalid-feedback">Please select a country.</div>
+                                    </div>
+
+                                    <div class="mb-4 col-md-4">
+                                        <label class="form-label">State <span class="text-danger">*</span></label>
+                                        <select class="select2 form-select" id="state_id" name="state_id"
+                                                required></select>
+                                        <div class="invalid-feedback">Please select a state.</div>
+                                    </div>
+
+                                    <div class="mb-4 col-md-4">
+                                        <label for="city" class="form-label">City</label>
+                                        <input class="form-control" type="text" id="city" name="city"
+                                               value="{{ profile.city|default:'' }}" placeholder=""/>
+                                    </div>
+                                    <div class="mb-4 col-md-8">
+                                        <label class="form-label">Address</label>
+                                        <input type="text" class="form-control" id="userAddress" name="userAddress"
+                                               value="{{ profile.address|default:'' }}" placeholder="High Street"/>
+                                    </div>
+
+                                    <div class="mb-4 col-md-4">
+                                        <label class="form-label">Currency <span class="text-danger">*</span></label>
+                                        <select name="currency_id" class="select2 form-select" required>
+                                            <option value="">Please Select Currency</option>
+                                            {% for entry in currencyList %}
+                                                <option {% if entry.currency_id == profile.currency_id %}
+                                                    selected {% endif %}
+                                                    value="{{ entry.currency_id }}">
+                                                    {{ entry.currency_symbol }} {{ entry.currency_code }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="invalid-feedback"> Please select your currency.</div>
+                                    </div>
+
+                                    <div class="mb-4 col-md-4">
+                                        <label for="timeZones" class="form-label">Time zone <span
+                                                class="text-danger">*</span></label>
+                                        <select name="time_zone" class="select2 form-select" data-allow-clear="true"
+                                                required>
+                                            <option value="">Please Select Timezone</option>
+                                            {% for tz in timeZoneList %}
+                                                <option value="{{ tz.time_zone_id }}"
+                                                        {% if tz.time_zone_id == profile.time_zone_id %}
+                                                        selected {% endif %}>
+                                                    {{ tz.display_label }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="invalid-feedback"> Please select your time zone.</div>
+                                    </div>
+
+                                    <div class="mb-4 col-md-4">
+                                        <label for="dateFormat" class="form-label">Date Format <span
+                                                class="text-danger">*</span></label>
+                                        <select name="date_formate_view" class="select2 form-select"
+                                                data-allow-clear="true"
+                                                required>
+                                            <option value="">Please Select Date Format</option>
+                                            {% for df in dateFormatList %}
+                                                <option value="{{ df.date_format_id }}"
+                                                        {% if df.date_format_id == profile.date_formate_view_id %}
+                                                        selected {% endif %}>
+                                                    {{ df.display_label }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="invalid-feedback"> Please select your date format.</div>
+                                    </div>
+                                    <div class="mb-4 col-md-4">
+                                        <label for="timeFormat" class="form-label">Time Format <span
+                                                class="text-danger">*</span></label>
+                                        <select name="time_formate_view" class="select2 form-select"
+                                                data-allow-clear="true"
+                                                required>
+                                            <option value="">Please Select Time Format</option>
+                                            {% for tf in timeFormatList %}
+                                                <option value="{{ tf.time_format_id }}"
+                                                        {% if tf.time_format_id == profile.time_formate_view_id %}
+                                                        selected {% endif %}>
+                                                    {{ tf.display_label }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="invalid-feedback"> Please select your time format.</div>
+                                    </div>
+
+
+                                    <!-- Account Status -->
+                                    <div class="mb-4 col-md-4">
+                                        <label class="form-label d-block">Account Status</label>
+                                        <label class="switch switch-primary mt-2">
+                                            <input type="checkbox" class="switch-input" id="edituserstatus"
+                                                   name="edituserstatus"
+                                                   {% if profile.user.is_active or not profile %}checked{% endif %}>
+                                            <span class="switch-toggle-slider">
+                                                <span class="switch-on">
+                                                    <i class="icon-base ti tabler-check"></i>
+                                                </span>
+                                                <span class="switch-off">
+                                                    <i class="icon-base ti tabler-x"></i>
+                                                </span>
+                                            </span>
+                                            <span class="switch-label">Active</span>
+                                        </label>
+                                    </div>
+
+                                    <!-- Login with OTP -->
+                                    <div class="mb-4 col-md-4">
+                                        <label class="form-label d-block">OTP Authentication</label>
+                                        <label class="switch switch-primary mt-2">
+                                            <input type="checkbox" class="switch-input" id="is_login_with_otp"
+                                                   name="is_login_with_otp"
+                                                   {% if profile.is_login_with_otp %}checked{% endif %}>
+                                            <span class="switch-toggle-slider">
+                                                <span class="switch-on">
+                                                    <i class="icon-base ti tabler-check"></i>
+                                                </span>
+                                                <span class="switch-off">
+                                                    <i class="icon-base ti tabler-x"></i>
+                                                </span>
+                                            </span>
+                                            <span class="switch-label">Enable OTP Login</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Profile Pic -->
+                                <div class="d-flex align-items-start align-items-sm-center gap-6 mb-6">
+                                    <img src="
+
+                                            {% if profile.profile_picture_s3_url %}{{ request.S3_URL }}{{ profile.profile_picture_s3_url }}{% else %}{% static 'assets/img/avatars/NA.png' %}{% endif %}"
+                                         alt="user-avatar" class="d-block w-px-100 h-px-100 rounded"
+                                         id="uploadProfilePic"/>
+                                    <div class="button-wrapper">
+                                        <label class="btn btn-primary me-3 mb-4" tabindex="0">
+                                            <span class="d-none d-sm-block">Upload Photo</span>
+                                            <i class="ti ti-upload d-block d-sm-none"></i>
+                                            <input type="file" id="uploadprofilephoto" name="uploadprofilephoto"
+                                                   class="uploadProfilePic-input" hidden
+                                                   accept="image/png, image/jpeg"/>
+                                        </label>
+                                        <button type="button"
+                                                class="btn btn-label-secondary uploadProfilePic-reset mb-4">
+                                            <i class="ti ti-refresh-dot d-block d-sm-none"></i>
+                                            <span class="d-none d-sm-block">Reset</span>
+                                        </button>
+                                        <div>Allowed JPG, GIF or PNG. Max size of 800K</div>
+                                    </div>
+                                </div>
+
+                                <!-- Submit Buttons -->
+                                <div class="border-top pt-4 text-end">
+                                    <button name="btn_createUserDetails" class="btn btn-primary me-2" type="submit">
+                                        {% if profile %}Update Details{% else %}Create User{% endif %}
+                                    </button>
+                                    <a href="javascript:history.back()" class="btn btn-label-secondary">Cancel</a>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- TAB 2: Login ID & Password -->
+                        <div class="tab-pane fade {% if active_tab == 'security' %}show active{% endif %}"
+                             id="navs-user-login" role="tabpanel">
+                            <form class="needs-validation" novalidate id="formUserSecurity" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ profile.user.id|default:'' }}">
+
+                                <h5 class="card-title mb-4">Login Credentials</h5>
+
+                                {% if not profile %}
+                                    <div class="alert alert-warning mb-4">
+                                        <p class="mb-0">Please create the user's personal details first. Once the
+                                            profile is saved, you can set up their login credentials here.</p>
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-info mb-4">
+                                        <p class="mb-0">Leave the password fields blank if you do not wish to change the
+                                            current password.</p>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="mb-4 col-md-12">
+                                            <label class="form-label">Username / Login ID <span
+                                                    class="text-danger">*</span></label>
+                                            <input class="form-control" type="text" required id="username"
+                                                   name="username" value="{{ profile.user.username|default:'' }}"
+                                                   autocomplete="off"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="mb-4 col-md-6 form-password-toggle">
+                                            <label class="form-label" for="password">New Password</label>
+                                            <div class="input-group input-group-merge">
+                                                <input class="form-control" type="password" id="password"
+                                                       name="password"
+                                                       placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                                       autocomplete="new-password"/>
+                                                <span class="input-group-text cursor-pointer"><i
+                                                        class="ti tabler-eye-off"></i></span>
+                                            </div>
+                                        </div>
+                                        <div class="mb-4 col-md-6 form-password-toggle">
+                                            <label class="form-label" for="confirm_password">Confirm Password</label>
+                                            <div class="input-group input-group-merge">
+                                                <input class="form-control" type="password" id="confirm_password"
+                                                       name="confirm_password"
+                                                       placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                                       autocomplete="new-password"/>
+                                                <span class="input-group-text cursor-pointer"><i
+                                                        class="ti tabler-eye-off"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="border-top pt-4 text-end">
+                                        <button name="btn_createUserSecurity" class="btn btn-primary me-2"
+                                                type="submit">Update Credentials
+                                        </button>
+                                    </div>
+                                {% endif %}
+                            </form>
+                        </div>
+
+                        <!-- TAB 3: Login History / Recent Devices -->
+                        <div class="tab-pane fade {% if active_tab == 'logs' %}show active{% endif %}"
+                             id="navs-user-logs" role="tabpanel">
+                            <h5 class="card-header px-0 mt-0">Recent Devices Login Details</h5>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th class="text-truncate">Browser</th>
+                                        <th class="text-truncate">OS info</th>
+                                        <th class="text-truncate">Login/Logout</th>
+                                        <th class="text-truncate">Recent Activities</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for logininfo in loginhistory %}
+                                        <tr>
+                                            <td class="text-truncate text-heading fw-medium">
+                                                {% if logininfo.browser|lower == 'chrome' %}
+                                                    <i class='ti tabler-brand-chrome ti-md align-top text-info me-2'></i>
+                                                {% elif logininfo.browser|lower == 'firefox' %}
+                                                    <i class='ti tabler-brand-firefox ti-md align-top text-warning me-2'></i>
+                                                {% elif logininfo.browser|lower == 'mobile safari' or logininfo.browser|lower == 'safari' %}
+                                                    <i class='ti tabler-compass ti-md align-top text-danger me-2'></i>
+                                                {% elif logininfo.browser|lower == 'edge' %}
+                                                    <i class='ti tabler-brand-edge ti-md align-top text-danger me-2'></i>
+                                                {% else %}
+                                                    <i class='ti tabler-world-upload ti-md align-top me-2'></i>
+                                                {% endif %}
+                                                {{ logininfo.browser|default:"unknown"|capfirst }}
+                                                on {{ logininfo.browser_os_info|default:"unknown"|capfirst }}
+                                            </td>
+                                            <td class="text-truncate">{{ logininfo.browser_os_info|default:"unknown"|capfirst }}</td>
+
+                                            {% if logininfo.is_user_logged %}
+                                                <td class="text-truncate"><i
+                                                        class="ti tabler-user-check text-success me-2"></i></td>
+                                            {% else %}
+                                                <td class="text-truncate"><i
+                                                        class="ti tabler-user-off text-danger me-2"></i></td>
+                                            {% endif %}
+
+                                            <td class="text-truncate">{{ logininfo.created_date }}</td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="4" class="text-center">No login history available for this
+                                                user.
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div> <!-- End Tab Content -->
+                </div>
+            </div>
+        </div>
+    </div>
+    {% include 'layout/dropdown_select.html' %}
+    <script>
+        $(document).ready(function () {
+            // 1. Initial State Load
+            GetStateList();
+
+            // 2. Trigger State Load when Country Changes
+            $('#country_id').on('change', function () {
+                GetStateList();
+            });
+
+            // 3. User Details Form Validation (Fix for Empty Dropdowns)
+            $('#formUserDetails').on('submit', function (event) {
+                if (!this.checkValidity()) {
+                    event.preventDefault(); // Stop submission
+                    event.stopPropagation();
+
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Missing Required Fields',
+                        text: 'Please make sure all required fields (like Gender, Role, and Country) are selected.'
+                    });
+                }
+                $(this).addClass('was-validated'); // Adds Bootstrap red borders
+            });
+
+            // 4. Password Validation
+            $('#formUserSecurity').on('submit', function (e) {
+                var pwd = $('#password').val();
+                var confPwd = $('#confirm_password').val();
+                if (pwd !== confPwd) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Passwords do not match!'
+                    });
+                }
+            });
+        });
+
+        // Fetch Cascading States
+        function GetStateList() {
+            var defaultCountry = '{{ profile.country_id|default:"" }}';
+            var countryID = $("#country_id").val() !== "" ? $("#country_id").val() : defaultCountry;
+
+            if (countryID && countryID !== '0') {
+                var options = '<option value="">Please Select State</option>';
+                $.getJSON('/masters/GetStateListJson/?countryID=' + countryID, function (data) {
+                    var targetStateId = '{{ profile.state_id|default:"" }}';
+                    $.each(data, function (i, d) {
+                        var selected = '';
+                        if (d.pk.toString() === targetStateId) {
+                            selected = 'selected';
+                        }
+                        options += "<option " + selected + " value='" + d.pk + "'>" + d.fields['state_name'] + "</option>";
+                    });
+                    $('#state_id').html(options);
+                });
+            } else {
+                var options = '<option value="">Please Select State</option>';
+                $('#state_id').html(options);
+            }
+        }
+
+        // Profile Picture Preview Script
+        let uploadProfilePic = document.getElementById('uploadProfilePic');
+        let headerProfileImage = document.getElementById('headerProfileImage');
+        const fileInputPic = document.querySelector('.uploadProfilePic-input'),
+            resetFileInputPic = document.querySelector('.uploadProfilePic-reset');
+
+        if (uploadProfilePic && fileInputPic && resetFileInputPic) {
+            const resetImage = uploadProfilePic.src;
+            fileInputPic.onchange = () => {
+                if (fileInputPic.files[0]) {
+                    let newUrl = window.URL.createObjectURL(fileInputPic.files[0]);
+                    uploadProfilePic.src = newUrl;
+                    if (headerProfileImage) headerProfileImage.src = newUrl;
+                }
+            };
+            resetFileInputPic.onclick = () => {
+                fileInputPic.value = '';
+                uploadProfilePic.src = resetImage;
+                if (headerProfileImage) headerProfileImage.src = resetImage;
+            };
+        }
+    </script>
+
+{% endblock content %}

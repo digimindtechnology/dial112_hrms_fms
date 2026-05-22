@@ -1,0 +1,207 @@
+{% extends "layout/layout_base.html" %}
+{% load static %}
+{% load ui_filter_tags %}
+
+{% block title %}Create Tenant{% endblock %}
+
+{% block content %}
+<div>
+    <div class="col-md-12">
+        <div class="card mb-6">
+            <div class="card-body">
+             <h5 class="card-header">Create New Tenant</h5><hr>
+                <form class="needs-validation" novalidate method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">Organization Name <span class="text-danger">*</span></label>
+                            <input class="form-control" required type="text" id="tenant_name" name="tenant_name" autofocus/>
+                            <div class="valid-feedback">Looks good!</div>
+                            <div class="invalid-feedback">Please enter organization name.</div>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">Website URL</label>
+                            <input class="form-control" type="url" id="website_url" name="website_url"/>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">First Name <span class="text-danger">*</span></label>
+                            <input class="form-control" required type="text" id="first_name" name="first_name"/>
+                            <div class="valid-feedback">Looks good!</div>
+                            <div class="invalid-feedback">Please enter first name.</div>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">Last Name <span class="text-danger">*</span></label>
+                            <input class="form-control" required type="text" id="last_name" name="last_name"/>
+                            <div class="valid-feedback">Looks good!</div>
+                            <div class="invalid-feedback">Please enter last name.</div>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            <input class="form-control" required type="email" id="email" name="email" placeholder="admin@company.com"/>
+                            <div class="valid-feedback">Looks good!</div>
+                            <div class="invalid-feedback">Please enter a valid email.</div>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">Mobile Number <span class="text-danger">*</span></label>
+                            <input class="form-control" required type="text" id="mobile" name="mobile" maxlength="10" placeholder="202 555 0111"/>
+                            <div class="valid-feedback">Looks good!</div>
+                            <div class="invalid-feedback">Please enter mobile number.</div>
+                        </div>
+                        <div class="mb-4 col-md-12">
+                            <label class="form-label">Address</label>
+                            <input class="form-control" type="text" id="address" name="address" placeholder="High Street"/>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">Country <span class="text-danger">*</span></label>
+                            <select required class="select2 form-select" data-allow-clear="true" id="country_id" name="country_id" onchange="GetStateList();">
+                                <option value="">Please Select Country</option>
+                                {% for entry in countryList %}
+                                <option value="{{entry.country_id}}">{{entry.country_name}}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="valid-feedback">Looks good!</div>
+                            <div class="invalid-feedback">Please select country.</div>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">State <span class="text-danger">*</span></label>
+                            <select required class="select2 form-select" data-allow-clear="true" id="state_id" name="state_id">
+                                <option value="">Please Select State</option>
+                            </select>
+                            <div class="valid-feedback">Looks good!</div>
+                            <div class="invalid-feedback">Please select state.</div>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">City</label>
+                            <input class="form-control" type="text" id="city" name="city" placeholder="California"/>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">Zip Code</label>
+                            <input class="form-control" type="text" id="postal_code" name="postal_code" placeholder="231465" maxlength="6"/>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">Currency <span class="text-danger">*</span></label>
+                            <select required class="select2 form-select" data-allow-clear="true" id="currency_id" name="currency_id">
+                                <option value="">Please Select Currency</option>
+                                {% for entry in currencyList %}
+                                <option value="{{entry.currency_id}}">{{entry.currency_symbol}} {{entry.currency_code}}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="valid-feedback">Looks good!</div>
+                            <div class="invalid-feedback">Please select currency.</div>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">Time Zone <span class="text-danger">*</span></label>
+                            <select required class="select2 form-select" data-allow-clear="true" id="time_zone" name="time_zone">
+                                <option value="">Please Select Timezone</option>
+                                {% for tz in timeZoneList %}
+                                <option value="{{ tz.time_zone_id }}">{{ tz.display_label }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="valid-feedback">Looks good!</div>
+                            <div class="invalid-feedback">Please select time zone.</div>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">Date Format <span class="text-danger">*</span></label>
+                            <select required class="select2 form-select" data-allow-clear="true" id="date_formate_view" name="date_formate_view">
+                                <option value="">Please Select Date Format</option>
+                                {% for df in dateFormatList %}
+                                <option value="{{ df.date_format_id }}">{{ df.display_label }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="valid-feedback">Looks good!</div>
+                            <div class="invalid-feedback">Please select date format.</div>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">Time Format <span class="text-danger">*</span></label>
+                            <select required class="select2 form-select" data-allow-clear="true" id="time_formate_view" name="time_formate_view">
+                                <option value="">Please Select Time Format</option>
+                                {% for tf in timeFormatList %}
+                                <option value="{{ tf.time_format_id }}">{{ tf.display_label }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="valid-feedback">Looks good!</div>
+                            <div class="invalid-feedback">Please select time format.</div>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">PAN No</label>
+                            <input class="form-control" type="text" id="pan" name="pan" maxlength="15"/>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">GST No</label>
+                            <input class="form-control" type="text" id="gst" name="gst" maxlength="15"/>
+                        </div>
+
+                    <div class="mb-4 col-md-6">
+                            <label class="form-label">Logo <span class="text-danger">*</span></label>
+                            <input class="form-control" type="file" id="uploadTenantLogFile" name="uploadTenantLogFile" required />
+                         <div class="valid-feedback">Looks good!</div>
+                            <div class="invalid-feedback">select logo</div>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">Favicon <span class="text-danger">*</span></label>
+                            <input class="form-control" type="file" id="uploadTenantIconFile" name="uploadTenantIconFile"  required/>
+                             <div class="valid-feedback">Looks good!</div>
+                            <div class="invalid-feedback">select favicon</div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info" role="alert">
+                        <i class="icon-base ti tabler-info-circle me-2"></i>
+                        Upon creation, the system will automatically:
+                        <ul class="mb-0 mt-1">
+                            <li>Create <strong>Administrator</strong> and <strong>Admin</strong> roles with full permissions (copied from reference configuration)</li>
+                            <li>Create the admin user account with the provided credentials</li>
+                            <li>Assign full access control to both roles</li>
+                        </ul>
+                    </div>
+
+                    <div class="mt-2">
+                        <button name="btn_CreateTenant" class="btn btn-primary me-3 loading_spinner" type="submit">
+                            <span class="btnText me-1">Create Tenant</span>
+                            <span class="btnLoader spinner-border spinner-border visually-hidden" role="status" aria-hidden="true"></span>
+                        </button>
+                        <a href="{% url 'dashboard-home' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function(){
+        if ($.fn.select2) {
+            $('.select2').each(function () {
+                var $this = $(this);
+                if ($this.hasClass('select2-hidden-accessible')) {
+                    $this.select2('destroy');
+                }
+                if (!$this.parent().hasClass('position-relative')) {
+                    $this.wrap('<div class="position-relative"></div>');
+                }
+                $this.select2({
+                    placeholder: $this.find('option:first').text(),
+                    dropdownParent: $this.parent()
+                }).on('change', function () {
+                    $(this).removeClass('is-invalid').addClass(this.value ? 'is-valid' : 'is-invalid');
+                });
+            });
+        }
+    });
+
+    function GetStateList() {
+        var countryID = $("#country_id").val();
+        if (countryID) {
+            var options = '<option value="">Please Select State</option>';
+            $.getJSON('/masters/GetStateListJson/?countryID=' + countryID, function (data) {
+                $.each(data, function (i, d) {
+                    options += "<option value='" + d.pk + "'>" + d.fields['state_name'] + "</option>";
+                });
+                $('#state_id').html(options).trigger('change');
+            });
+        } else {
+            $('#state_id').html('<option value="">Please Select State</option>').trigger('change');
+        }
+    }
+</script>
+    {% include 'layout/dropdown_select.html' %}
+{% endblock %}

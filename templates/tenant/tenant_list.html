@@ -1,0 +1,217 @@
+{% extends "layout/layout_base.html" %}
+{% load static %}
+{% load ui_filter_tags %}
+
+
+{% block content %}
+    <div class="row g-6 mb-6">
+        <div class="col-sm-6 col-xl-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div class="content-left">
+                            <span class="text-heading">Total Tenants</span>
+                            <div class="d-flex align-items-center my-1">
+                                <h4 class="mb-0 me-2">{{ total_tenants }}</h4>
+                            </div>
+                        </div>
+                        <div class="avatar">
+                        <span class="avatar-initial rounded bg-label-primary">
+                            <i class="ti tabler-building"></i>
+                        </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div class="content-left">
+                            <span class="text-heading">Active Tenants</span>
+                            <div class="d-flex align-items-center my-1">
+                                <h4 class="mb-0 me-2 text-success">{{ active_tenants }}</h4>
+                            </div>
+                        </div>
+                        <div class="avatar">
+                        <span class="avatar-initial rounded bg-label-success">
+                            <i class="ti tabler-building-check"></i>
+                        </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div class="content-left">
+                            <span class="text-heading">Inactive Tenants</span>
+                            <div class="d-flex align-items-center my-1">
+                                <h4 class="mb-0 me-2 text-danger">{{ inactive_tenants }}</h4>
+                            </div>
+                        </div>
+                        <div class="avatar">
+                        <span class="avatar-initial rounded bg-label-danger">
+                            <i class="ti tabler-building-off"></i>
+                        </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   <div class="card">
+    <div class="table-responsive" style="padding: 15px;">
+
+        <div class="card-header border-bottom d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 py-3">
+            <h5 class="card-title mb-0">Tenants</h5>
+
+            <div class="d-flex align-items-center gap-3">
+                <form method="POST" class="d-flex align-items-center gap-2">
+                    {% csrf_token %}
+                    <input type="text" class="form-control form-control-sm" name="search"
+                           placeholder="Search tenants..." value="{{ search_query }}"
+                           style="min-width: 220px;">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="ti tabler-search"></i>
+                    </button>
+
+                    {% if search_query %}
+                        <a href="{% url 'tenant-list' %}" class="btn btn-label-secondary btn-sm">
+                            <i class="ti tabler-x"></i>
+                        </a>
+                    {% endif %}
+                </form>
+
+                <a href="{% url 'tenant-create' %}" class="btn btn-primary btn-sm">
+                    <i class="ti tabler-plus me-1"></i> Add Tenant
+                </a>
+            </div>
+        </div>
+
+        <!-- 🔥 TOP INFO -->
+        <div class="d-flex justify-content-between align-items-center px-2 py-2">
+            <small class="text-muted">
+                Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ paginator.count }} entries
+            </small>
+        </div>
+
+        <table class="table table-bordered">
+            <thead class="border-top">
+            <tr class="text-nowrap">
+                <th>S.no</th>
+                <th>Tenant Name</th>
+                <th>Contact Person</th>
+                <th>Country</th>
+                <th>Status</th>
+                <th>Created Date</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            {% for tenant in all_tenants %}
+                <tr>
+                    <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
+                    <td class="fw-medium">{{ tenant.tenant_name }}</td>
+                    <td>{{ tenant.contact_person }}</td>
+                    <td>{{ tenant.country.country_name|default:"-" }}</td>
+
+                    <td>
+                        <span class="badge bg-label-{% if tenant.is_active %}success{% else %}danger{% endif %}">
+                            {% if tenant.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </td>
+
+                    <td>{{ tenant.created_date|dyn_date:request.date_format_value }}</td>
+
+                    <td class="text-nowrap">
+                        <a href="{% url 'tenant-settings-account' %}"
+                           class="btn btn-icon btn-text-secondary rounded-pill waves-effect" title="Edit">
+                            <i class="ti tabler-edit ti-md"></i>
+                        </a>
+
+                        <a href="{% url 'tenant-detail' tenant.tenant_profile_id %}"
+                           class="btn btn-icon btn-text-secondary rounded-pill waves-effect" title="View">
+                            <i class="ti tabler-eye ti-md"></i>
+                        </a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">
+                        No tenants found.
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- 🔥 BOTTOM INFO + PAGINATION -->
+        <div class="d-flex justify-content-between align-items-center px-2 py-3 border-top">
+
+            <small class="text-muted">
+                Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ paginator.count }} entries
+            </small>
+
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">
+                                <i class="ti tabler-chevrons-left"></i>
+                            </a>
+                        </li>
+
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                <i class="ti tabler-chevron-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in paginator.page_range %}
+                        {% if num == page_obj.number %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link"
+                                   href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                    {{ num }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                <i class="ti tabler-chevron-right"></i>
+                            </a>
+                        </li>
+
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?page={{ paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                <i class="ti tabler-chevrons-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                </ul>
+            </nav>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

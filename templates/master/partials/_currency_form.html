@@ -1,0 +1,43 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">{% if currency %}Edit Currency{% else %}Add Currency{% endif %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <form id="frm_Currency" method="post" action="{% url 'AddUpdateCurrency' %}{% if currency %}{{ currency.currency_id }}/{% endif %}">
+        {% csrf_token %}
+        <div class="modal-body">
+            <div class="mb-4">
+                <label class="form-label">Currency Code <span class="text-danger">*</span></label>
+                <input type="text" name="currency_code" class="form-control" value="{{ currency.currency_code|default:'' }}" required placeholder="e.g. USD">
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Currency Symbol <span class="text-danger">*</span></label>
+                <input type="text" name="currency_symbol" class="form-control" value="{{ currency.currency_symbol|default:'' }}" required placeholder="e.g. $">
+            </div>
+            <div class="mb-4">
+                <div class="form-check">
+                    <input type="checkbox" name="is_active" class="form-check-input" id="currency_active" {% if currency.is_active or not currency %}checked{% endif %}>
+                    <label class="form-check-label" for="currency_active">Active</label>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary loading_spinner">{% if currency %}Update{% else %}Save{% endif %}</button>
+        </div>
+    </form>
+</div>
+<script>
+$('#frm_Currency').on('submit', function(e) {
+    e.preventDefault();
+    $.post($(this).attr('action'), $(this).serialize(), function(response) {
+        if (response.success) {
+            $('#Modal_SetupForm').modal('hide');
+            $.get("{% url 'CurrencyList' %}", function(d) {
+                $('#div_CurrencyList').html(d);
+                initDataTable('#currencyTable');
+            });
+        }
+    });
+});
+</script>

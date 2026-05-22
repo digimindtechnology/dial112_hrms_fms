@@ -1,0 +1,47 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">{% if tz %}Edit Time Zone{% else %}Add Time Zone{% endif %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <form id="frm_TimeZone" method="post" action="{% url 'AddUpdateTimeZone' %}{% if tz %}{{ tz.time_zone_id }}/{% endif %}">
+        {% csrf_token %}
+        <div class="modal-body">
+            <div class="mb-4">
+                <label class="form-label">Time Zone Name <span class="text-danger">*</span></label>
+                <input type="text" name="time_zone_name" class="form-control" value="{{ tz.time_zone_name|default:'' }}" required placeholder="e.g. Asia/Kolkata">
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Display Label <span class="text-danger">*</span></label>
+                <input type="text" name="display_label" class="form-control" value="{{ tz.display_label|default:'' }}" required placeholder="e.g. India Standard Time (GMT+5:30)">
+            </div>
+            <div class="mb-4">
+                <label class="form-label">UTC Offset</label>
+                <input type="text" name="utc_offset" class="form-control" value="{{ tz.utc_offset|default:'' }}" placeholder="e.g. +05:30">
+            </div>
+            <div class="mb-4">
+                <div class="form-check">
+                    <input type="checkbox" name="is_active" class="form-check-input" id="tz_active" {% if tz.is_active or not tz %}checked{% endif %}>
+                    <label class="form-check-label" for="tz_active">Active</label>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary loading_spinner">{% if tz %}Update{% else %}Save{% endif %}</button>
+        </div>
+    </form>
+</div>
+<script>
+$('#frm_TimeZone').on('submit', function(e) {
+    e.preventDefault();
+    $.post($(this).attr('action'), $(this).serialize(), function(response) {
+        if (response.success) {
+            $('#Modal_SetupForm').modal('hide');
+            $.get("{% url 'TimeZoneList' %}", function(d) {
+                $('#div_TimeZoneList').html(d);
+                initDataTable('#timezoneTable');
+            });
+        }
+    });
+});
+</script>

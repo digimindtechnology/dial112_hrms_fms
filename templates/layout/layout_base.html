@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en" class="layout-navbar-fixed layout-compact layout-menu-fixed" dir="ltr"
+      data-skin="default" data-assets-path="/static/assets/"
+      data-template="vertical-menu-template" data-bs-theme="light"
+      {% if IS_RunServer %}data-disable-devtools{% endif %}>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{% block title %}{{ request.title }}{% endblock %}</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ request.tenantFavicon }}">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'"
+          href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&amp;ampdisplay=swap">
+    <link rel="stylesheet" href="/static/assets/vendor/css/core.css">
+    <link rel="stylesheet" href="/static/assets/css/demo.css">
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'"
+          href="/static/assets/vendor/libs/node-waves/node-waves.css">
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'"
+          href="/static/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css">
+    <link rel="stylesheet" href="/static/assets/vendor/fonts/iconify-icons.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="/static/assets/vendor/libs/sweetalert2/sweetalert2.css" media="print"
+          onload="this.media='all'">
+    <link rel="stylesheet" href="/static/assets/vendor/libs/pickr/pickr-themes.css" media="print"
+          onload="this.media='all'">
+    <link rel="stylesheet" href="/static/assets/vendor/fonts/iconify-icons.css" media="print" onload="this.media='all'">
+    <style>
+        .nav-pills {
+             {#background: var(--bs-body-bg);#}
+            background: white;
+            padding: 12px;
+            border-radius: 0.5rem;
+        }
+        [data-bs-theme="dark"] .nav-pills {
+            background: #2b2c40;
+        }
+
+        .swal2-container .swal2-modal.swal2-popup .swal2-title {
+            font-size: 22px !important;
+            line-height: 1.375;
+            margin-block: 1.875rem 1rem;
+            max-inline-size: none;
+            color: #5951ad !important;
+        }
+
+        #globalSearchResults .search-section-header {
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        #globalSearchResults .search-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        #globalSearchResults .search-item:hover {
+            background: #f0f0ff;
+        }
+
+        #globalSearchResults .search-item i {
+            font-size: 16px;
+            color: #696cff;
+        }
+
+        #globalSearchResults .search-item span {
+            font-size: 13px;
+        }
+
+        #globalSearchResults .search-empty {
+            padding: 16px;
+            text-align: center;
+            color: #999;
+            font-size: 13px;
+        }
+    </style>
+
+    {% block vendor_css %}{% endblock %}
+    {% block page_css %}{% endblock %}
+</head>
+
+<body style="--bs-scrollbar-width: 15px;">
+<!-- Layout wrapper -->
+<div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+        <aside id="layout-menu" class="layout-menu menu-vertical menu" data-bs-theme="light"
+               style="touch-action: none; user-select: none; -webkit-user-drag: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);">
+            <div class="app-brand demo ">
+                <a href="#" class="app-brand-link">
+                    <span class="app-brand-logo demo"> <span class="text-primary">
+                        <img src="{{ request.tenantLogo }}"
+                             style="width: 35px;height: 30px;"></span> </span>
+                    <span class="app-brand-text demo menu-text fw-bold ms-3"
+                          style="font-size: 15px;">{{ request.role }}</span>
+                </a>
+
+                <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
+                    <i class="icon-base ti menu-toggle-icon d-none d-xl-block"></i>
+                    <i class="icon-base ti tabler-x d-block d-xl-none"></i>
+                </a>
+            </div>
+
+            <div class="menu-inner-shadow"></div>
+            <ul class="menu-inner ps ps--active-y">
+                {% for menu_id, menu_name, menu_icon, menu_slug, args, sequence_order, is_active, parent_id, menuType_id in menu_list %}
+                    {% if menuType_id == 1 %}
+                        <li class="menu-item{% if request.path == menu_slug %} active{% endif %}">
+                            <a href="{{ menu_slug }}" class="menu-link">
+                                <i class="menu-icon icon-base ti {{ menu_icon }}"></i>
+                                <div>{{ menu_name }}</div>
+                            </a>
+                        </li>
+                    {% elif menuType_id == 2 %}
+                        <li class="menu-item
+
+                                {% for c_menu_id, c_menu_name, c_menu_icon, c_menu_slug, c_args, c_sequence_order, c_is_active, c_parent_id, c_menuType_id in menu_list_child %}{% if c_parent_id == menu_id and request.path == c_menu_slug %} active open {% endif %}{% endfor %}">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <i class="menu-icon icon-base ti {{ menu_icon }}"></i>
+                                <div>{{ menu_name }}</div>
+                            </a>
+                            <ul class="menu-sub">
+                                {% for c_menu_id, c_menu_name, c_menu_icon, c_menu_slug, c_args, c_sequence_order, c_is_active, c_parent_id, c_menuType_id in menu_list_child %}
+                                    {% if c_parent_id == menu_id %}
+                                        <li class="menu-item{% if request.path == c_menu_slug %} active{% endif %}">
+                                            <a href="{{ c_menu_slug }}" class="menu-link">
+                                                <div>{{ c_menu_name }}</div>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </aside>
+        <div class="menu-mobile-toggler d-xl-none rounded-1">
+            <a href="javascript:void(0);"
+               class="layout-menu-toggle menu-link text-large text-bg-secondary p-2 rounded-1">
+                <i class="ti tabler-menu icon-base"></i>
+                <i class="ti tabler-chevron-right icon-base"></i>
+            </a>
+        </div>
+        <!-- / Menu -->
+        <!-- Layout container -->
+        <div class="layout-page">
+            <nav class="layout-navbar container-xxl navbar-detached navbar navbar-expand-xl align-items-center bg-navbar-theme"
+                 id="layout-navbar">
+                <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0   d-xl-none ">
+                    <a class="nav-item nav-link px-0 me-xl-6" href="javascript:void(0)">
+                        <i class="icon-base ti tabler-menu-2 icon-md"></i>
+                    </a>
+                </div>
+
+                <div class="navbar-nav-right d-flex align-items-center justify-content-end" id="navbar-collapse">
+                    <!-- Search -->
+                    <div class="navbar-nav align-items-center flex-grow-1" style="position:relative;">
+                        <div class="nav-item w-100 px-md-0 px-2 mb-0">
+                            <div class="input-group input-group-merge" style="border:none;">
+                                <span class="input-group-text border-0 bg-transparent" id="search-addon">
+                                    <i class="ti tabler-search icon-base"></i>
+                                </span>
+                                <input type="text" id="globalSearchInput"
+                                       class="form-control border-0 bg-transparent shadow-none"
+                                       placeholder="Search users....." autocomplete="off"
+                                       aria-label="Search" aria-describedby="search-addon">
+                            </div>
+                        </div>
+                        <div id="globalSearchResults"
+                             class="dropdown-menu show position-absolute"
+                             style="display:none; top:100%; left:0; right:0; max-height:400px; overflow-y:auto; z-index:9999; margin-top:4px;">
+                        </div>
+                    </div>
+
+                    <!-- /Search -->
+
+                    <ul class="navbar-nav flex-row align-items-center ms-md-auto" title="Toggle theme">
+
+                        <!-- Style Switcher -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle hide-arrow btn btn-icon btn-text-secondary rounded-pill waves-effect"
+                               id="nav-theme" href="javascript:void(0);" data-bs-toggle="dropdown"
+                               aria-label="Toggle theme (light)">
+                                <i class="tabler-sun icon-base ti icon-22px theme-icon-active text-heading"></i>
+                                <span class="d-none ms-2" id="nav-theme-text">Toggle theme</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-theme-text">
+                                <li>
+                                    <button type="button" class="dropdown-item align-items-center waves-effect active"
+                                            data-bs-theme-value="light" aria-pressed="true">
+                                        <span><i class="icon-base ti tabler-sun icon-22px me-3" data-icon="sun"></i>Light</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" class="dropdown-item align-items-center waves-effect"
+                                            data-bs-theme-value="dark" aria-pressed="false">
+                                        <span><i class="icon-base ti tabler-moon-stars icon-22px me-3"
+                                                 data-icon="moon-stars"></i>Dark</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" class="dropdown-item align-items-center waves-effect"
+                                            data-bs-theme-value="semidark" aria-pressed="false">
+                                        <span><i class="icon-base ti tabler-layout-sidebar icon-22px me-3"
+                                                 data-icon="layout-sidebar"></i>Semi Dark</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" class="dropdown-item align-items-center waves-effect"
+                                            data-bs-theme-value="system" aria-pressed="false">
+                                        <span><i class="icon-base ti tabler-device-desktop-analytics icon-22px me-3"
+                                                 data-icon="device-desktop-analytics"></i>System</span>
+                                    </button>
+                                </li>
+
+                            </ul>
+                        </li>
+                        <!-- / Style Switcher-->
+
+                        <!-- Primary Color -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle hide-arrow btn btn-icon btn-text-secondary rounded-pill waves-effect"
+                               id="nav-color" href="javascript:void(0);" data-bs-toggle="dropdown"
+                               aria-label="Primary Color">
+                                <i class="tabler-palette icon-base ti icon-22px text-heading"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-color">
+                                <li><h6 class="dropdown-header">Primary Color</h6></li>
+                                <li>
+                                    <button type="button" class="dropdown-item d-flex align-items-center waves-effect"
+                                            data-primary-color="#7367f0">
+                                        <span class="d-inline-block rounded-circle me-3 flex-shrink-0"
+                                              style="width:20px;height:20px;background:#7367f0;border:2px solid transparent;"></span>
+                                        <span>Default</span>
+                                        <i class="icon-base ti tabler-check ms-auto color-check d-none"></i>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" class="dropdown-item d-flex align-items-center waves-effect"
+                                            data-primary-color="#2092EC">
+                                        <span class="d-inline-block rounded-circle me-3 flex-shrink-0"
+                                              style="width:20px;height:20px;background:#2092EC;border:2px solid transparent;"></span>
+                                        <span>Blue</span>
+                                        <i class="icon-base ti tabler-check ms-auto color-check d-none"></i>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" class="dropdown-item d-flex align-items-center waves-effect"
+                                            data-primary-color="#0D9394">
+                                        <span class="d-inline-block rounded-circle me-3 flex-shrink-0"
+                                              style="width:20px;height:20px;background:#0D9394;border:2px solid transparent;"></span>
+                                        <span>Teal</span>
+                                        <i class="icon-base ti tabler-check ms-auto color-check d-none"></i>
+                                    </button>
+                                </li>
+
+                                <li>
+                                    <button type="button" class="dropdown-item d-flex align-items-center waves-effect"
+                                            data-primary-color="#FFAB1D">
+                                        <span class="d-inline-block rounded-circle me-3 flex-shrink-0"
+                                              style="width:20px;height:20px;background:#FFAB1D;border:2px solid transparent;"></span>
+                                        <span>Orange</span>
+                                        <i class="icon-base ti tabler-check ms-auto color-check d-none"></i>
+                                    </button>
+                                </li>
+
+                                <li>
+                                    <hr class="dropdown-divider my-1">
+                                </li>
+                                <li style="position:relative;">
+                                    <button type="button" class="dropdown-item d-flex align-items-center waves-effect"
+                                            id="custom-color-trigger">
+                                        <div id="custom-color-picker"
+                                             style="position:absolute;top:0;left:0;width:0;height:0;overflow:hidden;pointer-events:none;"></div>
+                                        <span style="margin-left: 10px;">Custom</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </li>
+                        <!-- / Primary Color -->
+
+                        <!-- Notification -->
+                        <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-2">
+                            <a class="nav-link dropdown-toggle hide-arrow btn btn-icon btn-text-secondary rounded-pill waves-effect"
+                               href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-auto-close="outside"
+                               aria-expanded="false">
+                    <span class="position-relative">
+                      <i class="icon-base ti tabler-bell icon-22px text-heading"></i>
+                      <span class="badge rounded-pill bg-danger badge-dot badge-notifications border"></span>
+                    </span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end p-0">
+                                <li class="dropdown-menu-header border-bottom">
+                                    <div class="dropdown-header d-flex align-items-center py-3">
+                                        <h6 class="mb-0 me-auto">Notification</h6>
+                                        <div class="d-flex align-items-center h6 mb-0">
+                                            <span class="badge bg-label-primary me-2">1 New</span>
+                                            <a href="javascript:void(0)"
+                                               class="dropdown-notifications-all p-2 btn btn-icon waves-effect waves-light"
+                                               data-bs-toggle="tooltip" data-bs-placement="top"
+                                               aria-label="Mark all as read"
+                                               data-bs-original-title="Mark all as read"><i
+                                                    class="icon-base ti tabler-mail-opened text-heading"></i></a>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="dropdown-notifications-list scrollable-container ps">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item list-group-item-action dropdown-notifications-item waves-effect">
+                                            <div class="d-flex">
+                                                <div class="flex-shrink-0 me-3">
+                                                    <div class="avatar">
+                                                        <img loading="lazy" src="/static/assets/img/avatars/NA.png"
+                                                             alt=""
+                                                             class="rounded-circle">
+                                                    </div>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="small mb-1">Congratulation Lettie 🎉</h6>
+                                                    <small class="mb-1 d-block text-body">Won the monthly best seller
+                                                        gold badge</small>
+                                                    <small class="text-body-secondary">1h ago</small>
+                                                </div>
+                                                <div class="flex-shrink-0 dropdown-notifications-actions">
+                                                    <a href="javascript:void(0)"
+                                                       class="dropdown-notifications-read"><span
+                                                            class="badge badge-dot"></span></a>
+                                                    <a href="javascript:void(0)" class="dropdown-notifications-archive"><span
+                                                            class="icon-base ti tabler-x"></span></a>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                    <div class="ps__rail-x" style="left: 0px; bottom: 0px;">
+                                        <div class="ps__thumb-x" tabindex="0" style="left: 0px; width: 0px;"></div>
+                                    </div>
+                                    <div class="ps__rail-y" style="top: 0px; right: 0px;">
+                                        <div class="ps__thumb-y" tabindex="0" style="top: 0px; height: 0px;"></div>
+                                    </div>
+                                </li>
+                                <li class="border-top">
+                                    <div class="d-grid p-4">
+                                        <a class="btn btn-primary btn-sm d-flex waves-effect waves-light"
+                                           href="javascript:void(0);">
+                                            <small class="align-middle">View all notifications</small>
+                                        </a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                        <!--/ Notification -->
+                        <!-- User -->
+                        <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                            <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);"
+                               data-bs-toggle="dropdown">
+                                <div class="avatar avatar-online">
+                                    <img loading="lazy" src="{{ request.image }}" alt="" class="rounded-circle">
+                                </div>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item mt-0 waves-effect"
+                                       href="#">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0 me-2">
+                                                <div class="avatar avatar-online">
+                                                    <img loading="lazy" src="{{ request.image }}" alt=""
+                                                         class="rounded-circle">
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-0">{{ request.user.first_name }}
+                                                    {{ request.user.last_name }}</h6>
+                                                <small class="text-body-secondary">{{ request.role }}</small>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <div class="dropdown-divider my-1 mx-n2"></div>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item waves-effect" href="/user/{{ request.user.id }}/detail/">
+                                        <i class="icon-base ti tabler-user me-3 icon-md"></i><span class="align-middle">My Profile</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item waves-effect" href="/user/{{ request.user.id }}/update/">
+                                        <i class="icon-base ti tabler-settings me-3 icon-md"></i><span
+                                            class="align-middle">Settings</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <div class="dropdown-divider my-1 mx-n2"></div>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item waves-effect" href="#">
+                                        <i class="icon-base ti tabler-question-mark me-3 icon-md"></i><span
+                                            class="align-middle">FAQ</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <div class="d-grid px-2 pt-2 pb-1">
+                                        <a class="btn btn-sm btn-danger d-flex waves-effect waves-light"
+                                           href="{% url 'logout' %}">
+                                            <small class="align-middle">Logout</small>
+                                            <i class="icon-base ti tabler-logout ms-2 icon-14px"></i>
+                                        </a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                        <!--/ User -->
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Content wrapper  Body-->
+            <div class="content-wrapper">
+                <div class="container-xxl container-p-y">
+                    {% if AUTO_LOGOUT %}
+                        <div style="display:none" id="alert-auto-logout"
+                             class="alert alert-warning alert-icon-start alert-dismissible fade show">
+                            <span class="alert-icon bg-warning text-white"> <i class="ti tabler-logout-2"></i> </span>
+                            <span class="fw-semibold">Warning!</span> You’ve been inactive. To keep your session
+                            secure,you’ll be logged out soon.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endif %}
+                    <script defer src="/static/assets/vendor/libs/jquery/jquery.js"></script>
+                    {% block content %}
+                    {% endblock %}
+                </div>
+
+                <!-- Footer -->
+                <footer class="content-footer footer bg-footer-theme">
+                    <div class="container-xxl">
+                        <div class="footer-container d-flex align-items-center justify-content-between py-4 flex-md-row flex-column">
+                            <div class="text-body"> © 2026, made with ❤️ by
+                                <a href="#" target="_blank" class="footer-link">Digimind</a></div>
+                            <div class="d-none d-lg-inline-block">
+                                <a href="#" target="_blank" class="footer-link me-4">Documentation</a>
+                                <a href="#" target="_blank" class="footer-link d-none d-sm-inline-block">Support</a>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+                <!-- / Footer -->
+
+                <div class="content-backdrop fade"></div>
+            </div>
+
+            <!-- Content wrapper -->
+        </div>
+        <!-- / Layout page -->
+    </div>
+
+    <!-- Overlay -->
+    <div class="layout-overlay layout-menu-toggle"></div>
+    <input type="hidden" id="hdn_IS_RunServer" value="{{ IS_RunServer }}">
+    <input type="hidden" id="hdn_AUTO_LOGOUT" value="{{ AUTO_LOGOUT }}">
+    <div class="modal fade" id="Modal_BindPartialPages" aria-hidden="true">
+        <div class="modal-dialog" id="div_BindPartialPages"></div>
+    </div>
+</div>
+
+<!-- / Layout wrapper -->
+
+<script defer src="/static/assets/vendor/js/helpers.js"></script>
+<script defer src="/static/assets/js/config.js"></script>
+<script defer src="/static/assets/vendor/js/menu.js"></script>
+<script defer src="/static/assets/vendor/libs/popper/popper.js"></script>
+<script defer src="/static/assets/vendor/js/bootstrap.js"></script>
+<script defer src="/static/assets/vendor/libs/node-waves/node-waves.js"></script>
+<script defer src="/static/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+<script defer src="/static/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+<script defer src="/static/assets/vendor/libs/pickr/pickr.js"></script>
+<script defer src="/static/assets/js/main.js"></script>
+<script src="/static/assets/js/custom_ss.js"></script>
+
+{% block vendor_js %}{% endblock %}
+{% block page_js %}{% endblock %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        {% if messages %}
+            {% for message in messages %}
+                (() => {
+                    const tags = '{{ message.tags|escapejs }}';
+                    const msg = '{{ message|escapejs }}';
+                    let type = 'info';
+                    if (tags.includes('error') || tags.includes('danger')) type = 'error';
+                    else if (tags.includes('warning')) type = 'warning';
+                    else if (tags.includes('success')) type = 'success';
+                    Swal.fire({
+                        icon: type,
+                        title: msg.toUpperCase(),
+                        timer: 3000,
+                        showConfirmButton: false,
+                        timerProgressBar: true,
+                        customClass: {popup: 'swal2-center-popup'}
+                    });
+                })();
+            {% endfor %}
+        {% endif %}
+    });
+</script>
+</body>
+</html>

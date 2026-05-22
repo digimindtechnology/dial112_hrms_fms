@@ -1,0 +1,54 @@
+<div>
+    <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">Date Formats</h5>
+        <div class="d-flex gap-2">
+            <button class="btn btn-success btn-sm" onclick="showImportModal('DateFormat')">
+                <i class="ti tabler-upload me-1"></i> Import
+            </button>
+            <div class="dropdown">
+                <button class="btn btn-info btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="ti tabler-download me-1"></i> Export
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'ExportCSV' 'DateFormat' %}">CSV</a></li>
+                    <li><a class="dropdown-item" href="{% url 'ExportExcel' 'DateFormat' %}">Excel</a></li>
+                </ul>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="openSetupForm('{% url 'AddUpdateDateFormat' %}')">
+                <i class="ti tabler-plus me-1"></i> Add Date Format
+            </button>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover" id="dateformatTable">
+            <thead class="border-top">
+                <tr>
+                      <th>Sr.</th>
+                    <th>Display Label</th>
+                    <th>Format Value</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in formats %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ f.display_label }}</td>
+                    <td><code>{{ f.format_value }}</code></td>
+                    <td><span class="badge bg-label-{% if f.is_active %}success{% else %}danger{% endif %}">{% if f.is_active %}Active{% else %}Inactive{% endif %}</span></td>
+                    <td>
+                        <button class="btn btn-icon btn-text-secondary waves-effect rounded-pill" onclick="openSetupForm('{% url 'AddUpdateDateFormat' f.date_format_id %}')">
+                            <i class="ti tabler-edit ti-md"></i>
+                        </button>
+                        <button class="btn btn-icon btn-text-danger waves-effect rounded-pill" onclick="deleteSetupItem('{% url 'DeleteDateFormat' %}', {{ f.date_format_id }}, 'date format')">
+                            <i class="ti tabler-trash ti-md"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

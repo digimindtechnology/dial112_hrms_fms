@@ -1,0 +1,44 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">{% if fmt %}Edit Time Format{% else %}Add Time Format{% endif %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <form id="frm_TimeFormat" method="post" action="{% url 'AddUpdateTimeFormat' %}{% if fmt %}{{ fmt.time_format_id }}/{% endif %}">
+        {% csrf_token %}
+        <div class="modal-body">
+            <div class="mb-4">
+                <label class="form-label">Display Label <span class="text-danger">*</span></label>
+                <input type="text" name="display_label" class="form-control" value="{{ fmt.display_label|default:'' }}" required placeholder="e.g. HH:MM:SS (24-hour)">
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Format Value <span class="text-danger">*</span></label>
+                <input type="text" name="format_value" class="form-control" value="{{ fmt.format_value|default:'' }}" required placeholder="e.g. H:i:s">
+                <small class="text-muted">Use PHP/date format syntax (H=24h, h=12h, i=minutes, s=seconds, A=AM/PM)</small>
+            </div>
+            <div class="mb-4">
+                <div class="form-check">
+                    <input type="checkbox" name="is_active" class="form-check-input" id="tf_active" {% if fmt.is_active or not fmt %}checked{% endif %}>
+                    <label class="form-check-label" for="tf_active">Active</label>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary loading_spinner">{% if fmt %}Update{% else %}Save{% endif %}</button>
+        </div>
+    </form>
+</div>
+<script>
+$('#frm_TimeFormat').on('submit', function(e) {
+    e.preventDefault();
+    $.post($(this).attr('action'), $(this).serialize(), function(response) {
+        if (response.success) {
+            $('#Modal_SetupForm').modal('hide');
+            $.get("{% url 'TimeFormatList' %}", function(d) {
+                $('#div_TimeFormatList').html(d);
+                initDataTable('#timeformatTable');
+            });
+        }
+    });
+});
+</script>

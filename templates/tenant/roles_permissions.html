@@ -1,0 +1,44 @@
+{% extends "layout/layout_base.html" %}
+{% load static %}
+
+{% block title %} Roles - Apps{% endblock %}
+
+{% block content %}
+<h4 class="mb-1">Roles List</h4>
+<p class="mb-6">A role provided access to predefined menus and features so that depending on assigned role an administrator can have access to <br>what user needs.</p>
+<div class="row g-6" id="div_RoleList"></div>
+
+<div class="modal fade" id="RoleFrom_Modal" tabindex="-1" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-lg modal-simple modal-dialog-centered modal-add-new-role">
+        <div id="div_RoleFrom"></div>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        LoadRoleList();
+    });
+    function LoadRoleList(){
+        $('#div_RoleList').load('/tenant/RoleList/')
+    }
+    function AddUpdateRoleFrom(p){
+        $('#div_RoleFrom').load('/tenant/AddUpdateRoleFrom/'+p);
+        $('#RoleFrom_Modal').modal('toggle');
+   }
+   function CopyRole(p){
+       var confirmSubmit = confirm("Are you sure you want to Copy this Role?");
+        if (confirmSubmit) {
+              $.ajax({
+              type: "POST",
+              url: "{% url 'CopyRole' %}",
+              data: {'copyRoleId': p, 'csrfmiddlewaretoken': '{{ csrf_token }}'},
+              success: function(response) {
+                     LoadRoleList();
+                     $('#div_RoleList').scrollTop($('#div_RoleList')[0].scrollHeight);
+              }
+            })
+        }
+   }
+</script>
+{% endblock %}

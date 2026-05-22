@@ -1,0 +1,167 @@
+{% extends "layout/layout_base.html" %}
+{% load static %}
+
+{% block title %}Account settings - Security{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="nav-align-top">
+            <ul class="nav nav-pills flex-column flex-md-row mb-6 gap-2 gap-lg-0">
+                <li class="nav-item"><a class="nav-link" href="{% url 'tenant-settings-account' %}"><i class="menu-icon icon-base ti tabler-id"></i> Account</a></li>
+                <li class="nav-item"><a class="nav-link active"  href="{% url 'tenant-settings-security' %}"><i class="menu-icon icon-base ti tabler-lock"></i> Security</a></li>
+            </ul>
+        </div>
+        <!-- Change Password -->
+        <div class="card mb-6">
+            <h5 class="card-header">Change Password</h5>
+            <div class="card-body pt-1">
+                <form class="needs-validation" novalidate id="frm_ChangePassword" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                     <input type="hidden" name="tenant_id" value="{{tenant.tenant_id}}" id  ='tenant_id'>
+                    <div class="row">
+                        <div class="mb-6 col-md-12 form-password-toggle">
+                            <label class="form-label" for="currentPassword">Current Password</label>
+                            <div class="input-group input-group-merge">
+                                <input class="form-control" type="password" required name="currentPassword" id="currentPassword" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"/>
+                                <span class="input-group-text cursor-pointer"><i class="ti tabler-eye-off"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="mb-6 col-md-6 form-password-toggle">
+                            <label class="form-label" for="newPassword">New Password</label>
+                            <div class="input-group input-group-merge">
+                                <input class="form-control" type="password" required id="newPassword" name="newPassword" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"/>
+                                <span class="input-group-text cursor-pointer"><i class="ti tabler-eye-off"></i></span>
+                            </div>
+                        </div>
+                        <div class="mb-6 col-md-6 form-password-toggle">
+                            <label class="form-label" for="confirmPassword">Confirm New Password</label>
+                            <div class="input-group input-group-merge">
+                                <input class="form-control" type="password" required name="confirmPassword" id="confirmPassword" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"/>
+                                <span class="input-group-text cursor-pointer"><i class="ti tabler-eye-off"></i></span>
+                            </div>
+                        </div>
+                        <div id="error" style="color:red;"></div>
+                    </div>
+                    <h6 class="text-body"><b>Password Requirements:</b></h6>
+                    <ul class="ps-4 mb-0">
+                        <li class="mb-4">Minimum 8 characters long - the more, the better</li>
+                        <li class="mb-4">At least one lowercase character</li>
+                        <li>At least one number, symbol, or whitespace character</li>
+                    </ul>
+                    <div class="mt-6">
+                        <button type="submit" class="btn btn-primary me-3 loading_spinner" name="btn_ChangePassword" id  ='btn_ChangePassword'>Save changes</button>
+                        <button type="reset" class="btn btn-label-secondary">Reset</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!--/ Change Password -->
+
+        <!-- Recent Devices -->
+        <div class="card mb-6">
+            <h5 class="card-header">Recent Devices Login Details</h5>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th class="text-truncate">Browser</th>
+                        <th class="text-truncate">OS info</th>
+                        <th class="text-truncate">Login/Logout</th>
+                        <th class="text-truncate">Recent Activities</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for logininfo in loginhistory %}
+                    <tr>
+                        <td class="text-truncate text-heading fw-medium">
+                            {% if logininfo.browser|lower == 'chrome' %}
+                                <i class='ti tabler-brand-chrome ti-md align-top text-info me-2'></i>
+                            {% elif logininfo.browser|lower == 'firefox' %}
+                                <i class='ti tabler-brand-firefox ti-md align-top text-warning me-2'></i>
+                            {% elif logininfo.browser|lower == 'mobile safari' or logininfo.browser|lower == 'safari'  %}
+                                <i class='ti tabler-compass ti-md align-top text-danger me-2'></i>
+                            {% elif logininfo.browser|lower == 'edge' %}
+                                <i class='ti tabler-brand-edge ti-md align-top text-danger me-2'></i>
+                            {% else %}
+                                <i class='ti tabler-world-upload ti-md align-top me-2'></i>
+                            {% endif %}
+                            {{ logininfo.browser|default:"unknown"|capfirst }} on {{ logininfo.browser_os_info|default:"unknown"|capfirst }}
+                        </td>
+                        <td class="text-truncate">{{ logininfo.browser_os_info|default:"unknown"|capfirst }}</td>
+                        
+                        {% if logininfo.is_user_logged %}
+                        <td class="text-truncate"><i class="ti tabler-user-check text-success me-2"></i></td>
+
+                        
+                        {% else %}
+                        <td class="text-truncate"><i class="ti tabler-user-off text-danger me-2"></i></td>
+                        {% endif %}
+                        <td class="text-truncate">{{ logininfo.created_date }}</td>
+                    </tr>
+                    {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!--/ Recent Devices -->
+
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        $('#frm_ChangePassword').on('submit', function(event) {
+            event.preventDefault();
+            var  currentPassword  = $('#currentPassword').val();
+            var newPassword = $('#newPassword').val();
+            var confirmPassword = $('#confirmPassword').val();
+            if (newPassword != confirmPassword){
+                $('#error').text('Note : Password and confirm password does not match');
+            }
+            else {
+                var errorMessage = validatePassword(newPassword);
+                if (errorMessage) {
+                    $('#error').text(errorMessage);
+                }
+                else {
+                    changes_password(currentPassword,newPassword,confirmPassword)
+                   
+                }
+            }
+        });
+
+        function validatePassword(password) {
+            if (password.length < 8) {
+                return 'Note : Password must be at least 8 characters long.';
+            }
+            if (!/[a-z]/.test(password)) {
+                return 'Note : Password must contain at least one lowercase letter.';
+            }
+            if (!/[0-9\s!@#$%^&*(),.?":{}|<>]/.test(password)) {
+                return 'Note : Password must contain at least one number, symbol, or whitespace character.';
+            }
+            return '';
+        }
+    });
+
+
+    function changes_password(currentpwd,newpwd,oldpwd){
+        let tenant_id  =  $('#tenant_id').val();
+        data  ={
+            "tenant_id":tenant_id,
+            "currentPassword":currentpwd,
+            "newPassword":newpwd,
+            "confirmPassword":oldpwd,   
+
+        }
+        url = '/tenant/account/security/'
+        // it  function  call for  Ajax
+        ajaxpostRequest(url,data)
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,376 @@
+{% extends "layout/layout_base.html" %}
+{% load static %}
+{% load ui_filter_tags %}
+
+{% block title %}  Account settings - Account {% endblock %}
+
+{% block content %}
+
+    <div class="col-md-12">
+        <div class="nav-align-top">
+            <ul class="nav nav-pills flex-column flex-md-row mb-6 gap-2 gap-lg-0">
+                <li class="nav-item"><a class="nav-link active" href="{% url 'tenant-settings-account' %}"><i
+                        class="menu-icon icon-base ti tabler-id"></i> Account</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'tenant-settings-security' %}"><i
+                        class="menu-icon icon-base ti tabler-lock"></i> Security</a></li>
+            </ul>
+        </div>
+        <form class="needs-validation" novalidate id="formAccountSettings" method="POST"
+              enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="tenant_id" value="{{ tenant.tenant_id }}">
+            <div class="card mb-6">
+                <div class="card-body row">
+                    <div class="mb-1 col-md-6">
+                        <div class="d-flex align-items-start align-items-sm-center gap-6">
+                            {% if not tenant.tenant_logo_s3_url %}
+                                <img src="/static/assets/img/avatars/NA.png" alt="user-avatar"
+                                     class="d-block w-px-100 h-px-100 rounded" id="uploadTenantLog"/>
+                            {% else %}
+                                <img src="{{ tenant.tenant_logo_s3_url|file_url }}" alt="user-avatar"
+                                     class="d-block w-px-100 h-px-100 rounded" id="uploadTenantLog"/>
+                            {% endif %}
+                            <div class="button-wrapper">
+                                <label class="btn btn-primary me-3 mb-4" tabindex="0">
+                                    <span class="d-none d-sm-block">Upload Logo</span>
+                                    <i class="ti ti-upload d-block d-sm-none"></i>
+                                    <input type="file" id="uploadTenantLogFile" name="uploadTenantLogFile"
+                                           class="uploadTenantLog-input" hidden accept="image/png, image/jpeg"/>
+                                </label>
+                                <button type="button" class="btn btn-label-secondary uploadTenantLog-reset mb-4">
+                                    <i class="ti ti-refresh-dot d-block d-sm-none"></i>
+                                    <span class="d-none d-sm-block">Reset</span>
+                                </button>
+                                <div>Allowed JPG, GIF or PNG. Max size of 800K</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-1 col-md-6">
+                        <div class="d-flex align-items-start align-items-sm-center gap-6">
+                            {% if not tenant.tenant_favicon_s3_url %}
+                                <img src="/static/assets/img/avatars/NA.png" alt="user-avatar"
+                                     class="d-block w-px-100 h-px-100 rounded" id="uploadTenantIcon"/>
+                            {% else %}
+                                <img src="{{ tenant.tenant_favicon_s3_url|file_url }}" alt="user-avatar"
+                                     class="d-block w-px-100 h-px-100 rounded" id="uploadTenantIcon"/>
+                            {% endif %}
+
+                            <div class="button-wrapper">
+                                <label class="btn btn-primary me-3 mb-4" tabindex="0">
+                                    <span class="d-none d-sm-block">Upload Icon</span>
+                                    <i class="ti ti-upload d-block d-sm-none"></i>
+                                    <input type="file" id="uploadTenantIconFile" name="uploadTenantIconFile"
+                                           class="uploadTenantIcon-input" hidden accept="image/png, image/jpeg"/>
+                                </label>
+                                <button type="button" class="btn btn-label-secondary uploadTenantIcon-reset mb-4">
+                                    <i class="ti ti-refresh-dot d-block d-sm-none"></i>
+                                    <span class="d-none d-sm-block">Reset</span>
+                                </button>
+                                <div>Allowed JPG, GIF or PNG. Max size of 800K</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="card-body pt-4">
+
+                    <div class="row">
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">First Name <span class="text-danger">*</span></label>
+                            <input class="form-control" required type="text" id="first_name" name="first_name"
+                                   value="{{ tenant.admin_user.first_name }}" autofocus/>
+                            <div class="valid-feedback"> Looks good!</div>
+                            <div class="invalid-feedback"> Please enter your first name.</div>
+                        </div>
+
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">Last Name <span class="text-danger">*</span></label>
+                            <input class="form-control" type="text" required name="last_name" id="last_name"
+                                   value="{{ tenant.admin_user.last_name }}"/>
+                            <div class="valid-feedback"> Looks good!</div>
+                            <div class="invalid-feedback"> Please enter your last name.</div>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label for="email" class="form-label">E-mail <span class="text-danger">*</span></label>
+                            <input class="form-control" type="text" required id="email" name="email"
+                                   value="{{ tenant.email|default:'' }}" placeholder="john.doe@example.com"/>
+                            <div class="valid-feedback"> Looks good!</div>
+                            <div class="invalid-feedback"> Please enter your email.</div>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label for="organization" class="form-label">Organization <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="tenant_name" required name="tenant_name"
+                                   value="{{ tenant.tenant_name|default:'' }}"/>
+                            <div class="valid-feedback"> Looks good!</div>
+                            <div class="invalid-feedback"> Please enter your organization.</div>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">Mobile Number <span class="text-danger">*</span></label>
+                            <div class="input-group input-group-merge">
+                                <input type="text" id="mobile" required name="mobile" maxlength="10"
+                                       value="{{ tenant.mobile|default:'' }}" class="form-control"
+                                       placeholder="202 555 0111"/>
+                                <div class="valid-feedback"> Looks good!</div>
+                                <div class="invalid-feedback"> Please enter your phone no.</div>
+                            </div>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label for="address" class="form-label">Address <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" required class="form-control" id="address" name="address"
+                                   value="{{ tenant.address|default:'' }}" placeholder="High Street"/>
+                            <div class="valid-feedback"> Looks good!</div>
+                            <div class="invalid-feedback"> Please enter your address.</div>
+                        </div>
+
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">Zip Code</label>
+                            <input type="text" class="form-control" id="postal_code" name="postal_code"
+                                   value="{{ tenant.postal_code|default:'' }}" placeholder="231465" maxlength="6"/>
+                            <div class="valid-feedback"> Looks good!</div>
+                            <div class="invalid-feedback"> Please enter your zip code.</div>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">Country <span class="text-danger">*</span></label>
+
+                            <select required class="select2 form-select" data-allow-clear="true" id="country_id"
+                                    name="country_id" onchange="GetStateList();">
+                                <option value="">Please Select Country</option>
+                                {% for entry in countryList %}
+                                    <option {% if entry.country_id == tenant.country.country_id %}
+                                        selected {% endif %} value="{{ entry.country_id }}">
+                                        {{ entry.country_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <div class="valid-feedback"> Looks good!</div>
+                            <div class="invalid-feedback"> Please select your country.</div>
+                        </div>
+
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">State <span class="text-danger">*</span></label>
+                            <select required class="select2 form-select" data-allow-clear="true" id="state_id"
+                                    name="state_id"> </select>
+                            <div class="valid-feedback"> Looks good!</div>
+                            <div class="invalid-feedback"> Please select your state.</div>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label for="state" class="form-label">City</label>
+                            <input class="form-control" type="text" id="city" name="city" required
+                                   value="{{ tenant.city|default:'' }}" placeholder="California"/>
+                            <div class="valid-feedback"> Looks good!</div>
+                            <div class="invalid-feedback"> Please enter your city.</div>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">Currency <span class="text-danger">*</span></label>
+                            <select name="currency_id" class="select2 form-select" required>
+                                <option value="">Please Select Currency</option>
+                                {% for entry in currencyList %}
+                                    <option {% if entry.currency_id == tenant.currency_id %} selected {% endif %}
+                                                                                             value="{{ entry.currency_id }}">
+                                        {{ entry.currency_symbol }} {{ entry.currency_code }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <div class="valid-feedback"> Looks good!</div>
+                            <div class="invalid-feedback"> Please select your currency.</div>
+                        </div>
+
+                        <div class="mb-4 col-md-6">
+                            <label for="timeZones" class="form-label">Time zone <span
+                                    class="text-danger">*</span></label>
+                            <select name="time_zone" class="select2 form-select" data-allow-clear="true" required>
+                                <option value="">Please Select Timezone</option>
+                                {% for tz in timeZoneList %}
+                                    <option value="{{ tz.time_zone_id }}"
+                                            {% if tz.time_zone_id == tenant.time_zone_id %} selected {% endif %}>
+                                        {{ tz.display_label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <div class="valid-feedback"> Looks good!</div>
+                            <div class="invalid-feedback"> Please select your time zone.</div>
+                        </div>
+
+                        <div class="mb-4 col-md-6">
+                            <label for="dateFormat" class="form-label">Date Format <span
+                                    class="text-danger">*</span></label>
+                            <select name="date_formate_view" class="select2 form-select" data-allow-clear="true"
+                                    required>
+                                <option value="">Please Select Date Format</option>
+                                {% for df in dateFormatList %}
+                                    <option value="{{ df.date_format_id }}"
+                                            {% if df.date_format_id == tenant.date_formate_view_id %}
+                                            selected {% endif %}>
+                                        {{ df.display_label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <div class="valid-feedback"> Looks good!</div>
+                            <div class="invalid-feedback"> Please select your date format.</div>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label for="timeFormat" class="form-label">Time Format <span
+                                    class="text-danger">*</span></label>
+                            <select name="time_formate_view" class="select2 form-select" data-allow-clear="true"
+                                    required>
+                                <option value="">Please Select Time Format</option>
+                                {% for tf in timeFormatList %}
+                                    <option value="{{ tf.time_format_id }}"
+                                            {% if tf.time_format_id == tenant.time_formate_view_id %}
+                                            selected {% endif %}>
+                                        {{ tf.display_label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <div class="valid-feedback"> Looks good!</div>
+                            <div class="invalid-feedback"> Please select your time format.</div>
+                        </div>
+
+
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">PAN No <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="pan" name="pan"
+                                   value="{{ tenant.pan|default:'' }}" required placeholder="231465"
+                                   maxlength="15"/>
+                            <div class="valid-feedback"> Looks good!</div>
+                            <div class="invalid-feedback"> Please enter vaild your Pan No</div>
+                        </div>
+                        <div class="mb-4 col-md-6">
+                            <label class="form-label">GST No <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="gst" name="gst"
+                                   value="{{ tenant.gst|default:'' }}" required
+                                   pattern="^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$"
+                                   maxlength="15"/>
+                            <div class="valid-feedback"> Looks good!</div>
+                            <div class="invalid-feedback"> Please enter valid your GST no.</div>
+                        </div>
+                        <div class="mb-4 col-md-10">
+                            <label class="form-label">Website URL</label>
+                            <input type="url" class="form-control" id="website_url" name="website_url"
+                                   value="{{ tenant.website_url|default:'' }}"/>
+                            <div class="valid-feedback"> Looks good!</div>
+                            <div class="invalid-feedback"> Please enter website url.</div>
+                        </div>
+
+                        <div class="mb-4 col-md-2">
+                            <label class="form-label">Account Status : </label>
+                            {% if tenant.is_active %}
+                                <br><span style="margin-top: 8px;" class="badge bg-success">Active </span>
+                            {% else %}
+                                <span style="margin-top: 8px;" class="badge bg-danger">Deactivated</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mt-2">
+                        <button name="btn_SubmitAccount" class="btnSubmit btn btn-primary me-3 loading_spinner"
+                                type="submit">
+                            <span class="btnText me-1">Save Changes</span>
+                            <span class="btnLoader spinner-border spinner-border visually-hidden" role="status"
+                                  aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h5 class="card-header">{{ accountStatus }} Account</h5>
+                <div class="card-body">
+                    <div class="mb-6 col-12 mb-0">
+                        <div class="alert alert-warning">
+                            <h5 class="alert-heading mb-1">Are you sure you want to {{ accountStatus }} your
+                                account?</h5>
+                            <p class="mb-0">Once you '{{ accountStatus }}' your account, there is no going back.
+                                Please be certain.</p>
+                        </div>
+                    </div>
+                    <div class="form-check my-8">
+                        <input class="form-check-input checkbox" type="checkbox" name="accountActivation"
+                               id="accountActivation"/>
+                        <label class="form-check-label" for="accountActivation">I confirm my
+                            account {{ accountStatus }}</label>
+                    </div>
+                    <button type="submit" name="btn_{{ accountStatus }}" id="btn_{{ accountStatus }}"
+                            class="btn btn-danger deactivate-account" disabled>{{ accountStatus }} Account
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            GetStateList();
+        });
+
+        function GetStateList() {
+            var countryID = $("#country_id").val() != "" ? $("#country_id").val() : '{{tenant.country_id|default:0}}'
+            if (countryID) {
+                var options = '<option value="">Please Select State</option>';
+                $.getJSON('/masters/GetStateListJson/?countryID=' + countryID, function (data) {
+                    $.each(data, function (i, d) {
+                        var selected = ''
+                        if (d.pk.toString() == '{{tenant.state_id|default:0}}') {
+                            selected = 'selected'
+                        }
+                        options += "<option " + selected + " value='" + d.pk + "'>" + d.fields['state_name'] + "</option>";
+                    });
+                    $('#state_id').html(options).trigger('change');
+                })
+
+            } else {
+                var options = '<option value="">Please Select State</option>';
+                $('#state_id').html(options).trigger('change');
+
+            }
+
+        }
+
+        let uploadTenantLog = document.getElementById('uploadTenantLog');
+        const fileInputLogo = document.querySelector('.uploadTenantLog-input'),
+            resetFileInputLogo = document.querySelector('.uploadTenantLog-reset');
+        if (uploadTenantLog) {
+            const resetImage = uploadTenantLog.src;
+            fileInputLogo.onchange = () => {
+                if (fileInputLogo.files[0]) {
+                    uploadTenantLog.src = window.URL.createObjectURL(fileInputLogo.files[0]);
+                }
+            };
+            resetFileInputLogo.onclick = () => {
+                fileInputLogo.value = '';
+                uploadTenantLog.src = resetImage;
+            };
+        }
+
+        let uploadTenantIcon = document.getElementById('uploadTenantIcon');
+        const fileInputIcon = document.querySelector('.uploadTenantIcon-input'),
+            resetFileInputIcon = document.querySelector('.uploadTenantIcon-reset');
+        if (uploadTenantIcon) {
+            const resetImage = uploadTenantIcon.src;
+            fileInputIcon.onchange = () => {
+                if (fileInputIcon.files[0]) {
+                    uploadTenantIcon.src = window.URL.createObjectURL(fileInputIcon.files[0]);
+                }
+            };
+            resetFileInputIcon.onclick = () => {
+                fileInputIcon.value = '';
+                uploadTenantIcon.src = resetImage;
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            $('.checkbox').click(function () {
+                $('.deactivate-account').attr('disabled', 'disabled');
+                if ($(this).is(':checked')) {
+                    $('.deactivate-account').removeAttr('disabled');
+                }
+            });
+        });
+    </script>
+    {% include 'layout/dropdown_select.html' %}
+{% endblock %}
+
+

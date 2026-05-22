@@ -1,0 +1,44 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">{% if fmt %}Edit Date Format{% else %}Add Date Format{% endif %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <form id="frm_DateFormat" method="post" action="{% url 'AddUpdateDateFormat' %}{% if fmt %}{{ fmt.date_format_id }}/{% endif %}">
+        {% csrf_token %}
+        <div class="modal-body">
+            <div class="mb-4">
+                <label class="form-label">Display Label <span class="text-danger">*</span></label>
+                <input type="text" name="display_label" class="form-control" value="{{ fmt.display_label|default:'' }}" required placeholder="e.g. DD/MM/YYYY">
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Format Value <span class="text-danger">*</span></label>
+                <input type="text" name="format_value" class="form-control" value="{{ fmt.format_value|default:'' }}" required placeholder="e.g. d/m/Y">
+                <small class="text-muted">Use PHP/date format syntax (d=day, m=month, Y=year)</small>
+            </div>
+            <div class="mb-4">
+                <div class="form-check">
+                    <input type="checkbox" name="is_active" class="form-check-input" id="df_active" {% if fmt.is_active or not fmt %}checked{% endif %}>
+                    <label class="form-check-label" for="df_active">Active</label>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary loading_spinner">{% if fmt %}Update{% else %}Save{% endif %}</button>
+        </div>
+    </form>
+</div>
+<script>
+$('#frm_DateFormat').on('submit', function(e) {
+    e.preventDefault();
+    $.post($(this).attr('action'), $(this).serialize(), function(response) {
+        if (response.success) {
+            $('#Modal_SetupForm').modal('hide');
+            $.get("{% url 'DateFormatList' %}", function(d) {
+                $('#div_DateFormatList').html(d);
+                initDataTable('#dateformatTable');
+            });
+        }
+    });
+});
+</script>

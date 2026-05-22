@@ -1,0 +1,182 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ error_title }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f6f7fb;
+            --panel: #ffffff;
+            --panel-border: rgba(47, 43, 61, .10);
+            --text: #2f2b3d;
+            --muted: #6f6b7d;
+            --primary: #7367f0;
+            --danger: #ea5455;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Public Sans", system-ui, -apple-system, Segoe UI, sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(115, 103, 240, .12), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(234, 84, 85, .10), transparent 24%),
+                var(--bg);
+            color: var(--text);
+        }
+        .wrap {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+        }
+        .card {
+            width: min(920px, 100%);
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 18px;
+            box-shadow: 0 24px 70px rgba(47, 43, 61, .12);
+            overflow: hidden;
+        }
+        .hero {
+            padding: 28px 28px 18px;
+            display: grid;
+            gap: 12px;
+            border-bottom: 1px solid var(--panel-border);
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            width: fit-content;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(234, 84, 85, .08);
+            color: var(--danger);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+        .title {
+            margin: 0;
+            font-size: clamp(28px, 3vw, 40px);
+            line-height: 1.1;
+        }
+        .desc {
+            margin: 0;
+            color: var(--muted);
+            max-width: 70ch;
+            line-height: 1.6;
+        }
+        .body {
+            display: grid;
+            grid-template-columns: 1.1fr .9fr;
+            gap: 18px;
+            padding: 24px 28px 28px;
+        }
+        .panel {
+            background: #fbfbfd;
+            border: 1px solid var(--panel-border);
+            border-radius: 14px;
+            padding: 18px;
+            min-width: 0;
+        }
+        .label {
+            margin: 0 0 8px;
+            font-size: 12px;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: 700;
+        }
+        .code {
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font: 12px/1.6 Consolas, "Liberation Mono", monospace;
+            color: #1f2430;
+            max-height: 420px;
+            overflow: auto;
+        }
+        .meta {
+            display: grid;
+            gap: 10px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+        .meta strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 0 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid transparent;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-secondary {
+            background: #fff;
+            color: var(--text);
+            border-color: var(--panel-border);
+        }
+        @media (max-width: 900px) {
+            .body { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="card">
+            <div class="hero">
+                <div class="badge">Application Error</div>
+                <h1 class="title">{{ error_title }}</h1>
+                <p class="desc">{{ error_message }}</p>
+            </div>
+            <div class="body">
+                <div class="panel">
+                    <div class="label">Details</div>
+                    <div class="meta">
+                        <div><strong>Time:</strong> {{ error_context.timestamp|default:"-" }}</div>
+                        <div><strong>Path:</strong> {{ error_context.path|default:"-" }}</div>
+                        <div><strong>Method:</strong> {{ error_context.method|default:"-" }}</div>
+                        <div><strong>User:</strong> {{ error_context.user|default:"-" }}</div>
+                        <div><strong>Query:</strong> {{ error_context.query_string|default:"-" }}</div>
+                        <div><strong>POST Keys:</strong> {{ error_context.post_keys|default:"-" }}</div>
+                    </div>
+                    <div class="actions">
+                        <a class="btn btn-primary" href="{% if request.user.is_authenticated %}{% url 'dashboard-home' %}{% else %}{% url 'login' %}{% endif %}">Continue</a>
+                        <a class="btn btn-secondary" href="javascript:history.back()">Go Back</a>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="label">Traceback</div>
+                    <pre class="code">{{ error_context.traceback|default:"Traceback is unavailable." }}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
