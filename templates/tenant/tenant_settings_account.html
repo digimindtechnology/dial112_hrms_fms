@@ -27,7 +27,7 @@
                                 <img src="/static/assets/img/avatars/NA.png" alt="user-avatar"
                                      class="d-block w-px-100 h-px-100 rounded" id="uploadTenantLog"/>
                             {% else %}
-                                <img src="{{ tenant.tenant_logo_s3_url|file_url }}" alt="user-avatar"
+                                <img src="{{ request.filePath }}{{ tenant.tenant_logo_s3_url }}" alt="user-avatar"
                                      class="d-block w-px-100 h-px-100 rounded" id="uploadTenantLog"/>
                             {% endif %}
                             <div class="button-wrapper">
@@ -52,7 +52,7 @@
                                 <img src="/static/assets/img/avatars/NA.png" alt="user-avatar"
                                      class="d-block w-px-100 h-px-100 rounded" id="uploadTenantIcon"/>
                             {% else %}
-                                <img src="{{ tenant.tenant_favicon_s3_url|file_url }}" alt="user-avatar"
+                                <img src="{{request.filePath }}{{ tenant.tenant_favicon_s3_url }}" alt="user-avatar"
                                      class="d-block w-px-100 h-px-100 rounded" id="uploadTenantIcon"/>
                             {% endif %}
 

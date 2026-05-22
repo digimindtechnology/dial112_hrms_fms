@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from accounts.helpers.basicUtility import DeleteFileFromS3, UploadFileS3Server
+from accounts.helpers.basicUtility import DeleteFileFromS3, UploadFileS3Server, UploadFileData
 from accounts.helpers.base import Base
 from accounts.helpers.decorators import CheckRole
 from accounts.helpers.message_helper import send_sweetalert
@@ -124,7 +124,7 @@ def tenant_create(request):
                 def upload(file, folder, field):
                     if not file:
                         return
-                    path = UploadFileS3Server(request.tenantID, folder, file)
+                    path = UploadFileData(request.tenantID, folder, file)
                     if path:
                         old = getattr(tenant, field)
                         setattr(tenant, field, path)
@@ -256,7 +256,7 @@ def tenant_settings_account(request):
                         if tenant_logo:
                             try:
                                 old_logo = tenant.tenant_logo_s3_url
-                                logo_path = UploadFileS3Server(request.tenantID, 'logo', tenant_logo)
+                                logo_path = UploadFileData(request.tenantID, 'logo', tenant_logo)
                                 if not logo_path:
                                     raise ValueError("Logo upload failed")
                                 tenant.tenant_logo_s3_url = logo_path
@@ -270,7 +270,7 @@ def tenant_settings_account(request):
                         if tenant_favicon:
                             try:
                                 old_favicon = tenant.tenant_favicon_s3_url
-                                favicon_path = UploadFileS3Server(request.tenantID, 'logo', tenant_favicon)
+                                favicon_path = UploadFileData(request.tenantID, 'logo', tenant_favicon)
                                 if not favicon_path:
                                     raise ValueError("Favicon upload failed")
                                 tenant.tenant_favicon_s3_url = favicon_path

@@ -1,7 +1,7 @@
 from django.utils.deprecation import MiddlewareMixin
 from rest_framework.authtoken.models import Token
 from accounts.helpers.basicUtility import GetFileUrl
-from DmtHrmsFmsApp.settings import COPY_RIGHT_INFORMATION, S3_URL
+from DmtHrmsFmsApp.settings import COPY_RIGHT_INFORMATION, S3_URL,MEDIA_URL,IS_FILE_UPLOAD_S3
 from accounts.models import Profile
 
 
@@ -11,18 +11,19 @@ class RoleMiddleware(MiddlewareMixin):
         if not user or not user.is_authenticated:
             return None
 
-        s3_url = S3_URL or ''
+        filePath = S3_URL if IS_FILE_UPLOAD_S3 else f"{MEDIA_URL}/"
+        print('filePath',filePath)
         request.COPY_RIGHT_INFORMATION = COPY_RIGHT_INFORMATION
-        request.S3_URL = s3_url
-        request.image = f'{s3_url}default.jpg'
+        request.filePath = filePath
+        request.image = f'{filePath}default.jpg'
         request.roleID = 1
         request.role = ''
         request.tenantID = 0
         request.tenantName = ''
 
-        request.tenantLogo = f'{s3_url}digimind.png'
-        request.tenantFavicon = f'{s3_url}favicon.ico'
-
+        request.tenantLogo = f'{filePath}digimind.png'
+        request.tenantFavicon = f'{filePath}favicon.ico'
+        print('request.tenantLogo',request.tenantLogo)
         request.currencySymbol = '\u20b9'
         request.is_company_setup = False
         request.is_system_assigned_password = False

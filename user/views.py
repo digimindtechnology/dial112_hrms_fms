@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.db import transaction
 from django.db.models import Q, Count
-from accounts.helpers.basicUtility import UploadFileS3Server, GetFileUrl
+from accounts.helpers.basicUtility import UploadFileS3Server, GetFileUrl, UploadFileData
 from accounts.helpers.import_export_utils import export_csv, export_xlsx, parse_upload
 from accounts.helpers.base import Base
 from accounts.helpers.decorators import CheckRole
@@ -194,7 +194,7 @@ def user_create(request, user_id=None):
                     # 3. Process Profile Picture
                     if profile_photo:
                         # Make sure UploadFileS3Server is imported and working
-                        profile_url = UploadFileS3Server(tenant_id, 'profile', profile_photo, '')
+                        profile_url = UploadFileData(tenant_id, 'profile', profile_photo, '')
                         if profile_url:
                             profile.profile_picture_s3_url = profile_url
 

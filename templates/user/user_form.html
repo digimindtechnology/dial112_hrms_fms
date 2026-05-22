@@ -256,7 +256,7 @@
                                 <div class="d-flex align-items-start align-items-sm-center gap-6 mb-6">
                                     <img src="
 
-                                            {% if profile.profile_picture_s3_url %}{{ request.S3_URL }}{{ profile.profile_picture_s3_url }}{% else %}{% static 'assets/img/avatars/NA.png' %}{% endif %}"
+                                            {% if profile.profile_picture_s3_url %}{{request.filePath}}{{ profile.profile_picture_s3_url }}{% else %}{% static 'assets/img/avatars/NA.png' %}{% endif %}"
                                          alt="user-avatar" class="d-block w-px-100 h-px-100 rounded"
                                          id="uploadProfilePic"/>
                                     <div class="button-wrapper">
