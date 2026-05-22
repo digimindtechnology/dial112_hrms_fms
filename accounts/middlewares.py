@@ -1,7 +1,7 @@
 from django.utils.deprecation import MiddlewareMixin
 from rest_framework.authtoken.models import Token
 from accounts.helpers.basicUtility import GetFileUrl
-from ProcureBOApp.settings import COPY_RIGHT_INFORMATION, S3_URL
+from DmtHrmsFmsApp.settings import COPY_RIGHT_INFORMATION, S3_URL
 from accounts.models import Profile
 
 

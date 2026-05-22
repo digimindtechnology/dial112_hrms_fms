@@ -9,7 +9,7 @@ from botocore.exceptions import ClientError
 from botocore.config import Config
 from django.http import HttpResponse
 
-from ProcureBOApp.settings import (
+from DmtHrmsFmsApp.settings import (
     AWS_S3_ENDPOINT_URL,
     AWS_S3_REGION_NAME,
     FILE_UPLOAD_STORAGE,

@@ -1,5 +1,5 @@
 from django.db import connection
-from ProcureBOApp.settings import S3_URL, LOGIN_URL, IS_RunServer, AUTO_LOGOUT
+from DmtHrmsFmsApp.settings import S3_URL, LOGIN_URL, IS_RunServer, AUTO_LOGOUT
 from accounts.helpers.base import Base
 
 

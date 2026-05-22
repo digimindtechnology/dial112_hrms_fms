@@ -16,7 +16,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.clickjacking import xframe_options_deny
 from django.views.decorators.http import require_POST
 
-from ProcureBOApp.settings import LOGIN_URL, SMS_SERVICE_ON
+from DmtHrmsFmsApp.settings import LOGIN_URL, SMS_SERVICE_ON
 from accounts.helpers.message_helper import send_sweetalert
 from accounts.helpers.sms_helper import send_otp_sms
 from accounts.models import Profile, UserLoginTrace

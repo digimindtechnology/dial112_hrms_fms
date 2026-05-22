@@ -1,6 +1,6 @@
 import base64
 from cryptography.fernet import Fernet
-from ProcureBOApp.settings import SECRET_KEY
+from DmtHrmsFmsApp.settings import SECRET_KEY
 
 
 # =========================
