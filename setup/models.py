@@ -67,3 +67,120 @@ class CostCenter(BaseModel):
 
     def __str__(self):
         return f"{self.cost_center_name} ({self.cost_center_code})"
+
+
+class SetupLookupBase(BaseModel):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    tenantProfile = models.ForeignKey(TenantProfile, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_created')
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='%(class)s_updated')
+
+    class Meta:
+        abstract = True
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name
+
+
+class EmployeeType(SetupLookupBase):
+    class Meta(SetupLookupBase.Meta):
+        verbose_name = 'Employee Type'
+        verbose_name_plural = 'Employee Types'
+        constraints = [
+            models.UniqueConstraint(fields=['tenantProfile', 'name'], name='setup_employee_type_tenant_name_uniq')
+        ]
+
+
+class Designation(SetupLookupBase):
+    class Meta(SetupLookupBase.Meta):
+        verbose_name = 'Designation'
+        verbose_name_plural = 'Designations'
+        constraints = [
+            models.UniqueConstraint(fields=['tenantProfile', 'name'], name='setup_designation_tenant_name_uniq')
+        ]
+
+
+class Grade(SetupLookupBase):
+    class Meta(SetupLookupBase.Meta):
+        verbose_name = 'Grade'
+        verbose_name_plural = 'Grades'
+        constraints = [
+            models.UniqueConstraint(fields=['tenantProfile', 'name'], name='setup_grade_tenant_name_uniq')
+        ]
+
+
+class Language(SetupLookupBase):
+    class Meta(SetupLookupBase.Meta):
+        verbose_name = 'Language'
+        verbose_name_plural = 'Languages'
+        constraints = [
+            models.UniqueConstraint(fields=['tenantProfile', 'name'], name='setup_language_tenant_name_uniq')
+        ]
+
+
+class Dialect(SetupLookupBase):
+    class Meta(SetupLookupBase.Meta):
+        verbose_name = 'Dialect'
+        verbose_name_plural = 'Dialects'
+        constraints = [
+            models.UniqueConstraint(fields=['tenantProfile', 'name'], name='setup_dialect_tenant_name_uniq')
+        ]
+
+
+class LeaveType(SetupLookupBase):
+    class Meta(SetupLookupBase.Meta):
+        verbose_name = 'Leave Type'
+        verbose_name_plural = 'Leave Types'
+        constraints = [
+            models.UniqueConstraint(fields=['tenantProfile', 'name'], name='setup_leave_type_tenant_name_uniq')
+        ]
+
+
+class ShiftCategory(SetupLookupBase):
+    how_many_hours = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    class Meta(SetupLookupBase.Meta):
+        verbose_name = 'Shift Category'
+        verbose_name_plural = 'Shift Categories'
+        constraints = [
+            models.UniqueConstraint(fields=['tenantProfile', 'name'], name='setup_shift_category_tenant_name_uniq')
+        ]
+
+
+class ViolationType(SetupLookupBase):
+    class Meta(SetupLookupBase.Meta):
+        verbose_name = 'Violation Type'
+        verbose_name_plural = 'Violation Types'
+        constraints = [
+            models.UniqueConstraint(fields=['tenantProfile', 'name'], name='setup_violation_type_tenant_name_uniq')
+        ]
+
+
+class TrainerType(SetupLookupBase):
+    class Meta(SetupLookupBase.Meta):
+        verbose_name = 'Trainer Type'
+        verbose_name_plural = 'Trainer Types'
+        constraints = [
+            models.UniqueConstraint(fields=['tenantProfile', 'name'], name='setup_trainer_type_tenant_name_uniq')
+        ]
+
+
+class FRVType(SetupLookupBase):
+    class Meta(SetupLookupBase.Meta):
+        verbose_name = 'FRV Type'
+        verbose_name_plural = 'FRV Types'
+        constraints = [
+            models.UniqueConstraint(fields=['tenantProfile', 'name'], name='setup_frv_type_tenant_name_uniq')
+        ]
+
+
+class FRVMaintenanceType(SetupLookupBase):
+    class Meta(SetupLookupBase.Meta):
+        verbose_name = 'FRV Maintenance Type'
+        verbose_name_plural = 'FRV Maintenance Types'
+        constraints = [
+            models.UniqueConstraint(fields=['tenantProfile', 'name'], name='setup_frv_maintenance_type_tenant_name_uniq')
+        ]

@@ -44,6 +44,8 @@ def CheckRole(*roles):
             except Exception as e:
                 print(f"CheckRole Exception: {e}")
                 send_sweetalert(request, 'error', str(e))
+                if getattr(request.user, 'is_authenticated', False):
+                    return HttpResponseRedirect(reverse('unauthorized'))
                 return HttpResponseRedirect(reverse('login'))
 
         return wrapper

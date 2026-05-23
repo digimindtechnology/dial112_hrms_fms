@@ -11,5 +11,9 @@ urlpatterns = [
     path('cost-centers/download-sample/<str:fmt>/', views.cost_center_download_sample, name='setup-cost-center-download-sample'),
     path('cost-centers/upload-detail/<int:pk>/', views.cost_center_upload_detail, name='setup-cost-center-upload-detail'),
     path('cost-centers/download-errors/<int:pk>/', views.cost_center_download_errors, name='setup-cost-center-download-errors'),
+    path('lookups/<str:slug>/', views.setup_lookup_list, name='setup-lookup-list'),
+    path('lookups/<str:slug>/add/', views.setup_lookup_form, name='setup-lookup-add'),
+    path('lookups/<str:slug>/edit/<int:pk>/', views.setup_lookup_form, name='setup-lookup-edit'),
+    path('lookups/<str:slug>/delete/', views.setup_lookup_delete, name='setup-lookup-delete'),
 
 ]

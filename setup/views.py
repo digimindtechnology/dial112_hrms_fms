@@ -1,20 +1,175 @@
 import csv
 import json
 import io
+from decimal import Decimal, InvalidOperation
 from django.contrib.auth.decorators import login_required
+from django.db import DatabaseError
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from accounts.helpers.base import Base
 from accounts.helpers.decorators import CheckRole
 from accounts.models import Profile
-from setup.models import CostCenter, CostCenterStatus, CostCenterBulkUploadHistory
+from setup.models import (
+    CostCenter,
+    CostCenterStatus,
+    CostCenterBulkUploadHistory,
+    EmployeeType,
+    Designation,
+    Grade,
+    Language,
+    Dialect,
+    LeaveType,
+    ShiftCategory,
+    ViolationType,
+    TrainerType,
+    FRVType,
+    FRVMaintenanceType,
+)
 from accounts.helpers.import_export_utils import parse_upload
 
 
 @login_required
 @CheckRole(Base.Group.SetupGroup.value)
 def data_setup(request):
-    return render(request, "setup/data_setup.html")
+    lookup_cards = [{'slug': slug, **cfg} for slug, cfg in SETUP_LOOKUPS.items()]
+    return render(request, "setup/data_setup.html", {'setup_lookups': lookup_cards})
+
+
+SETUP_LOOKUPS = {
+    'employee-type': {'model': EmployeeType, 'title': 'Employee Type', 'plural': 'Employee Types', 'icon': 'tabler-users-group'},
+    'designation': {'model': Designation, 'title': 'Designation', 'plural': 'Designations', 'icon': 'tabler-id-badge-2'},
+    'grade': {'model': Grade, 'title': 'Grade', 'plural': 'Grades', 'icon': 'tabler-layers-subtract'},
+    'language': {'model': Language, 'title': 'Language', 'plural': 'Languages', 'icon': 'tabler-language'},
+    'dialect': {'model': Dialect, 'title': 'Dialect', 'plural': 'Dialects', 'icon': 'tabler-message-language'},
+    'leave-type': {'model': LeaveType, 'title': 'Leave Type', 'plural': 'Leave Types', 'icon': 'tabler-calendar-minus'},
+    'shift-category': {'model': ShiftCategory, 'title': 'Shift Category', 'plural': 'Shift Categories', 'icon': 'tabler-clock-hour-4', 'has_hours': True},
+    'violation-type': {'model': ViolationType, 'title': 'Violation Type', 'plural': 'Violation Types', 'icon': 'tabler-alert-triangle'},
+    'trainer-type': {'model': TrainerType, 'title': 'Trainer Type', 'plural': 'Trainer Types', 'icon': 'tabler-user-star'},
+    'frv-type': {'model': FRVType, 'title': 'FRV Type', 'plural': 'FRV Types', 'icon': 'tabler-ambulance'},
+    'frv-maintenance-type': {'model': FRVMaintenanceType, 'title': 'FRV Maintenance Type', 'plural': 'FRV Maintenance Types', 'icon': 'tabler-tools'},
+}
+
+
+def _lookup_config(slug):
+    return SETUP_LOOKUPS.get(slug)
+
+
+def _lookup_tenant(request):
+    profile = Profile.objects.filter(user=request.user).select_related('tenantProfile').first()
+    return profile.tenantProfile if profile else None
+
+
+@login_required
+@CheckRole(Base.Group.SetupGroup.value)
+def setup_lookup_list(request, slug):
+    cfg = _lookup_config(slug)
+    if not cfg:
+        return JsonResponse({'success': False, 'error': 'Unknown setup type'}, status=404)
+    try:
+        items = cfg['model'].objects.filter(tenantProfile_id=request.tenantID).order_by('name')
+    except DatabaseError as e:
+        items = []
+        db_error = str(e)
+    else:
+        db_error = ''
+
+    return render(request, "setup/setup_lookup_list.html", {
+        'slug': slug,
+        'items': items,
+        'title': cfg['title'],
+        'plural': cfg['plural'],
+        'has_hours': cfg.get('has_hours', False),
+        'db_error': db_error,
+    })
+
+
+@login_required
+@CheckRole(Base.Group.SetupGroup.value)
+def setup_lookup_form(request, slug, pk=0):
+    cfg = _lookup_config(slug)
+    if not cfg:
+        return JsonResponse({'success': False, 'error': 'Unknown setup type'}, status=404)
+
+    model = cfg['model']
+    try:
+        obj = model.objects.filter(id=pk, tenantProfile_id=request.tenantID).first() if pk else None
+    except DatabaseError as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+    if pk and not obj:
+        return JsonResponse({'success': False, 'error': f"{cfg['title']} not found"}, status=404)
+
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        description = request.POST.get("description", "").strip()
+        is_active = request.POST.get("is_active") == "on"
+        how_many_hours = None
+        if not name:
+            return JsonResponse({'success': False, 'error': f"{cfg['title']} name is required"})
+
+        if cfg.get('has_hours'):
+            hours_value = request.POST.get("how_many_hours", "").strip()
+            if hours_value:
+                try:
+                    how_many_hours = Decimal(hours_value)
+                except InvalidOperation:
+                    return JsonResponse({'success': False, 'error': 'How many hours must be a valid number'})
+
+        tenant = _lookup_tenant(request)
+        if not tenant:
+            return JsonResponse({'success': False, 'error': 'No tenant profile found for your account'})
+
+        try:
+            duplicate = model.objects.filter(tenantProfile=tenant, name__iexact=name)
+            if obj:
+                duplicate = duplicate.exclude(id=obj.id)
+            if duplicate.exists():
+                return JsonResponse({'success': False, 'error': f"{cfg['title']} already exists"})
+
+            if obj:
+                obj.name = name
+                obj.description = description or None
+                obj.is_active = is_active
+                if cfg.get('has_hours'):
+                    obj.how_many_hours = how_many_hours
+                obj.updated_by = request.user
+                obj.save()
+            else:
+                create_kwargs = {
+                    'name': name,
+                    'description': description or None,
+                    'is_active': is_active,
+                    'tenantProfile': tenant,
+                    'created_by': request.user,
+                }
+                if cfg.get('has_hours'):
+                    create_kwargs['how_many_hours'] = how_many_hours
+                model.objects.create(**create_kwargs)
+            return JsonResponse({'success': True})
+        except (DatabaseError, Exception) as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    return render(request, "setup/partials/_setup_lookup_form.html", {
+        'slug': slug,
+        'obj': obj,
+        'title': cfg['title'],
+        'has_hours': cfg.get('has_hours', False),
+    })
+
+
+@login_required
+@CheckRole(Base.Group.SetupGroup.value)
+def setup_lookup_delete(request, slug):
+    cfg = _lookup_config(slug)
+    if not cfg:
+        return JsonResponse({'success': False, 'error': 'Unknown setup type'}, status=404)
+
+    pk = request.POST.get("pk")
+    try:
+        cfg['model'].objects.filter(id=pk, tenantProfile_id=request.tenantID).delete()
+        return JsonResponse({'success': True})
+    except DatabaseError as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
 @login_required
