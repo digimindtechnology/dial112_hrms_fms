@@ -11,7 +11,7 @@ class RoleMiddleware(MiddlewareMixin):
         if not user or not user.is_authenticated:
             return None
 
-        filePath = S3_URL if IS_FILE_UPLOAD_S3 else f"{MEDIA_URL}/"
+        filePath = S3_URL if IS_FILE_UPLOAD_S3 else f"{MEDIA_URL}"
         print('filePath',filePath)
         request.COPY_RIGHT_INFORMATION = COPY_RIGHT_INFORMATION
         request.filePath = filePath
@@ -141,11 +141,11 @@ class RoleMiddleware(MiddlewareMixin):
             # ---------- Logo / Favicon ----------
             if request.is_company_setup:
                 logo = tenant.tenant_logo_s3_url
-                favicon = (tenant.tenant_favicon_s3_url)
+                favicon = tenant.tenant_favicon_s3_url
                 if logo:
-                    request.tenantLogo = (GetFileUrl(logo))
+                    request.tenantLogo = f'{filePath}{logo}'
                 if favicon:
-                    request.tenantFavicon = (GetFileUrl(favicon))
+                    request.tenantFavicon = f'{filePath}{favicon}'
 
         request.usertoken = (Token.objects.filter(user_id=user.id).values_list('key', flat=True).first() or '')
         return None
