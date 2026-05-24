@@ -12,7 +12,6 @@ class RoleMiddleware(MiddlewareMixin):
             return None
 
         filePath = S3_URL if IS_FILE_UPLOAD_S3 else f"{MEDIA_URL}"
-        print('filePath',filePath)
         request.COPY_RIGHT_INFORMATION = COPY_RIGHT_INFORMATION
         request.filePath = filePath
         request.image = f'{filePath}default.jpg'
@@ -23,7 +22,6 @@ class RoleMiddleware(MiddlewareMixin):
 
         request.tenantLogo = f'{filePath}digimind.png'
         request.tenantFavicon = f'{filePath}favicon.ico'
-        print('request.tenantLogo',request.tenantLogo)
         request.currencySymbol = '\u20b9'
         request.is_company_setup = False
         request.is_system_assigned_password = False

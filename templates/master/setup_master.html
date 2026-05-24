@@ -69,34 +69,34 @@
 
         <div class="tab-content card">
             <div class="tab-pane fade show active" id="tab-countries" role="tabpanel">
-                <div id="div_CountryList"></div>
+                <div id="div_CountryList" data-loaded="0"></div>
             </div>
             <div class="tab-pane fade" id="tab-currencies" role="tabpanel">
-                <div id="div_CurrencyList"></div>
+                <div id="div_CurrencyList" data-loaded="0"></div>
             </div>
             <div class="tab-pane fade" id="tab-states" role="tabpanel">
-                <div id="div_StateList"></div>
+                <div id="div_StateList" data-loaded="0"></div>
             </div>
             <div class="tab-pane fade" id="tab-divisions" role="tabpanel">
-                <div id="div_DivisionList"></div>
+                <div id="div_DivisionList" data-loaded="0"></div>
             </div>
             <div class="tab-pane fade" id="tab-districts" role="tabpanel">
-                <div id="div_DistrictList"></div>
+                <div id="div_DistrictList" data-loaded="0"></div>
             </div>
             <div class="tab-pane fade" id="tab-zones" role="tabpanel">
-                <div id="div_ZoneList"></div>
+                <div id="div_ZoneList" data-loaded="0"></div>
             </div>
             <div class="tab-pane fade" id="tab-cities" role="tabpanel">
-                <div id="div_CityList"></div>
+                <div id="div_CityList" data-loaded="0"></div>
             </div>
             <div class="tab-pane fade" id="tab-timezones" role="tabpanel">
-                <div id="div_TimeZoneList"></div>
+                <div id="div_TimeZoneList" data-loaded="0"></div>
             </div>
             <div class="tab-pane fade" id="tab-dateformats" role="tabpanel">
-                <div id="div_DateFormatList"></div>
+                <div id="div_DateFormatList" data-loaded="0"></div>
             </div>
             <div class="tab-pane fade" id="tab-timeformats" role="tabpanel">
-                <div id="div_TimeFormatList"></div>
+                <div id="div_TimeFormatList" data-loaded="0"></div>
             </div>
         </div>
     </div>
@@ -146,6 +146,44 @@
 
     <script>
         var importEntityName = '';
+        function loadTab(url, containerId, tableId, forceReload) {
+            var container = document.getElementById(containerId);
+            if (!container) return;
+            if (container.dataset.loaded === '1' && !forceReload) {
+                if (tableId) initDataTable(tableId);
+                return;
+            }
+            container.innerHTML = '<div class="p-4 text-center text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Loading...</div>';
+            $.get(url, function (data) {
+                container.innerHTML = data;
+                container.dataset.loaded = '1';
+                initDataTable(tableId);
+            });
+        }
+
+        var setupTabMap = {
+            '#tab-countries': ['{% url 'CountryList' %}', 'div_CountryList', '#countryTable'],
+            '#tab-currencies': ['{% url 'CurrencyList' %}', 'div_CurrencyList', '#currencyTable'],
+            '#tab-states': ['{% url 'StateList' %}', 'div_StateList', '#stateTable'],
+            '#tab-divisions': ['{% url 'DivisionList' %}', 'div_DivisionList', '#divisionTable'],
+            '#tab-districts': ['{% url 'DistrictList' %}', 'div_DistrictList', '#districtTable'],
+            '#tab-zones': ['{% url 'ZoneList' %}', 'div_ZoneList', '#zoneTable'],
+            '#tab-cities': ['{% url 'CityList' %}', 'div_CityList', '#cityTable'],
+            '#tab-timezones': ['{% url 'TimeZoneList' %}', 'div_TimeZoneList', '#timezoneTable'],
+            '#tab-dateformats': ['{% url 'DateFormatList' %}', 'div_DateFormatList', '#dateformatTable'],
+            '#tab-timeformats': ['{% url 'TimeFormatList' %}', 'div_TimeFormatList', '#timeformatTable'],
+        };
+
+        function refreshActiveSetupTab() {
+            var activeTab = document.querySelector('.nav-pills .active');
+            if (!activeTab) return;
+            var target = activeTab.getAttribute('data-bs-target');
+            var info = setupTabMap[target];
+            if (!info) return;
+            var container = document.getElementById(info[1]);
+            if (container) container.dataset.loaded = '0';
+            loadTab(info[0], info[1], info[2], true);
+        }
 
         function showImportModal(entity) {
             importEntityName = entity;
@@ -179,8 +217,7 @@
                         div.innerHTML = '<div class="alert alert-success mb-0">' + data.message + '</div>';
                         setTimeout(function () {
                             $('#Modal_Import').modal('hide');
-                            var activeTab = document.querySelector('.nav-pills .active');
-                            if (activeTab) activeTab.click();
+                            refreshActiveSetupTab();
                         }, 2000);
                     } else {
                         div.innerHTML = '<div class="alert alert-danger mb-0">' + (data.error || data.message) + '</div>';
@@ -196,36 +233,12 @@
         });
 
         document.addEventListener('DOMContentLoaded', function () {
-            function loadTab(url, containerId, tableId) {
-                $.get(url, function (data) {
-                    $('#' + containerId).html(data);
-                    initDataTable(tableId);
-                });
-            }
-
             loadTab("{% url 'CountryList' %}", 'div_CountryList', '#countryTable');
-            loadTab("{% url 'CurrencyList' %}", 'div_CurrencyList', '#currencyTable');
-            loadTab("{% url 'StateList' %}", 'div_StateList', '#stateTable');
-            loadTab("{% url 'DivisionList' %}", 'div_DivisionList', '#divisionTable');
-            loadTab("{% url 'DistrictList' %}", 'div_DistrictList', '#districtTable');
-            loadTab("{% url 'ZoneList' %}", 'div_ZoneList', '#zoneTable');
-            loadTab("{% url 'CityList' %}", 'div_CityList', '#cityTable');
-            loadTab("{% url 'TimeZoneList' %}", 'div_TimeZoneList', '#timezoneTable');
-            loadTab("{% url 'DateFormatList' %}", 'div_DateFormatList', '#dateformatTable');
-            loadTab("{% url 'TimeFormatList' %}", 'div_TimeFormatList', '#timeformatTable');
             document.querySelectorAll('[data-bs-toggle="tab"]').forEach(function (tab) {
                 tab.addEventListener('shown.bs.tab', function (e) {
                     var target = e.target.getAttribute('data-bs-target');
-                    if (target === '#tab-countries') loadTab("{% url 'CountryList' %}", 'div_CountryList', '#countryTable');
-                    else if (target === '#tab-currencies') loadTab("{% url 'CurrencyList' %}", 'div_CurrencyList', '#currencyTable');
-                    else if (target === '#tab-states') loadTab("{% url 'StateList' %}", 'div_StateList', '#stateTable');
-                    else if (target === '#tab-divisions') loadTab("{% url 'DivisionList' %}", 'div_DivisionList', '#divisionTable');
-                    else if (target === '#tab-districts') loadTab("{% url 'DistrictList' %}", 'div_DistrictList', '#districtTable');
-                    else if (target === '#tab-zones') loadTab("{% url 'ZoneList' %}", 'div_ZoneList', '#zoneTable');
-                    else if (target === '#tab-cities') loadTab("{% url 'CityList' %}", 'div_CityList', '#cityTable');
-                    else if (target === '#tab-timezones') loadTab("{% url 'TimeZoneList' %}", 'div_TimeZoneList', '#timezoneTable');
-                    else if (target === '#tab-dateformats') loadTab("{% url 'DateFormatList' %}", 'div_DateFormatList', '#dateformatTable');
-                    else if (target === '#tab-timeformats') loadTab("{% url 'TimeFormatList' %}", 'div_TimeFormatList', '#timeformatTable');
+                    var info = setupTabMap[target];
+                    if (info) loadTab(info[0], info[1], info[2]);
                 });
             });
         });
@@ -245,23 +258,8 @@
                     var activeTab = document.querySelector('.nav-pills .active');
                     if (activeTab) {
                         var target = activeTab.getAttribute('data-bs-target');
-                        var tabMap = {
-                            '#tab-countries': ['CountryList', 'div_CountryList', '#countryTable'],
-                            '#tab-currencies': ['CurrencyList', 'div_CurrencyList', '#currencyTable'],
-                            '#tab-states': ['StateList', 'div_StateList', '#stateTable'],
-                            '#tab-divisions': ['DivisionList', 'div_DivisionList', '#divisionTable'],
-                            '#tab-districts': ['DistrictList', 'div_DistrictList', '#districtTable'],
-                            '#tab-zones': ['ZoneList', 'div_ZoneList', '#zoneTable'],
-                            '#tab-cities': ['CityList', 'div_CityList', '#cityTable'],
-                            '#tab-timezones': ['TimeZoneList', 'div_TimeZoneList', '#timezoneTable'],
-                            '#tab-dateformats': ['DateFormatList', 'div_DateFormatList', '#dateformatTable'],
-                            '#tab-timeformats': ['TimeFormatList', 'div_TimeFormatList', '#timeformatTable'],
-                        };
-                        var info = tabMap[target];
-                        if (info) $.get("{% url 'CountryList' %}".replace('CountryList', info[0]), function (d) {
-                            $('#' + info[1]).html(d);
-                            initDataTable(info[2]);
-                        });
+                        var info = setupTabMap[target];
+                        if (info) loadTab(info[0], info[1], info[2], true);
                     }
                 }
             });
