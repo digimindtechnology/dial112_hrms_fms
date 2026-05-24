@@ -1,30 +1,5 @@
-<!doctype html>
-<html data-template="vertical-menu-template-no-customizer"
-      class="layout-wide customizer-hide"
-      dir="ltr"
-      data-skin="default"
-      data-bs-theme="light"
-      data-assets-path="/static/assets/">
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"/>
-    <meta name="robots" content="noindex, nofollow"/>
-    <title>Logged Out - DIAL-112 HRMS & FMS</title>
-    <link rel="icon" type="image/x-icon" href="/static/assets/img/favicon/favicon.ico"/>
-    <link rel="preconnect" href="https://fonts.googleapis.com"/>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap">
-    <link rel="stylesheet" href="/static/assets/vendor/css/core.css"/>
-    <link rel="stylesheet" href="/static/assets/css/demo.css"/>
-    <link rel="stylesheet" href="/static/assets/vendor/css/pages/page-auth.css"/>
-    <link rel="stylesheet" href="/static/assets/vendor/fonts/iconify-icons.css" media="print" onload="this.media='all'"/>
-    <link rel="stylesheet" href="/static/assets/vendor/libs/@form-validation/form-validation.css" media="print" onload="this.media='all'"/>
-    <noscript>
-        <link rel="stylesheet" href="/static/assets/vendor/fonts/iconify-icons.css"/>
-        <link rel="stylesheet" href="/static/assets/vendor/libs/@form-validation/form-validation.css"/>
-    </noscript>
-</head>
-<body>
+{% extends "layout/no_login_page.html" %}
+{% block content %}
 <div class="authentication-wrapper authentication-cover">
     <a href="#" class="app-brand auth-cover-brand">
         <span class="app-brand-logo demo"><span class="text-primary"></span></span>
@@ -52,16 +27,5 @@
         </div>
     </div>
 </div>
-<script defer src="/static/assets/vendor/js/helpers.js"></script>
-<script defer src="/static/assets/js/config.js"></script>
-<script defer src="/static/assets/vendor/js/template-customizer.js"></script>
-<script src="/static/assets/vendor/libs/jquery/jquery.js"></script>
-<script defer src="/static/assets/vendor/libs/popper/popper.js"></script>
-<script defer src="/static/assets/vendor/js/bootstrap.js"></script>
-<script defer src="/static/assets/vendor/libs/@form-validation/popular.js"></script>
-<script defer src="/static/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
-<script defer src="/static/assets/vendor/libs/@form-validation/auto-focus.js"></script>
-<script defer src="/static/assets/js/main.js"></script>
-<script defer src="/static/assets/js/pages-auth.js"></script>
-</body>
-</html>
+
+{% endblock %}

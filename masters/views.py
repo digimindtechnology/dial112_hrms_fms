@@ -8,7 +8,7 @@ from django.http import JsonResponse
 
 from accounts.helpers.base import  Base
 from accounts.helpers.decorators import CheckRole
-from masters.models import Country, State, District, Currency, Division
+from masters.models import Country, State, District, Currency, Division, Zone, City
 
 from tenant.models import TimeZone, DateFormat, TimeFormat
 from accounts.helpers.import_export_utils import export_csv, export_xlsx, parse_upload
@@ -151,6 +151,54 @@ def DeleteState(request):
 
 
 # =========================================================
+# DIVISION
+# =========================================================
+
+@login_required
+def DivisionList(request):
+    divisions = Division.objects.select_related('state', 'state__country').all().order_by('division_name')
+    return _render_partial(request, "master/partials/_division_list.html", {'divisions': divisions})
+
+
+@login_required
+def AddUpdateDivision(request, pk=0):
+    division = Division.objects.filter(division_id=pk).first() if pk else None
+    countries = Country.objects.filter(is_active=True)
+    states = State.objects.filter(is_active=True)
+    if request.method == "POST":
+        name = request.POST.get("division_name", "").strip()
+        code = request.POST.get("division_code", "").strip()
+        state_id = request.POST.get("state_id")
+        is_active = request.POST.get("is_active") == "on"
+        if name and state_id:
+            if division:
+                division.division_name = name
+                division.division_code = code or None
+                division.state_id = state_id
+                division.is_active = is_active
+                division.save()
+            else:
+                Division.objects.create(
+                    division_name=name,
+                    division_code=code or None,
+                    state_id=state_id,
+                    is_active=is_active,
+                )
+            return JsonResponse({'success': True})
+        return JsonResponse({'success': False, 'error': 'Division name and state are required'})
+    return _render_partial(request, "master/partials/_division_form.html", {
+        'division': division, 'countries': countries, 'states': states
+    })
+
+
+@login_required
+def DeleteDivision(request):
+    pk = request.POST.get("pk")
+    Division.objects.filter(division_id=pk).delete()
+    return JsonResponse({'success': True})
+
+
+# =========================================================
 # DISTRICT
 # =========================================================
 
@@ -165,22 +213,30 @@ def AddUpdateDistrict(request, pk=0):
     district = District.objects.filter(district_id=pk).first() if pk else None
     countries = Country.objects.filter(is_active=True)
     states = State.objects.filter(is_active=True)
+    divisions = Division.objects.filter(is_active=True)
     if request.method == "POST":
         name = request.POST.get("district_name", "").strip()
         state_id = request.POST.get("state_id")
+        division_id = request.POST.get("division_id") or None
         is_active = request.POST.get("is_active") == "on"
         if name and state_id:
             if district:
                 district.district_name = name
                 district.state_id = state_id
+                district.division_id = division_id
                 district.is_active = is_active
                 district.save()
             else:
-                District.objects.create(district_name=name, state_id=state_id, is_active=is_active)
+                District.objects.create(
+                    district_name=name,
+                    state_id=state_id,
+                    division_id=division_id,
+                    is_active=is_active,
+                )
             return JsonResponse({'success': True})
         return JsonResponse({'success': False, 'error': 'District name and state are required'})
     return _render_partial(request, "master/partials/_district_form.html", {
-        'district': district, 'countries': countries, 'states': states
+        'district': district, 'countries': countries, 'states': states, 'divisions': divisions
     })
 
 
@@ -188,6 +244,102 @@ def AddUpdateDistrict(request, pk=0):
 def DeleteDistrict(request):
     pk = request.POST.get("pk")
     District.objects.filter(district_id=pk).delete()
+    return JsonResponse({'success': True})
+
+
+# =========================================================
+# ZONE
+# =========================================================
+
+@login_required
+def ZoneList(request):
+    zones = Zone.objects.select_related('district', 'district__state').all().order_by('zone_name')
+    return _render_partial(request, "master/partials/_zone_list.html", {'zones': zones})
+
+
+@login_required
+def AddUpdateZone(request, pk=0):
+    zone = Zone.objects.filter(zone_id=pk).first() if pk else None
+    districts = District.objects.filter(is_active=True).select_related('state')
+    if request.method == "POST":
+        name = request.POST.get("zone_name", "").strip()
+        name_hindi = request.POST.get("zone_name_hindi", "").strip()
+        district_id = request.POST.get("district_id") or None
+        sequence = request.POST.get("sequence") or 1
+        is_active = request.POST.get("is_active") == "on"
+        if name:
+            if zone:
+                zone.zone_name = name
+                zone.zone_name_hindi = name_hindi or None
+                zone.district_id = district_id
+                zone.sequence = sequence
+                zone.is_active = is_active
+                zone.save()
+            else:
+                Zone.objects.create(
+                    zone_name=name,
+                    zone_name_hindi=name_hindi or None,
+                    district_id=district_id,
+                    sequence=sequence,
+                    is_active=is_active,
+                )
+            return JsonResponse({'success': True})
+        return JsonResponse({'success': False, 'error': 'Zone name is required'})
+    return _render_partial(request, "master/partials/_zone_form.html", {'zone': zone, 'districts': districts})
+
+
+@login_required
+def DeleteZone(request):
+    pk = request.POST.get("pk")
+    Zone.objects.filter(zone_id=pk).delete()
+    return JsonResponse({'success': True})
+
+
+# =========================================================
+# CITY
+# =========================================================
+
+@login_required
+def CityList(request):
+    cities = City.objects.select_related('district', 'district__state').all().order_by('city_name')
+    return _render_partial(request, "master/partials/_city_list.html", {'cities': cities})
+
+
+@login_required
+def AddUpdateCity(request, pk=0):
+    city = City.objects.filter(city_id=pk).first() if pk else None
+    districts = District.objects.filter(is_active=True).select_related('state')
+    if request.method == "POST":
+        name = request.POST.get("city_name", "").strip()
+        name_hindi = request.POST.get("city_name_hindi", "").strip()
+        district_id = request.POST.get("district_id") or None
+        sequence = request.POST.get("sequence") or 1
+        is_active = request.POST.get("is_active") == "on"
+        if name:
+            if city:
+                city.city_name = name
+                city.city_name_hindi = name_hindi or None
+                city.district_id = district_id
+                city.sequence = sequence
+                city.is_active = is_active
+                city.save()
+            else:
+                City.objects.create(
+                    city_name=name,
+                    city_name_hindi=name_hindi or None,
+                    district_id=district_id,
+                    sequence=sequence,
+                    is_active=is_active,
+                )
+            return JsonResponse({'success': True})
+        return JsonResponse({'success': False, 'error': 'City name is required'})
+    return _render_partial(request, "master/partials/_city_form.html", {'city': city, 'districts': districts})
+
+
+@login_required
+def DeleteCity(request):
+    pk = request.POST.get("pk")
+    City.objects.filter(city_id=pk).delete()
     return JsonResponse({'success': True})
 
 
@@ -333,6 +485,24 @@ ENTITY_CONFIG = {
         'headers': {'district_name': 'District Name', 'state__state_name': 'State Name', 'division__division_name': 'Division Name', 'is_active': 'Active'},
         'unique': ['district_name'],
     },
+    'Division': {
+        'model': Division,
+        'fields': ['division_name', 'division_code', 'state__state_name', 'is_active'],
+        'headers': {'division_name': 'Division Name', 'division_code': 'Division Code', 'state__state_name': 'State Name', 'is_active': 'Active'},
+        'unique': ['division_name'],
+    },
+    'Zone': {
+        'model': Zone,
+        'fields': ['zone_name', 'zone_name_hindi', 'district__district_name', 'sequence', 'is_active'],
+        'headers': {'zone_name': 'Zone Name', 'zone_name_hindi': 'Hindi Name', 'district__district_name': 'District Name', 'sequence': 'Sequence', 'is_active': 'Active'},
+        'unique': ['zone_name'],
+    },
+    'City': {
+        'model': City,
+        'fields': ['city_name', 'city_name_hindi', 'district__district_name', 'sequence', 'is_active'],
+        'headers': {'city_name': 'City Name', 'city_name_hindi': 'Hindi Name', 'district__district_name': 'District Name', 'sequence': 'Sequence', 'is_active': 'Active'},
+        'unique': ['city_name'],
+    },
     'TimeZone': {
         'model': TimeZone,
         'fields': ['time_zone_name', 'display_label', 'utc_offset', 'is_active'],
@@ -382,6 +552,10 @@ def _resolve_row(entity_name, row):
             kwargs['state'] = State.objects.filter(state_name=raw).first()
         elif field == 'division__division_name':
             kwargs['division'] = Division.objects.filter(division_name=raw).first() if raw else None
+        elif field == 'district__district_name':
+            kwargs['district'] = District.objects.filter(district_name=raw).first() if raw else None
+        elif field == 'sequence':
+            kwargs[field] = int(raw) if str(raw).strip() else 1
         else:
             kwargs[field] = raw
     return kwargs

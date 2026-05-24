@@ -1,165 +1,174 @@
-<!doctype html>
-<html data-template="vertical-menu-template-no-customizer"
-      class="layout-wide customizer-hide"
-      dir="ltr"
-      data-skin="default"
-      data-bs-theme="light"
-      data-assets-path="/static/assets/">
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"/>
-    <meta name="robots" content="noindex, nofollow"/>
-    <title>OTP Verification — DIAL-112 HRMS & FMS</title>
-    <link rel="icon" type="image/x-icon" href="/static/assets/img/favicon/favicon.ico"/>
-    <link rel="preconnect" href="https://fonts.googleapis.com"/>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap">
-    <link rel="stylesheet" href="/static/assets/vendor/css/core.css" media="print" onload="this.media='all'"/>
-    <link rel="stylesheet" href="/static/assets/css/demo.css" media="print" onload="this.media='all'"/>
-    <link rel="stylesheet" href="/static/assets/vendor/css/pages/page-auth.css" media="print" onload="this.media='all'"/>
-
-   <noscript>
-        <link rel="stylesheet" href="/static/assets/vendor/fonts/iconify-icons.css" media="print"
-              onload="this.media='all'">
-        <link rel="stylesheet" href="/static/assets/vendor/libs/sweetalert2/sweetalert2.css" media="print"
-              onload="this.media='all'">
-    </noscript>
-
+{% extends "layout/no_login_page.html" %}
+{% block content %}
     <style>
-        .otp-inputs { display: flex; gap: 8px; justify-content: center; }
+        .otp-inputs {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
         .otp-inputs input {
-            width: 48px; height: 48px; text-align: center; font-size: 1.25rem;
-            border: 1px solid #d9dee3; border-radius: 6px; outline: none;
+            width: 48px;
+            height: 48px;
+            text-align: center;
+            font-size: 1.25rem;
+            border: 1px solid #d9dee3;
+            border-radius: 6px;
+            outline: none;
             transition: border-color .15s;
         }
-        .otp-inputs input:focus { border-color: #7367f0; box-shadow: 0 0 0 2px rgba(115,103,240,.2); }
-        .otp-inputs input.input-error { border-color: #ff3e1d; animation: shake .4s ease-in-out; }
-        @keyframes shake {
-            0%,100% { transform: translateX(0); }
-            10%,30%,50%,70%,90% { transform: translateX(-4px); }
-            20%,40%,60%,80% { transform: translateX(4px); }
-        }
-        #timer { font-weight: 600; color: #7367f0; min-width: 60px; display: inline-block; }
-        #resendBtn:disabled { opacity: 0.5; cursor: not-allowed; }
-    </style>
-</head>
-<body>
-<div class="authentication-wrapper authentication-cover">
-    <a href="#" class="app-brand auth-cover-brand">
-        <span class="app-brand-text demo text-heading fw-bold">DIAL-112 HRMS & FMS</span>
-    </a>
-    <div class="authentication-inner row m-0">
-        <div class="d-none d-xl-flex col-xl-8 p-0">
-            <div class="auth-cover-bg d-flex justify-content-center align-items-center">
-                <img alt="auth-otp-cover" class="my-5 auth-illustration"
-                     src="/static/assets/img/illustrations/auth-login-illustration-light.png"
-                     data-app-light-img="illustrations/auth-login-illustration-light.png"
-                     data-app-dark-img="illustrations/auth-login-illustration-dark.png"/>
-                <img alt="auth-bg" class="platform-bg"
-                     src="/static/assets/img/illustrations/bg-shape-image-light.png"
-                     data-app-light-img="illustrations/bg-shape-image-light.png"
-                     data-app-dark-img="illustrations/bg-shape-image-dark.png"/>
-            </div>
-        </div>
-        <div class="d-flex col-12 col-xl-4 align-items-center authentication-bg p-sm-12 p-6">
-            <div class="w-px-400 mx-auto mt-2 pt-2">
-                <h4 class="mb-1">OTP Verification</h4>
-                <p class="mb-3">We sent a one-time password to <strong>{{ masked_mobile|default:"your registered mobile number" }}</strong></p>
 
-                <form id="otpForm" method="POST" action="{% url 'otp-verify' %}">
-                    {% csrf_token %}
-                    <div class="mb-4">
-                        <label class="form-label">Enter OTP</label>
-                        <div class="otp-inputs" id="otpInputs">
-                            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autofocus>
-                            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
-                            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
-                            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        .otp-inputs input:focus {
+            border-color: #7367f0;
+            box-shadow: 0 0 0 2px rgba(115, 103, 240, .2);
+        }
+
+        .otp-inputs input.input-error {
+            border-color: #ff3e1d;
+            animation: shake .4s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            10%, 30%, 50%, 70%, 90% {
+                transform: translateX(-4px);
+            }
+            20%, 40%, 60%, 80% {
+                transform: translateX(4px);
+            }
+        }
+
+        #timer {
+            font-weight: 600;
+            color: #7367f0;
+            min-width: 60px;
+            display: inline-block;
+        }
+
+        #resendBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+    <div class="authentication-wrapper authentication-cover">
+        <a href="#" class="app-brand auth-cover-brand">
+            <span class="app-brand-text demo text-heading fw-bold">DIAL-112 HRMS & FMS</span>
+        </a>
+        <div class="authentication-inner row m-0">
+            <div class="d-none d-xl-flex col-xl-8 p-0">
+                <div class="auth-cover-bg d-flex justify-content-center align-items-center">
+                    <img alt="auth-otp-cover" class="my-5 auth-illustration"
+                         src="/static/assets/img/illustrations/auth-login-illustration-light.png"
+                         data-app-light-img="illustrations/auth-login-illustration-light.png"
+                         data-app-dark-img="illustrations/auth-login-illustration-dark.png"/>
+                    <img alt="auth-bg" class="platform-bg"
+                         src="/static/assets/img/illustrations/bg-shape-image-light.png"
+                         data-app-light-img="illustrations/bg-shape-image-light.png"
+                         data-app-dark-img="illustrations/bg-shape-image-dark.png"/>
+                </div>
+            </div>
+            <div class="d-flex col-12 col-xl-4 align-items-center authentication-bg p-sm-12 p-6">
+                <div class="w-px-400 mx-auto mt-2 pt-2">
+                    <h4 class="mb-1">OTP Verification</h4>
+                    <p class="mb-3">We sent a one-time password to <strong>{{ masked_mobile|default:"your registered mobile number" }}</strong></p>
+
+                    <form id="otpForm" method="POST" action="{% url 'otp-verify' %}">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label class="form-label">Enter OTP</label>
+                            <div class="otp-inputs" id="otpInputs">
+                                <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autofocus>
+                                <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                                <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                                <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                            </div>
+                            <input type="hidden" name="otp" id="otpHidden">
                         </div>
-                        <input type="hidden" name="otp" id="otpHidden">
+
+                        <button type="submit" class="btn btn-primary d-grid w-100 mb-3">Verify OTP</button>
+                    </form>
+
+                    <div class="text-center">
+                        <p class="mb-1">Time remaining: <span id="timer">--</span></p>
+                        <button type="button" id="resendBtn" class="btn btn-link p-0" disabled>Resend OTP</button>
                     </div>
 
-                    <button type="submit" class="btn btn-primary d-grid w-100 mb-3">Verify OTP</button>
-                </form>
-
-                <div class="text-center">
-                    <p class="mb-1">Time remaining: <span id="timer">--</span></p>
-                    <button type="button" id="resendBtn" class="btn btn-link p-0" disabled>Resend OTP</button>
-                </div>
-
-                <div class="text-center mt-4">
-                    <a href="{% url 'login' %}"><i class="icon-base ti tabler-arrow-left"></i> Back to login</a>
+                    <div class="text-center mt-4">
+                        <a href="{% url 'login' %}"><i class="icon-base ti tabler-arrow-left"></i> Back to login</a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<script>
-(function() {
-    var remaining = {{ remaining_seconds|default:0 }};
-    var timerEl = document.getElementById('timer');
-    var resendBtn = document.getElementById('resendBtn');
-    var inputs = document.querySelectorAll('.otp-inputs input');
-    var hiddenInput = document.getElementById('otpHidden');
-    var form = document.getElementById('otpForm');
+    <script>
+        (function () {
+            var remaining = {{ remaining_seconds|default:0 }};
+            var timerEl = document.getElementById('timer');
+            var resendBtn = document.getElementById('resendBtn');
+            var inputs = document.querySelectorAll('.otp-inputs input');
+            var hiddenInput = document.getElementById('otpHidden');
+            var form = document.getElementById('otpForm');
 
-    function updateTimer() {
-        if (remaining <= 0) {
-            timerEl.textContent = '00:00';
-            resendBtn.disabled = false;
-            return;
-        }
-        var m = Math.floor(remaining / 60);
-        var s = remaining % 60;
-        timerEl.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
-        remaining--;
-        setTimeout(updateTimer, 1000);
-    }
-    updateTimer();
-
-    resendBtn.addEventListener('click', function() {
-        resendBtn.disabled = true;
-        fetch('{% url "otp-resend" %}', { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' } })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                if (data.success) {
-                    remaining = 60;
-                    updateTimer();
+            function updateTimer() {
+                if (remaining <= 0) {
+                    timerEl.textContent = '00:00';
+                    resendBtn.disabled = false;
+                    return;
                 }
+                var m = Math.floor(remaining / 60);
+                var s = remaining % 60;
+                timerEl.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+                remaining--;
+                setTimeout(updateTimer, 1000);
+            }
+
+            updateTimer();
+
+            resendBtn.addEventListener('click', function () {
+                resendBtn.disabled = true;
+                fetch('{% url "otp-resend" %}', {method: 'POST', headers: {'X-CSRFToken': '{{ csrf_token }}'}})
+                    .then(function (r) {
+                        return r.json();
+                    })
+                    .then(function (data) {
+                        if (data.success) {
+                            remaining = 60;
+                            updateTimer();
+                        }
+                    });
             });
-    });
 
-    inputs.forEach(function(input, idx) {
-        input.addEventListener('input', function() {
-            this.value = this.value.replace(/\D/g, '');
-            if (this.value && idx < inputs.length - 1) inputs[idx + 1].focus();
-        });
-        input.addEventListener('keydown', function(e) {
-            if (e.key === 'Backspace' && !this.value && idx > 0) inputs[idx - 1].focus();
-        });
-    });
+            inputs.forEach(function (input, idx) {
+                input.addEventListener('input', function () {
+                    this.value = this.value.replace(/\D/g, '');
+                    if (this.value && idx < inputs.length - 1) inputs[idx + 1].focus();
+                });
+                input.addEventListener('keydown', function (e) {
+                    if (e.key === 'Backspace' && !this.value && idx > 0) inputs[idx - 1].focus();
+                });
+            });
 
-    form.addEventListener('submit', function(e) {
-        var code = '';
-        inputs.forEach(function(inp) { code += inp.value; });
-        if (code.length < 4) {
-            e.preventDefault();
-            inputs.forEach(function(inp) { inp.classList.add('input-error'); });
-            setTimeout(function() { inputs.forEach(function(inp) { inp.classList.remove('input-error'); }); }, 500);
-            return;
-        }
-        hiddenInput.value = code;
-    });
-})();
-</script>
-<script defer src="/static/assets/vendor/js/helpers.js"></script>
-<script defer src="/static/assets/js/config.js"></script>
-<script src="/static/assets/vendor/libs/jquery/jquery.js"></script>
-<script defer src="/static/assets/vendor/libs/popper/popper.js"></script>
-<script defer src="/static/assets/vendor/js/bootstrap.js"></script>
-<script defer src="/static/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
-<script defer src="/static/assets/js/main.js"></script>
-<script defer src="/static/assets/js/pages-auth.js"></script>
-</body>
-</html>
+            form.addEventListener('submit', function (e) {
+                var code = '';
+                inputs.forEach(function (inp) {
+                    code += inp.value;
+                });
+                if (code.length < 4) {
+                    e.preventDefault();
+                    inputs.forEach(function (inp) {
+                        inp.classList.add('input-error');
+                    });
+                    setTimeout(function () {
+                        inputs.forEach(function (inp) {
+                            inp.classList.remove('input-error');
+                        });
+                    }, 500);
+                    return;
+                }
+                hiddenInput.value = code;
+            });
+        })();
+    </script>
+{% endblock %}

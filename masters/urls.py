@@ -24,11 +24,29 @@ urlpatterns = [
     path('AddUpdateState/<int:pk>/', views.AddUpdateState, name='AddUpdateState'),
     path('DeleteState/', views.DeleteState, name='DeleteState'),
 
+    # Division
+    path('DivisionList/', views.DivisionList, name='DivisionList'),
+    path('AddUpdateDivision/', views.AddUpdateDivision, name='AddUpdateDivision'),
+    path('AddUpdateDivision/<int:pk>/', views.AddUpdateDivision, name='AddUpdateDivision'),
+    path('DeleteDivision/', views.DeleteDivision, name='DeleteDivision'),
+
     # District
     path('DistrictList/', views.DistrictList, name='DistrictList'),
     path('AddUpdateDistrict/', views.AddUpdateDistrict, name='AddUpdateDistrict'),
     path('AddUpdateDistrict/<int:pk>/', views.AddUpdateDistrict, name='AddUpdateDistrict'),
     path('DeleteDistrict/', views.DeleteDistrict, name='DeleteDistrict'),
+
+    # Zone
+    path('ZoneList/', views.ZoneList, name='ZoneList'),
+    path('AddUpdateZone/', views.AddUpdateZone, name='AddUpdateZone'),
+    path('AddUpdateZone/<int:pk>/', views.AddUpdateZone, name='AddUpdateZone'),
+    path('DeleteZone/', views.DeleteZone, name='DeleteZone'),
+
+    # City
+    path('CityList/', views.CityList, name='CityList'),
+    path('AddUpdateCity/', views.AddUpdateCity, name='AddUpdateCity'),
+    path('AddUpdateCity/<int:pk>/', views.AddUpdateCity, name='AddUpdateCity'),
+    path('DeleteCity/', views.DeleteCity, name='DeleteCity'),
 
     # Time Zone
     path('TimeZoneList/', views.TimeZoneList, name='TimeZoneList'),

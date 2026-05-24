@@ -1,0 +1,58 @@
+<div>
+    <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">Cities</h5>
+        <div class="d-flex gap-2">
+            <button class="btn btn-success btn-sm" onclick="showImportModal('City')">
+                <i class="ti tabler-upload me-1"></i> Import
+            </button>
+            <div class="dropdown">
+                <button class="btn btn-info btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="ti tabler-download me-1"></i> Export
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'ExportCSV' 'City' %}">CSV</a></li>
+                    <li><a class="dropdown-item" href="{% url 'ExportExcel' 'City' %}">Excel</a></li>
+                </ul>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="openSetupForm('{% url 'AddUpdateCity' %}')">
+                <i class="ti tabler-plus me-1"></i> Add City
+            </button>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover" id="cityTable">
+            <thead class="border-top">
+                <tr>
+                    <th>Sr.</th>
+                    <th>City Name</th>
+                    <th>Hindi Name</th>
+                    <th>District</th>
+                    <th>Sequence</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in cities %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ c.city_name }}</td>
+                    <td>{{ c.city_name_hindi|default:'-' }}</td>
+                    <td>{{ c.district.district_name|default:'-' }}</td>
+                    <td>{{ c.sequence }}</td>
+                    <td><span class="badge bg-label-{% if c.is_active %}success{% else %}danger{% endif %}">{% if c.is_active %}Active{% else %}Inactive{% endif %}</span></td>
+                    <td>
+                        <button class="btn btn-icon btn-text-secondary waves-effect rounded-pill" onclick="openSetupForm('{% url 'AddUpdateCity' c.city_id %}')">
+                            <i class="ti tabler-edit ti-md"></i>
+                        </button>
+                        <button class="btn btn-icon btn-text-danger waves-effect rounded-pill" onclick="deleteSetupItem('{% url 'DeleteCity' %}', {{ c.city_id }}, 'city')">
+                            <i class="ti tabler-trash ti-md"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

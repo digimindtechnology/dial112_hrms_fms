@@ -1,361 +1,196 @@
-<!doctype html>
+{% extends "layout/no_login_page.html" %}
 
-<html data-template="vertical-menu-template-no-customizer"
-      class=" layout-wide  customizer-hide"
-      dir="ltr"
-      data-skin="default"
-      data-bs-theme="light"
-      data-assets-path="/static/assets/">
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"/>
-    <meta name="robots" content="noindex, nofollow"/>
-    <title> Login DIAL-112 HRMS & FMS</title>
-    <meta name="description" content=""/>
-    <link rel="icon" type="image/x-icon" href="/static/assets/img/favicon/favicon.ico"/>
-    <link rel="preconnect" href="https://fonts.googleapis.com"/>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap">
+{% block content %}
 
-    <link rel="stylesheet" href="/static/assets/vendor/css/core.css"/>
-    <link rel="stylesheet" href="/static/assets/css/demo.css"/>
-    <link rel="stylesheet" href="/static/assets/vendor/css/pages/page-auth.css"/>
-    <link rel="stylesheet" href="/static/assets/vendor/fonts/iconify-icons.css" media="print"
-          onload="this.media='all'"/>
-    <style>
-        .captcha-container {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-
-        .captcha-image-wrapper {
-            flex: 1;
-            border: 1px solid #d9dee3;
-            border-radius: 6px;
-            overflow: hidden;
-            background: #f8f9fa;
-            height: 45px;
-            display: flex;
-            align-items: center;
-        }
-
-        .captcha-image {
-            display: block;
-            width: 100%;
-            height: 50px;
-            object-fit: fill;
-            image-rendering: pixelated;
-        }
-
-        .captcha-refresh {
-            min-width: 42px;
-            height: 52px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-        }
-
-        .captcha-refresh:hover {
-            background-color: #e7e9ed;
-        }
-
-        .captcha-refresh:active {
-            transform: scale(0.95);
-        }
-
-        .captcha-refresh i {
-            font-size: 1.2rem;
-        }
-
-        .captcha-refresh.spinning i {
-            animation: spin 0.6s linear;
-        }
-
-        @keyframes spin {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        @keyframes shake {
-            0%, 100% {
-                transform: translateX(0);
-            }
-            10%, 30%, 50%, 70%, 90% {
-                transform: translateX(-4px);
-            }
-            20%, 40%, 60%, 80% {
-                transform: translateX(4px);
-            }
-        }
-
-        .shake {
-            animation: shake 0.4s ease-in-out;
-            border-color: #ff3e1d !important;
-        }
-
-        .captcha-loading {
-            opacity: 0.5;
-            pointer-events: none;
-        }
-
-        .form-label, .col-form-label {
-            font-weight: 700;
-        }
-
-        .my-8 {
-            margin-block-start: 1rem !important;
-            margin-block-end: 1rem !important;
-        }
-        .my-6 {
-    margin-block-start: 1rem !important;
-    margin-block-end: 1rem !important;
-}
-        .error-message{
-            color: red;
-        }
-    </style>
-    <link rel="stylesheet" href="/static/assets/vendor/libs/@form-validation/form-validation.css" media="print"
-          onload="this.media='all'"/>
-    <noscript>
-        <link rel="stylesheet" href="/static/assets/vendor/fonts/iconify-icons.css"/>
-        <link rel="stylesheet" href="/static/assets/vendor/libs/@form-validation/form-validation.css"/>
-    </noscript>
-</head>
-
-<body>
-<!-- Content -->
-
-<div class="authentication-wrapper authentication-cover">
-    <!-- Logo -->
-    <a href="#" class="app-brand auth-cover-brand">
+    <div class="authentication-wrapper authentication-cover">
+        <!-- Logo -->
+        <a href="#" class="app-brand auth-cover-brand">
         <span class="app-brand-logo demo">
-          <span class="text-primary">
-
-          </span>
         </span>
-        <span class="app-brand-text demo text-heading fw-bold">DIAL-112 HRMS & FMS</span>
-    </a>
-    <!-- /Logo -->
-    <div class="authentication-inner row m-0">
-        <!-- /Left Text -->
-        <div class="d-none d-xl-flex col-xl-8 p-0">
-            <div class="auth-cover-bg d-flex justify-content-center align-items-center">
-                <img alt="auth-login-cover" class="my-5 auth-illustration" loading="lazy"
-                     src="/static/assets/img/illustrations/auth-login-illustration-light.png"
-                     data-app-light-img="illustrations/auth-login-illustration-light.png"
-                     data-app-dark-img="illustrations/auth-login-illustration-dark.png"/>
-
-                <img alt="auth-login-cover" class="platform-bg" loading="lazy"
-                     src="/static/assets/img/illustrations/bg-shape-image-light.png"
-                     data-app-light-img="illustrations/bg-shape-image-light.png"
-                     data-app-dark-img="illustrations/bg-shape-image-dark.png"/>
-            </div>
-        </div>
-        <!-- /Left Text -->
-
-        <!-- Login -->
-        <div class="d-flex col-12 col-xl-4 align-items-center authentication-bg p-sm-12 p-6">
-            <div class="w-px-400 mx-auto mt-2 pt-2">
-                <h4 class="mb-1">Welcome to HRMS & FMS 👋</h4>
-                <p class="mb-3">Please sign-in to your account and start the adventure</p>
-
-                <form id="formAuthentication" class="mb-6" method="POST" action="{% url 'login' %}">
-                    {% csrf_token %}
-                    <div class="mb-4 form-control-validation">
-                        <label class="form-label">Username</label>
-                        <input
-                                type="text"
-                                class="form-control"
-                                id="username"
-                                name="username"
-                                placeholder="Enter your username"
-                                autofocus/>
-
-                        {% if form.username.errors %}
-                            <div class="error-message">{{ form.username.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="mb-4 form-password-toggle form-control-validation">
-                        <label class="form-label" for="password">Password</label>
-                        <div class="input-group input-group-merge">
-                            <input
-                                    type="password"
-                                    id="password"
-                                    class="form-control"
-                                    name="password"
-                                    placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                                    aria-describedby="password"/>
-                            <span class="input-group-text cursor-pointer"><i
-                                    class="icon-base ti tabler-eye-off"></i></span>
-                        </div>
-
-                        {% if form.password.errors %}
-                            <div class="error-message">{{ form.password.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-
-                    <div class="mb-4 form-control-validation captcha-section">
-                        <label class="form-label">Security Code</label>
-                        <div class="captcha-container">
-                            <div class="captcha-image-wrapper">
-                                <img id="captchaImage" class="captcha-image" src="" alt="CAPTCHA"/>
-                            </div>
-                            <button type="button" id="refreshCaptcha" style="height: 45px;"
-                                    class="btn btn-icon btn-outline-secondary captcha-refresh" title="Refresh CAPTCHA">
-                                <i class="icon-base ti tabler-refresh"></i>
-                            </button>
-                        </div>
-                        <input type="text" class="form-control" id="captchaInput" name="captcha"
-                             maxlength="6"  placeholder="Enter the code shown above" autocomplete="off"/>
-                        {% if form.captcha.errors %}
-                            <div class="error-message">{{ form.captcha.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-
-                    <div class="my-8">
-                        <div class="d-flex justify-content-between">
-                            <div class="form-check mb-0 ms-2">
-                                <input class="form-check-input" type="checkbox" id="remember-me"/>
-                                <label class="form-check-label" for="remember-me"> Remember Me </label>
-                            </div>
-                            <a href="{% url 'forgot-password' %}">
-                                <p class="mb-0">Forgot Password..?</p>
-                            </a>
-                        </div>
-                    </div>
-                    <button class="btn btn-primary d-grid w-100">Sign in</button>
-                </form>
-
-
-                <div class="divider my-6 ">
-                    <div class="divider-text">or</div>
-                </div>
-
-                <div class="d-flex justify-content-center ">
-                    <a href="javascript:;" class="btn btn-icon rounded-circle btn-text-facebook me-1_5">
-                        <i class="icon-base ti tabler-brand-facebook-filled icon-20px"></i>
-                    </a>
-
-                    <a href="javascript:;" class="btn btn-icon rounded-circle btn-text-twitter me-1_5">
-                        <i class="icon-base ti tabler-brand-twitter-filled icon-20px"></i>
-                    </a>
-
-                    <a href="javascript:;" class="btn btn-icon rounded-circle btn-text-github me-1_5">
-                        <i class="icon-base ti tabler-brand-github-filled icon-20px"></i>
-                    </a>
-
-                    <a href="javascript:;" class="btn btn-icon rounded-circle btn-text-google-plus">
-                        <i class="icon-base ti tabler-brand-google-filled icon-20px"></i>
-                    </a>
+        </a>
+        <!-- /Logo -->
+        <div class="authentication-inner row m-0">
+            <!-- /Left Text -->
+            <div class="d-none d-xl-flex col-xl-8 p-0 ss">
+                <div class="auth-cover-bg d-flex justify-content-center align-items-center">
+                <span class=" text-heading fw-bold" style="color: #2f7bb9e3 !important;margin-right: 50%;margin-top: -2%;">
+                   <span style="font-size: 35px;"> DIAL - 112 HRMS</span><br>
+                    <span style="font-size: 20px;">Human Resource Management System</span><br>
+                    <br><span style="font-size: 15px;">C-17, Police Radio Colony, Shastri Nagar Bhopal<br> Madhya Pradesh 462003</span>
+                </span>
                 </div>
             </div>
+            <!-- /Left Text -->
+
+            <!-- Login -->
+            <div class="d-flex col-12 col-xl-4 align-items-center authentication-bg p-sm-12 p-6">
+                <div class="w-px-400 mx-auto mt-2 pt-2">
+                    <h4 class="mb-1">Welcome to <span style="color: #ff4c51;font-size: 20px;">HRMS & FMS 👋</span></h4>
+                    <p class="mb-3">Please sign-in to your account and start the adventure</p>
+
+                    <form id="formAuthentication" class="mb-6" method="POST" action="{% url 'login' %}">
+                        {% csrf_token %}
+                        <div class="mb-4 form-control-validation">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" autofocus/>
+                            {% if form.username.errors %}
+                                <div class="error-message">{{ form.username.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-4 form-password-toggle form-control-validation">
+                            <label class="form-label" for="password">Password</label>
+                            <div class="input-group input-group-merge">
+                                <input type="password" id="password" class="form-control" name="password" aria-describedby="password"
+                                       placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"/>
+                                <span class="input-group-text cursor-pointer"><i class="icon-base ti tabler-eye-off"></i></span>
+                            </div>
+
+                            {% if form.password.errors %}
+                                <div class="error-message">{{ form.password.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4 form-control-validation captcha-section">
+                            <label class="form-label">Security Code</label>
+                            <div class="captcha-container">
+                                <div class="captcha-image-wrapper">
+                                    <img id="captchaImage" class="captcha-image" src="" alt="CAPTCHA"/>
+                                </div>
+                                <button type="button" id="refreshCaptcha" style="height: 45px;" class="btn btn-icon btn-outline-secondary captcha-refresh" title="Refresh CAPTCHA">
+                                    <i class="icon-base ti tabler-refresh"></i>
+                                </button>
+                            </div>
+                            <input type="text" class="form-control" id="captchaInput" name="captcha"
+                                   maxlength="6" placeholder="Enter the code shown above" autocomplete="off"/>
+                            {% if form.captcha.errors %}
+                                <div class="error-message">{{ form.captcha.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="my-8">
+                            <div class="d-flex justify-content-between">
+                                <div class="form-check mb-0 ms-2">
+                                    <input class="form-check-input" type="checkbox" id="remember-me"/>
+                                    <label class="form-check-label" for="remember-me"> Remember Me </label>
+                                </div>
+                                <a href="{% url 'forgot-password' %}">
+                                    <p class="mb-0">Forgot Password..?</p>
+                                </a>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary d-grid w-100">Sign in</button>
+                    </form>
+
+
+                    <div class="divider my-6 ">
+                        <div class="divider-text">or</div>
+                    </div>
+
+                    <div class="d-flex justify-content-center ">
+                        <a href="javascript:;" class="btn btn-icon rounded-circle btn-text-facebook me-1_5">
+                            <i class="icon-base ti tabler-brand-facebook-filled icon-20px"></i>
+                        </a>
+
+                        <a href="javascript:;" class="btn btn-icon rounded-circle btn-text-twitter me-1_5">
+                            <i class="icon-base ti tabler-brand-twitter-filled icon-20px"></i>
+                        </a>
+
+                        <a href="javascript:;" class="btn btn-icon rounded-circle btn-text-github me-1_5">
+                            <i class="icon-base ti tabler-brand-github-filled icon-20px"></i>
+                        </a>
+
+                        <a href="javascript:;" class="btn btn-icon rounded-circle btn-text-google-plus">
+                            <i class="icon-base ti tabler-brand-google-filled icon-20px"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!-- /Login -->
         </div>
-        <!-- /Login -->
     </div>
-</div>
-<script>
-    function fadeOutMessages() {
-        const messages = document.querySelectorAll('.alert, .error-message');
-        messages.forEach(function (message) {
-            setTimeout(function () {
-                message.classList.add('fade-out');
+    <script>
+        function fadeOutMessages() {
+            const messages = document.querySelectorAll('.alert, .error-message');
+            messages.forEach(function (message) {
                 setTimeout(function () {
-                    message.remove();
-                }, 1000);
-            }, 5000);
-        });
-    }
+                    message.classList.add('fade-out');
+                    setTimeout(function () {
+                        message.remove();
+                    }, 1000);
+                }, 5000);
+            });
+        }
 
-    async function refreshCaptcha() {
-        const captchaImage = document.getElementById('captchaImage');
-        const refreshBtn = document.getElementById('refreshCaptcha');
-        const captchaInput = document.getElementById('captchaInput');
+        async function refreshCaptcha() {
+            const captchaImage = document.getElementById('captchaImage');
+            const refreshBtn = document.getElementById('refreshCaptcha');
+            const captchaInput = document.getElementById('captchaInput');
 
-        if (!captchaImage || refreshBtn.classList.contains('spinning')) return;
+            if (!captchaImage || refreshBtn.classList.contains('spinning')) return;
+            refreshBtn.classList.add('spinning');
+            captchaImage.classList.add('captcha-loading');
 
-        refreshBtn.classList.add('spinning');
-        captchaImage.classList.add('captcha-loading');
-
-        try {
-            const response = await fetch('/get-captcha/');
-            if (!response.ok) throw new Error('Network error');
-            const data = await response.json();
-            captchaImage.src = data.captcha_image;
-            captchaImage.classList.remove('captcha-loading');
-            if (captchaInput) {
-                captchaInput.value = '';
-                captchaInput.classList.remove('shake');
-                captchaInput.focus();
+            try {
+                const response = await fetch('/get-captcha/');
+                if (!response.ok) throw new Error('Network error');
+                const data = await response.json();
+                captchaImage.src = data.captcha_image;
+                captchaImage.classList.remove('captcha-loading');
+                if (captchaInput) {
+                    captchaInput.value = '';
+                    captchaInput.classList.remove('shake');
+                    captchaInput.focus();
+                }
+            } catch (err) {
+                console.error('CAPTCHA error:', err);
+                captchaImage.classList.remove('captcha-loading');
+            } finally {
+                setTimeout(function () {
+                    refreshBtn.classList.remove('spinning');
+                }, 600);
             }
-        } catch (err) {
-            console.error('CAPTCHA error:', err);
-            captchaImage.classList.remove('captcha-loading');
-        } finally {
-            setTimeout(function () {
-                refreshBtn.classList.remove('spinning');
-            }, 600);
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        fadeOutMessages();
-        refreshCaptcha();
-
-        const refreshBtn = document.getElementById('refreshCaptcha');
-        if (refreshBtn) {
-            refreshBtn.addEventListener('click', refreshCaptcha);
         }
 
-        const formInputs = document.querySelectorAll('.form-control');
-        formInputs.forEach(function (input) {
-            input.addEventListener('focus', function () {
-                this.classList.add('glow-on-hover');
+        document.addEventListener('DOMContentLoaded', function () {
+            fadeOutMessages();
+            refreshCaptcha();
+
+            const refreshBtn = document.getElementById('refreshCaptcha');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', refreshCaptcha);
+            }
+
+            const formInputs = document.querySelectorAll('.form-control');
+            formInputs.forEach(function (input) {
+                input.addEventListener('focus', function () {
+                    this.classList.add('glow-on-hover');
+                });
+                input.addEventListener('blur', function () {
+                    this.classList.remove('glow-on-hover');
+                });
             });
-            input.addEventListener('blur', function () {
-                this.classList.remove('glow-on-hover');
-            });
+
+            // Password show/hide on eye icon hover
+            var eyeIcon = document.querySelector('.form-password-toggle .cursor-pointer i');
+            var passwordInput = document.getElementById('password');
+            if (eyeIcon && passwordInput) {
+                var eyeSpan = eyeIcon.closest('.cursor-pointer');
+                eyeSpan.addEventListener('mouseenter', function () {
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        eyeIcon.className = eyeIcon.className.replace('tabler-eye-off', 'tabler-eye');
+                    }
+                });
+                eyeSpan.addEventListener('mouseleave', function () {
+                    if (passwordInput.type === 'text') {
+                        passwordInput.type = 'password';
+                        eyeIcon.className = eyeIcon.className.replace('tabler-eye', 'tabler-eye-off');
+                    }
+                });
+            }
         });
-
-        // Password show/hide on eye icon hover
-        var eyeIcon = document.querySelector('.form-password-toggle .cursor-pointer i');
-        var passwordInput = document.getElementById('password');
-        if (eyeIcon && passwordInput) {
-            var eyeSpan = eyeIcon.closest('.cursor-pointer');
-            eyeSpan.addEventListener('mouseenter', function () {
-                if (passwordInput.type === 'password') {
-                    passwordInput.type = 'text';
-                    eyeIcon.className = eyeIcon.className.replace('tabler-eye-off', 'tabler-eye');
-                }
-            });
-            eyeSpan.addEventListener('mouseleave', function () {
-                if (passwordInput.type === 'text') {
-                    passwordInput.type = 'password';
-                    eyeIcon.className = eyeIcon.className.replace('tabler-eye', 'tabler-eye-off');
-                }
-            });
-        }
-    });
-</script>
+    </script>
+{% endblock %}
 
 
-<script defer src="/static/assets/vendor/js/helpers.js"></script>
-<script defer src="/static/assets/js/config.js"></script>
-<script src="/static/assets/vendor/libs/jquery/jquery.js"></script>
-<script defer src="/static/assets/vendor/libs/popper/popper.js"></script>
-<script defer src="/static/assets/vendor/js/bootstrap.js"></script>
-<script defer src="/static/assets/vendor/libs/@form-validation/popular.js"></script>
-<script defer src="/static/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
-<script defer src="/static/assets/vendor/libs/@form-validation/auto-focus.js"></script>
-<script defer src="/static/assets/js/main.js"></script>
-<script defer src="/static/assets/js/pages-auth.js"></script>
-</body>
-</html>
+

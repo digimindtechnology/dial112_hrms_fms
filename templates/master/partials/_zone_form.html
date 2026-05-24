@@ -1,0 +1,56 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">{% if zone %}Edit Zone{% else %}Add Zone{% endif %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <form id="frm_Zone" method="post" action="{% url 'AddUpdateZone' %}{% if zone %}{{ zone.zone_id }}/{% endif %}">
+        {% csrf_token %}
+        <div class="modal-body">
+            <div class="mb-4">
+                <label class="form-label">Zone Name <span class="text-danger">*</span></label>
+                <input type="text" name="zone_name" class="form-control" value="{{ zone.zone_name|default:'' }}" required placeholder="Enter zone name">
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Hindi Name</label>
+                <input type="text" name="zone_name_hindi" class="form-control" value="{{ zone.zone_name_hindi|default:'' }}" placeholder="Enter Hindi name">
+            </div>
+            <div class="mb-4">
+                <label class="form-label">District</label>
+                <select name="district_id" class="form-select">
+                    <option value="">Select District</option>
+                    {% for d in districts %}
+                    <option value="{{ d.district_id }}" {% if zone and zone.district_id == d.district_id %}selected{% endif %}>{{ d.district_name }}{% if d.state %} - {{ d.state.state_name }}{% endif %}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Sequence</label>
+                <input type="number" name="sequence" class="form-control" value="{{ zone.sequence|default:1 }}" min="1">
+            </div>
+            <div class="mb-4">
+                <div class="form-check">
+                    <input type="checkbox" name="is_active" class="form-check-input" id="zone_active" {% if zone.is_active or not zone %}checked{% endif %}>
+                    <label class="form-check-label" for="zone_active">Active</label>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary loading_spinner">{% if zone %}Update{% else %}Save{% endif %}</button>
+        </div>
+    </form>
+</div>
+<script>
+$('#frm_Zone').on('submit', function(e) {
+    e.preventDefault();
+    $.post($(this).attr('action'), $(this).serialize(), function(response) {
+        if (response.success) {
+            $('#Modal_SetupForm').modal('hide');
+            $.get("{% url 'ZoneList' %}", function(d) {
+                $('#div_ZoneList').html(d);
+                initDataTable('#zoneTable');
+            });
+        }
+    });
+});
+</script>

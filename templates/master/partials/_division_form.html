@@ -1,0 +1,69 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">{% if division %}Edit Division{% else %}Add Division{% endif %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <form id="frm_Division" method="post" action="{% url 'AddUpdateDivision' %}{% if division %}{{ division.division_id }}/{% endif %}">
+        {% csrf_token %}
+        <div class="modal-body">
+            <div class="mb-4">
+                <label class="form-label">Division Name <span class="text-danger">*</span></label>
+                <input type="text" name="division_name" class="form-control" value="{{ division.division_name|default:'' }}" required placeholder="Enter division name">
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Division Code</label>
+                <input type="text" name="division_code" class="form-control" value="{{ division.division_code|default:'' }}" placeholder="Enter division code">
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Country</label>
+                <select name="country_id" class="form-select" onchange="loadStatesForDivision(this.value)">
+                    <option value="">Select Country</option>
+                    {% for c in countries %}
+                    <option value="{{ c.country_id }}" {% if division and division.state.country_id == c.country_id %}selected{% endif %}>{{ c.country_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="form-label">State <span class="text-danger">*</span></label>
+                <select name="state_id" class="form-select" id="division_state_id" required>
+                    <option value="">Select State</option>
+                    {% for s in states %}
+                    <option value="{{ s.state_id }}" {% if division and division.state_id == s.state_id %}selected{% endif %}>{{ s.state_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-4">
+                <div class="form-check">
+                    <input type="checkbox" name="is_active" class="form-check-input" id="division_active" {% if division.is_active or not division %}checked{% endif %}>
+                    <label class="form-check-label" for="division_active">Active</label>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary loading_spinner">{% if division %}Update{% else %}Save{% endif %}</button>
+        </div>
+    </form>
+</div>
+<script>
+function loadStatesForDivision(countryId) {
+    if (!countryId) { $('#division_state_id').html('<option value="">Select State</option>'); return; }
+    $.getJSON('/masters/GetStateListJson/?countryID=' + countryId, function(data) {
+        var opts = '<option value="">Select State</option>';
+        $.each(data, function(i, d) { opts += '<option value="' + d.pk + '">' + d.fields.state_name + '</option>'; });
+        $('#division_state_id').html(opts);
+    });
+}
+$('#frm_Division').on('submit', function(e) {
+    e.preventDefault();
+    $.post($(this).attr('action'), $(this).serialize(), function(response) {
+        if (response.success) {
+            $('#Modal_SetupForm').modal('hide');
+            $.get("{% url 'DivisionList' %}", function(d) {
+                $('#div_DivisionList').html(d);
+                initDataTable('#divisionTable');
+            });
+        }
+    });
+});
+</script>
