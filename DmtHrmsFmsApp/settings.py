@@ -48,6 +48,7 @@ INSTALLED_APPS = [
 
     'approvalrules',
     'attendance',
+    'leave',
     'employee',
     'ticket',
     'training',

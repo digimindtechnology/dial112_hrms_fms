@@ -2,7 +2,7 @@ import random
 import string
 from django.db import models
 from django.contrib.auth.models import User
-from masters.models import BaseModel
+from masters.models import BaseModel, State, Division, District, Zone,City
 from tenant.models import TenantProfile
 
 
@@ -176,7 +176,6 @@ class FRVType(SetupLookupBase):
             models.UniqueConstraint(fields=['tenantProfile', 'name'], name='setup_frv_type_tenant_name_uniq')
         ]
 
-
 class FRVMaintenanceType(SetupLookupBase):
     class Meta(SetupLookupBase.Meta):
         verbose_name = 'FRV Maintenance Type'
@@ -184,3 +183,53 @@ class FRVMaintenanceType(SetupLookupBase):
         constraints = [
             models.UniqueConstraint(fields=['tenantProfile', 'name'], name='setup_frv_maintenance_type_tenant_name_uniq')
         ]
+
+
+class PoliceStation(BaseModel):
+    police_station_id = models.AutoField(primary_key=True)
+    police_station_name = models.CharField(max_length=500)
+    station_code = models.CharField(max_length=50, blank=True, null=True)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+
+    state = models.ForeignKey(State, related_name='state_PoliceStation', on_delete=models.CASCADE, verbose_name="State")
+    division = models.ForeignKey(Division, related_name='division_PoliceStation', on_delete=models.CASCADE, verbose_name="Division")
+    district = models.ForeignKey(District, related_name='district_PoliceStation', on_delete=models.CASCADE, verbose_name="District")
+    zone = models.ForeignKey(Zone,blank=True, null=True, related_name='zone_PoliceStation', on_delete=models.CASCADE, verbose_name="Zone")
+    City = models.ForeignKey(City,blank=True, null=True, related_name='City_PoliceStation', on_delete=models.CASCADE, verbose_name="City")
+    address = models.TextField()
+    pincode = models.CharField(max_length=10)
+    picture_url = models.CharField(max_length=1000, null=True, blank=True)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+
+    established_date = models.DateField(blank=True, null=True)
+    tenantProfile = models.ForeignKey(TenantProfile, related_name='tenantProfile_PoliceStation', on_delete=models.CASCADE, verbose_name="Tenant")
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="created_by_PoliceStation")
+    updated_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name="updated_by_PoliceStation")
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'police_station'
+        ordering = ['police_station_name']
+
+    def __str__(self):
+        return self.police_station_name
+
+class Holiday(BaseModel):
+    holiday_id = models.AutoField(primary_key=True)
+    holiday_name = models.CharField(max_length=500)
+    holiday_date = models.DateField()
+    description = models.TextField(blank=True, null=True)
+    is_national_holiday = models.BooleanField(default=False)
+    tenantProfile = models.ForeignKey(TenantProfile, related_name='tenantProfile_Holiday', on_delete=models.CASCADE, verbose_name="Tenant")
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE,related_name="created_by_Holiday")
+    updated_by = models.ForeignKey(User, on_delete=models.CASCADE,null=True,blank=True,related_name="updated_by_Holiday")
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['holiday_date']
+        verbose_name = "Holiday"
+        verbose_name_plural = "Holidays"
+    def __str__(self):
+        return f"{self.holiday_name} - {self.holiday_date}"
