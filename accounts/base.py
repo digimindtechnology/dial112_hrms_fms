@@ -54,11 +54,16 @@ class Base(models.Model):
         HomeGroup = "Home"
         TenantGroup = "Tenant"
         EmployeeGroup = "Employee"
-        FRV_Group = "FRV"
-        AttendanceGroup = "Attendance"
-        LeaveGroup = "Leave"
+        LeaveSetupGroup = "LeaveSetup"
+        ShiftRosterGroup = 'ShiftRosterManagement'
+        LeaveManagementGroup = "LeaveManagement"
+        AttendanceManagementGroup = 'AttendanceManagement'
+        TrainingManagementGroup = 'TrainingManagement'
+        ViolationGroup = 'Violation'
+        FRVManagementGroup = "FRVManagement"
+
         TicketGroup = "Ticket"
-        TrainingGroup = "Training"
+        HelpdeskGroup = "Helpdesk"
         SetupGroup = "Setup"
         UserGroup = "User"
         ReportGroup = "Report"

@@ -108,9 +108,9 @@ WSGI_APPLICATION = 'DmtHrmsFmsApp.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DATABASE_NAME', 'PROCURE_10_X_DB'),
-        'USER': os.getenv('USER_NAME', 'PROCURE_10_X_DB'),
-        'PASSWORD': os.getenv('PASSWORD', 'PROCURE10X@2026'),
+        'NAME': os.getenv('DATABASE_NAME', 'DMT_HRMS_FMS'),
+        'USER': os.getenv('USER_NAME', 'DMT_HRMS_FMS'),
+        'PASSWORD': os.getenv('PASSWORD', 'DMT.HRMS.FMS@2026'),
         'HOST': os.getenv('HOST', 'localhost'),
         'PORT': os.getenv('DB_PORT', '5432'),
         'CONN_MAX_AGE': 300,

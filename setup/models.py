@@ -192,13 +192,13 @@ class PoliceStation(BaseModel):
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
 
-    state = models.ForeignKey(State, related_name='state_PoliceStation', on_delete=models.CASCADE, verbose_name="State")
-    division = models.ForeignKey(Division, related_name='division_PoliceStation', on_delete=models.CASCADE, verbose_name="Division")
+    state = models.ForeignKey(State, related_name='state_PoliceStation', on_delete=models.CASCADE, verbose_name="State") ##Remove
+    division = models.ForeignKey(Division, related_name='division_PoliceStation', on_delete=models.CASCADE, verbose_name="Division")  ##Remove
     district = models.ForeignKey(District, related_name='district_PoliceStation', on_delete=models.CASCADE, verbose_name="District")
-    zone = models.ForeignKey(Zone,blank=True, null=True, related_name='zone_PoliceStation', on_delete=models.CASCADE, verbose_name="Zone")
-    City = models.ForeignKey(City,blank=True, null=True, related_name='City_PoliceStation', on_delete=models.CASCADE, verbose_name="City")
-    address = models.TextField()
-    pincode = models.CharField(max_length=10)
+    zone = models.ForeignKey(Zone,blank=True, null=True, related_name='zone_PoliceStation', on_delete=models.CASCADE, verbose_name="Zone")  ##Remove
+    City = models.ForeignKey(City,blank=True, null=True, related_name='City_PoliceStation', on_delete=models.CASCADE, verbose_name="City")  ##Remove
+    address = models.TextField(null=True, blank=True)
+    pincode = models.CharField(max_length=10,null=True, blank=True)
     picture_url = models.CharField(max_length=1000, null=True, blank=True)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
@@ -233,3 +233,5 @@ class Holiday(BaseModel):
         verbose_name_plural = "Holidays"
     def __str__(self):
         return f"{self.holiday_name} - {self.holiday_date}"
+
+##add Holiday  distict wise SS
