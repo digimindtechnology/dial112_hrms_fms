@@ -83,7 +83,7 @@ def ConvertToDateTime(value):
 def GetRoleWiseUserList(tenantId, roleId):
     try:
         from accounts.models import Profile
-        profileCount = Profile.objects.filter(tenant_id=tenantId, role_id=roleId).count()
+        profileCount = Profile.objects.filter(tenantProfile_id=tenantId, role_id=roleId).count()
         if profileCount == 0:
             return mark_safe(
                 '<h6 class="fw-normal mb-0 text-body"><span class="text-danger">User not available </span></h6>'
@@ -92,15 +92,15 @@ def GetRoleWiseUserList(tenantId, roleId):
                 'data-bs-toggle="tooltip" data-bs-placement="bottom" title="NA">NA</span></li></ul>'
             )
         profileList = Profile.objects.filter(
-            tenant_id=tenantId, role_id=roleId,
+            tenantProfile_id=tenantId, role_id=roleId,
             profile_picture_s3_url__isnull=False
         ).select_related('user').only(
             'user__first_name', 'user__last_name', 'profile_picture_s3_url'
         )[:3]
         users_html = ''.join(
-            '<li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" '
+            '<li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top " '
             f'title="{p.user.first_name} {p.user.last_name}" class="avatar pull-up">'
-            '<img class="rounded-circle" src="" alt="user"></li>'
+            '<i class="ti tabler-users" style="font-size: 35px;"></i>'
             for p in profileList
         )
         extra = profileCount - 3 if profileCount > 3 else 0

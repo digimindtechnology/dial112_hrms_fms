@@ -41,7 +41,7 @@ def tenant_list(request):
 
     search_query = request.GET.get("search", "").strip()
 
-    all_tenants = TenantProfile.objects.all()
+    all_tenants = TenantProfile.objects.select_related('country', 'state', 'currency')
     if search_query:
         all_tenants = all_tenants.filter(
             models.Q(tenant_name__icontains=search_query) |
@@ -83,7 +83,7 @@ def tenant_detail(request, pk):
     tenant = get_object_or_404(TenantProfile.objects.select_related(
         "country", "state", "currency", "time_zone", "date_formate_view", "time_formate_view", "admin_user"
     ), tenant_profile_id=pk)
-    roles = Role.objects.filter(tenantProfile=tenant)
+    roles = Role.objects.filter(tenantProfile=tenant).prefetch_related('group')
     context = {
         "tenant": tenant,
         "roles": roles,
@@ -398,7 +398,7 @@ def tenant_settings_account(request):
 @CheckRole(Base.Group.TenantGroup.value)
 def tenant_settings_security(request):
     tenant = TenantProfile.objects.filter(tenant_profile_id=request.tenantID).first()
-    loginhistory = UserLoginTrace.objects.filter(is_active=True, user=tenant.admin_user).order_by('-created_date')
+    loginhistory = UserLoginTrace.objects.filter(is_active=True, user=tenant.admin_user).order_by('-created_date')[:100]
     if request.method == "POST":
         if 'btn_ChangePassword' in request.POST:
             user = tenant.admin_user
@@ -453,7 +453,7 @@ def tenant_roles_permissions(request):
 def RoleList(request):
     roleList = Role.objects.filter(
         tenantProfile_id=request.tenantID
-    ).order_by('role_id')
+    ).prefetch_related('group').order_by('role_id')
     context = {
         'tenantId': request.tenantID,
         'roleList': roleList,

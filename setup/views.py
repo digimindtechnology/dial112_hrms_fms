@@ -175,7 +175,9 @@ def setup_lookup_delete(request, slug):
 @login_required
 def cost_center_list(request):
     tenant_id = request.tenantID
-    items = CostCenter.objects.filter(tenantProfile_id=tenant_id).order_by('cost_center_name')
+    items = CostCenter.objects.filter(tenantProfile_id=tenant_id).only(
+        'cost_center_id', 'cost_center_name', 'cost_center_code', 'description', 'is_active'
+    ).order_by('cost_center_name')
     upload_history = CostCenterBulkUploadHistory.objects.filter(tenantProfile_id=tenant_id).select_related('status', 'uploaded_by')
     return render(request, "setup/cost_center_list.html", {'items': items, 'upload_history': upload_history})
 

@@ -101,8 +101,8 @@ def user_create(request, user_id=None):
     # Fetch existing profile if editing
     if user_id:
         user_instance = get_object_or_404(User, id=user_id)
-        profile = Profile.objects.filter(user=user_instance).first()
-        loginhistory = UserLoginTrace.objects.filter(is_active=True, user=user_instance).order_by('-created_date')
+        profile = Profile.objects.filter(user=user_instance).select_related('role', 'tenantProfile').first()
+        loginhistory = UserLoginTrace.objects.filter(is_active=True, user=user_instance).order_by('-created_date')[:100]
 
     # Base Context
     context = {
@@ -259,8 +259,8 @@ def user_create(request, user_id=None):
 def user_detail(request, user_id=None):
     tenant_id = request.tenantID
     user_instance = get_object_or_404(User, id=user_id)
-    profile = Profile.objects.filter(user=user_instance).first()
-    loginhistory = UserLoginTrace.objects.filter(is_active=True, user=user_instance).order_by('-created_date')
+    profile = Profile.objects.filter(user=user_instance).select_related('role', 'gender', 'country', 'state', 'tenantProfile').first()
+    loginhistory = UserLoginTrace.objects.filter(is_active=True, user=user_instance).order_by('-created_date')[:100]
 
     has_username = bool(user_instance.username and user_instance.username.strip())
     has_password = user_instance.has_usable_password()

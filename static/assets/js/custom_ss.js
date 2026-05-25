@@ -143,3 +143,32 @@
     });
 })();
 
+(function () {
+        var loader = document.getElementById('content-loader');
+        function hideLoader() {
+            if (!loader) return;
+            loader.style.opacity = '0';
+            setTimeout(function () { loader.style.display = 'none'; }, 220);
+        }
+        function showLoader() {
+            if (!loader) return;
+            loader.style.display = 'flex';
+            loader.style.opacity = '1';
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', hideLoader);
+        } else {
+            hideLoader();
+        }
+        document.addEventListener('click', function (e) {
+            var link = e.target.closest('a[href]');
+            if (!link) return;
+            var href = link.getAttribute('href') || '';
+            if (!href || href === '#' || href.startsWith('#') || href.startsWith('javascript') ||
+                link.getAttribute('target') === '_blank' ||
+                link.hasAttribute('data-bs-toggle') ||
+                link.hasAttribute('data-bs-dismiss') ||
+                e.ctrlKey || e.metaKey || e.shiftKey) return;
+            showLoader();
+        });
+    })();

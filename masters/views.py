@@ -1,4 +1,3 @@
-from django.core import serializers
 import json
 from django.http import HttpResponse
 
@@ -18,14 +17,12 @@ from accounts.helpers.import_export_utils import export_csv, export_xlsx, parse_
 def GetStateListJson(request, **kwargs):
     if request.method == 'GET':
         countryID = request.GET['countryID']
-        stateList = State.objects.filter(is_active=True).order_by('state_name')
+        qs = State.objects.filter(is_active=True).order_by('state_name')
         if int(countryID) > 0:
-            stateList = stateList.filter(country=countryID)
-        tmpObj = ''
-        if stateList:
-            tmpJson = serializers.serialize("json", stateList)
-            tmpObj = json.loads(tmpJson)
-        return HttpResponse(json.dumps(tmpObj))
+            qs = qs.filter(country=countryID)
+        data = [{"pk": s["state_id"], "fields": {"state_name": s["state_name"]}}
+                for s in qs.values("state_id", "state_name")]
+        return HttpResponse(json.dumps(data))
 
 
 
@@ -535,10 +532,25 @@ def _bool(val):
     return str(val).strip().lower() in ('1', 'yes', 'true', 'active', 'on')
 
 
-def _resolve_row(entity_name, row):
+def _build_lookup_cache(entity_name):
+    fields = ENTITY_CONFIG[entity_name]['fields']
+    cache = {}
+    if 'country__country_name' in fields:
+        cache['country'] = {c.country_name: c for c in Country.objects.all()}
+    if 'state__state_name' in fields:
+        cache['state'] = {s.state_name: s for s in State.objects.all()}
+    if 'division__division_name' in fields:
+        cache['division'] = {d.division_name: d for d in Division.objects.all()}
+    if 'district__district_name' in fields:
+        cache['district'] = {d.district_name: d for d in District.objects.all()}
+    return cache
+
+
+def _resolve_row(entity_name, row, lookup_cache=None):
     kwargs = {}
     cfg = ENTITY_CONFIG[entity_name]
     rev_headers = {v: k for k, v in cfg['headers'].items()}
+    lc = lookup_cache or {}
 
     for col_name, raw in row.items():
         field = rev_headers.get(col_name)
@@ -547,13 +559,13 @@ def _resolve_row(entity_name, row):
         if field == 'is_active':
             kwargs[field] = _bool(raw)
         elif field == 'country__country_name':
-            kwargs['country'] = Country.objects.filter(country_name=raw).first()
+            kwargs['country'] = lc.get('country', {}).get(raw) if raw else None
         elif field == 'state__state_name':
-            kwargs['state'] = State.objects.filter(state_name=raw).first()
+            kwargs['state'] = lc.get('state', {}).get(raw) if raw else None
         elif field == 'division__division_name':
-            kwargs['division'] = Division.objects.filter(division_name=raw).first() if raw else None
+            kwargs['division'] = lc.get('division', {}).get(raw) if raw else None
         elif field == 'district__district_name':
-            kwargs['district'] = District.objects.filter(district_name=raw).first() if raw else None
+            kwargs['district'] = lc.get('district', {}).get(raw) if raw else None
         elif field == 'sequence':
             kwargs[field] = int(raw) if str(raw).strip() else 1
         else:
@@ -600,10 +612,11 @@ def ImportData(request, entity_name):
     created = 0
     updated = 0
     errors = []
+    lookup_cache = _build_lookup_cache(entity_name)
 
     for idx, row in enumerate(rows, start=2):
         try:
-            kwargs = _resolve_row(entity_name, row)
+            kwargs = _resolve_row(entity_name, row, lookup_cache)
             if not kwargs:
                 continue
 
