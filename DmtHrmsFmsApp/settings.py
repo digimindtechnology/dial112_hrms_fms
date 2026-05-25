@@ -44,7 +44,14 @@ INSTALLED_APPS = [
     'setup',
     'user',
     'dashboard',
-    'search'
+    'search',
+
+    'approvalrules',
+    'attendance',
+    'employee',
+    'ticket',
+    'training',
+    'frv',
 ]
 
 # --- REST FRAMEWORK CONFIG ---
