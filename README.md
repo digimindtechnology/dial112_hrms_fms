@@ -203,12 +203,8 @@ Types: `'success'`, `'error'`, `'warning'`, `'info'`.
 | Function | Signature | Purpose |
 |----------|-----------|---------|
 | `GetFileUrl` | `(file_path)` | Resolve S3 or local URL from stored path |
-| `UploadFileS3Server` | `(tenantId, directory, uploadFile, fileName='')` | Upload to S3; falls back to local on failure |
-| `UploadFileLocalSystem` | `(tenantId, directory, uploadFile, fileName='')` | Upload to local `media/` |
-| `UploadFileS3ServerProjectDirectory` | `(tenantId, directory, uploadFile, fileName='')` | Alias for `UploadFileS3Server` |
-| `DownloadS3DocFile` | `(request)` | Stream S3 file download (POST: `file` key) |
-| `GetFileNameFromS3Url` | `(fileUrl)` | Extract filename from an S3 URL |
-| `DeleteFileFromS3` | `(key)` | Delete file from S3 bucket by key |
+| `UploadFileData` | `(tenantId, directory, uploadFile, fileName='')` | Upload to local & S3 |
+
 
 **`S3DirectoryManager`** (class, static methods):
 
