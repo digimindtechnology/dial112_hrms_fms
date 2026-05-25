@@ -189,15 +189,7 @@ EMAIL_VERIFICATION_URL = os.getenv('EMAIL_VERIFICATION_URL', '')
 EMAIL_LOGIN_URL = os.getenv('EMAIL_LOGIN_URL', '')
 
 # --- AWS / S3 CONFIG ---
-S3_BUCKET_NAME = os.getenv('S3_BUCKET_NAME')
-S3_FOLDER = os.getenv('S3_FOLDER')
-S3_URL = os.getenv('S3_URL')
-aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
-aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
-AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', os.getenv('AWS_DEFAULT_REGION', 'ap-south-1'))
-AWS_S3_ENDPOINT_URL = os.getenv('AWS_S3_ENDPOINT_URL')
-FILE_UPLOAD_STORAGE = os.getenv('FILE_UPLOAD_STORAGE', 's3')
-IS_FILE_UPLOAD_S3 = os.getenv('IS_FILE_UPLOAD_S3', 'True') == 'True'
+
 
 # --- CUSTOM VARIABLES ---
 DEFAULT_PAGE_SIZE = os.getenv("DEFAULT_PAGE_SIZE")
