@@ -4,19 +4,18 @@ from django.db.models import Q
 from accounts.models import Profile
 
 SEARCH_REGISTRY = []
+
+
 def register(label, icon, model, fields, url, limit=5, tenant_filter=False, display_fn=None, url_fn=None):
-    SEARCH_REGISTRY.append({ 'label': label, 'icon': icon, 'model': model, 'fields': fields,
-                             'url': url, 'limit': limit, 'tenant_filter': tenant_filter,
-                             'display_fn': display_fn, 'url_fn': url_fn,})
+    SEARCH_REGISTRY.append({'label': label, 'icon': icon, 'model': model, 'fields': fields,
+                            'url': url, 'limit': limit, 'tenant_filter': tenant_filter,
+                            'display_fn': display_fn, 'url_fn': url_fn, })
+
 
 register('Users', 'tabler-user', Profile, ['user__first_name', 'user__last_name', 'user__email'],
          '/user/list/', tenant_filter=True, limit=5,
          display_fn=lambda o: f"{o.user.first_name} {o.user.last_name}".strip() + f" ({o.user.email})",
-         url_fn=lambda o: f"/user/list/{o.user.id}/update/")
-
-
-def _make_display(obj):
-    return str(obj)
+         url_fn=lambda o: f"/user/{o.user.id}/update/")
 
 
 @login_required
@@ -39,7 +38,7 @@ def global_search(request):
         if entry['tenant_filter']:
             qs = qs.filter(tenantProfile_id=request.tenantID)
 
-        related_map = { 'Users': ['user']}
+        related_map = {'Users': ['user']}
         related = related_map.get(entry['label'], [])
         if related:
             qs = qs.select_related(*related)
@@ -55,3 +54,7 @@ def global_search(request):
             results[key] = {'icon': entry['icon'], 'items': items}
 
     return JsonResponse({'results': results})
+
+
+def _make_display(obj):
+    return str(obj)
