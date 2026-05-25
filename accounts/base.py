@@ -53,7 +53,12 @@ class Base(models.Model):
     class Group(Enum):
         HomeGroup = "Home"
         TenantGroup = "Tenant"
-
+        EmployeeGroup = "Employee"
+        FRV_Group = "FRV"
+        AttendanceGroup = "Attendance"
+        LeaveGroup = "Leave"
+        TicketGroup = "Ticket"
+        TrainingGroup = "Training"
         SetupGroup = "Setup"
         UserGroup = "User"
         ReportGroup = "Report"

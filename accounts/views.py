@@ -20,7 +20,7 @@ from DmtHrmsFmsApp.settings import LOGIN_URL, SMS_SERVICE_ON
 from accounts.helpers.message_helper import send_sweetalert
 from accounts.helpers.sms_helper import send_otp_sms
 from accounts.models import Profile, UserLoginTrace
-from accounts.helpers.base import GenerateOTP
+from accounts.base import GenerateOTP
 
 
 def generate_captcha_text(length=5):

@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 
-from accounts.helpers.base import  Base
+from accounts.base import  Base
 from accounts.helpers.decorators import CheckRole
 from masters.models import Country, State, District, Currency, Division, Zone, City
 

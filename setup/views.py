@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.db import DatabaseError
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404
-from accounts.helpers.base import Base
+from accounts.base import Base
 from accounts.helpers.decorators import CheckRole
 from accounts.models import Profile
 from setup.models import (

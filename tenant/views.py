@@ -11,8 +11,8 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from accounts.helpers.basicUtility import DeleteFileFromS3, UploadFileS3Server, UploadFileData
-from accounts.helpers.base import Base
+from accounts.helpers.basicUtility import DeleteFileFromS3, UploadFileData
+from accounts.base import Base
 from accounts.helpers.decorators import CheckRole
 from accounts.helpers.message_helper import send_sweetalert
 from masters.models import Country, Currency

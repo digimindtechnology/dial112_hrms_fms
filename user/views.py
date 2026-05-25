@@ -5,9 +5,9 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.db import transaction
 from django.db.models import Q, Count
-from accounts.helpers.basicUtility import UploadFileS3Server, GetFileUrl, UploadFileData
+from accounts.helpers.basicUtility import GetFileUrl, UploadFileData
 from accounts.helpers.import_export_utils import export_csv, export_xlsx, parse_upload
-from accounts.helpers.base import Base
+from accounts.base import Base
 from accounts.helpers.decorators import CheckRole
 from accounts.models import Profile, UserLoginTrace
 from masters.models import Country, Gender, State, Currency

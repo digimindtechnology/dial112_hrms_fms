@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
-from accounts.helpers.base import Base
+from accounts.base import Base
 from accounts.helpers.decorators import CheckRole
 
 
