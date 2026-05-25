@@ -189,7 +189,15 @@ EMAIL_VERIFICATION_URL = os.getenv('EMAIL_VERIFICATION_URL', '')
 EMAIL_LOGIN_URL = os.getenv('EMAIL_LOGIN_URL', '')
 
 # --- AWS / S3 CONFIG ---
-
+S3_BUCKET_NAME = ''
+S3_FOLDER = ''
+S3_URL = ''
+aws_access_key_id = ''
+aws_secret_access_key = ''
+AWS_S3_REGION_NAME =  ''
+AWS_S3_ENDPOINT_URL = ''
+FILE_UPLOAD_STORAGE =  ''
+IS_FILE_UPLOAD_S3 = False
 
 # --- CUSTOM VARIABLES ---
 DEFAULT_PAGE_SIZE = os.getenv("DEFAULT_PAGE_SIZE")
