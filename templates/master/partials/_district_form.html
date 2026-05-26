@@ -38,6 +38,15 @@
                 </select>
             </div>
             <div class="mb-4">
+                <label class="form-label">Zone</label>
+                <select name="zone_id" class="form-select">
+                    <option value="">Select Zone</option>
+                    {% for z in zones %}
+                    <option value="{{ z.zone_id }}" {% if district and district.zone_id == z.zone_id %}selected{% endif %}>{{ z.zone_name }}{% if z.state %} - {{ z.state.state_name }}{% endif %}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-4">
                 <div class="form-check">
                     <input type="checkbox" name="is_active" class="form-check-input" id="district_active" {% if district.is_active or not district %}checked{% endif %}>
                     <label class="form-check-label" for="district_active">Active</label>

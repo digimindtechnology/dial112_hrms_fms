@@ -15,11 +15,11 @@
                 <input type="text" name="zone_name_hindi" class="form-control" value="{{ zone.zone_name_hindi|default:'' }}" placeholder="Enter Hindi name">
             </div>
             <div class="mb-4">
-                <label class="form-label">District</label>
-                <select name="district_id" class="form-select">
-                    <option value="">Select District</option>
-                    {% for d in districts %}
-                    <option value="{{ d.district_id }}" {% if zone and zone.district_id == d.district_id %}selected{% endif %}>{{ d.district_name }}{% if d.state %} - {{ d.state.state_name }}{% endif %}</option>
+                <label class="form-label">State <span class="text-danger">*</span></label>
+                <select name="state_id" class="form-select" required>
+                    <option value="">Select State</option>
+                    {% for s in states %}
+                    <option value="{{ s.state_id }}" {% if zone and zone.state_id == s.state_id %}selected{% endif %}>{{ s.state_name }}</option>
                     {% endfor %}
                 </select>
             </div>

@@ -201,7 +201,7 @@ def DeleteDivision(request):
 
 @login_required
 def DistrictList(request):
-    districts = District.objects.select_related('state', 'division').all().order_by('district_name')
+    districts = District.objects.select_related('state', 'division', 'zone').all().order_by('district_name')
     return _render_partial(request, "master/partials/_district_list.html", {'districts': districts})
 
 
@@ -211,16 +211,19 @@ def AddUpdateDistrict(request, pk=0):
     countries = Country.objects.filter(is_active=True)
     states = State.objects.filter(is_active=True)
     divisions = Division.objects.filter(is_active=True)
+    zones = Zone.objects.filter(is_active=True).select_related('state')
     if request.method == "POST":
         name = request.POST.get("district_name", "").strip()
         state_id = request.POST.get("state_id")
         division_id = request.POST.get("division_id") or None
+        zone_id = request.POST.get("zone_id") or None
         is_active = request.POST.get("is_active") == "on"
         if name and state_id:
             if district:
                 district.district_name = name
                 district.state_id = state_id
                 district.division_id = division_id
+                district.zone_id = zone_id
                 district.is_active = is_active
                 district.save()
             else:
@@ -228,12 +231,13 @@ def AddUpdateDistrict(request, pk=0):
                     district_name=name,
                     state_id=state_id,
                     division_id=division_id,
+                    zone_id=zone_id,
                     is_active=is_active,
                 )
             return JsonResponse({'success': True})
         return JsonResponse({'success': False, 'error': 'District name and state are required'})
     return _render_partial(request, "master/partials/_district_form.html", {
-        'district': district, 'countries': countries, 'states': states, 'divisions': divisions
+        'district': district, 'countries': countries, 'states': states, 'divisions': divisions, 'zones': zones
     })
 
 
@@ -250,25 +254,25 @@ def DeleteDistrict(request):
 
 @login_required
 def ZoneList(request):
-    zones = Zone.objects.select_related('district', 'district__state').all().order_by('zone_name')
+    zones = Zone.objects.select_related('state').all().order_by('zone_name')
     return _render_partial(request, "master/partials/_zone_list.html", {'zones': zones})
 
 
 @login_required
 def AddUpdateZone(request, pk=0):
     zone = Zone.objects.filter(zone_id=pk).first() if pk else None
-    districts = District.objects.filter(is_active=True).select_related('state')
+    states = State.objects.filter(is_active=True)
     if request.method == "POST":
         name = request.POST.get("zone_name", "").strip()
         name_hindi = request.POST.get("zone_name_hindi", "").strip()
-        district_id = request.POST.get("district_id") or None
+        state_id = request.POST.get("state_id") or None
         sequence = request.POST.get("sequence") or 1
         is_active = request.POST.get("is_active") == "on"
-        if name:
+        if name and state_id:
             if zone:
                 zone.zone_name = name
                 zone.zone_name_hindi = name_hindi or None
-                zone.district_id = district_id
+                zone.state_id = state_id
                 zone.sequence = sequence
                 zone.is_active = is_active
                 zone.save()
@@ -276,13 +280,13 @@ def AddUpdateZone(request, pk=0):
                 Zone.objects.create(
                     zone_name=name,
                     zone_name_hindi=name_hindi or None,
-                    district_id=district_id,
+                    state_id=state_id,
                     sequence=sequence,
                     is_active=is_active,
                 )
             return JsonResponse({'success': True})
-        return JsonResponse({'success': False, 'error': 'Zone name is required'})
-    return _render_partial(request, "master/partials/_zone_form.html", {'zone': zone, 'districts': districts})
+        return JsonResponse({'success': False, 'error': 'Zone name and state are required'})
+    return _render_partial(request, "master/partials/_zone_form.html", {'zone': zone, 'states': states})
 
 
 @login_required
@@ -478,8 +482,8 @@ ENTITY_CONFIG = {
     },
     'District': {
         'model': District,
-        'fields': ['district_name', 'state__state_name', 'division__division_name', 'is_active'],
-        'headers': {'district_name': 'District Name', 'state__state_name': 'State Name', 'division__division_name': 'Division Name', 'is_active': 'Active'},
+        'fields': ['district_name', 'state__state_name', 'division__division_name', 'zone__zone_name', 'is_active'],
+        'headers': {'district_name': 'District Name', 'state__state_name': 'State Name', 'division__division_name': 'Division Name', 'zone__zone_name': 'Zone Name', 'is_active': 'Active'},
         'unique': ['district_name'],
     },
     'Division': {
@@ -490,8 +494,8 @@ ENTITY_CONFIG = {
     },
     'Zone': {
         'model': Zone,
-        'fields': ['zone_name', 'zone_name_hindi', 'district__district_name', 'sequence', 'is_active'],
-        'headers': {'zone_name': 'Zone Name', 'zone_name_hindi': 'Hindi Name', 'district__district_name': 'District Name', 'sequence': 'Sequence', 'is_active': 'Active'},
+        'fields': ['zone_name', 'zone_name_hindi', 'state__state_name', 'sequence', 'is_active'],
+        'headers': {'zone_name': 'Zone Name', 'zone_name_hindi': 'Hindi Name', 'state__state_name': 'State Name', 'sequence': 'Sequence', 'is_active': 'Active'},
         'unique': ['zone_name'],
     },
     'City': {
@@ -543,6 +547,8 @@ def _build_lookup_cache(entity_name):
         cache['division'] = {d.division_name: d for d in Division.objects.all()}
     if 'district__district_name' in fields:
         cache['district'] = {d.district_name: d for d in District.objects.all()}
+    if 'zone__zone_name' in fields:
+        cache['zone'] = {z.zone_name: z for z in Zone.objects.all()}
     return cache
 
 
@@ -566,6 +572,8 @@ def _resolve_row(entity_name, row, lookup_cache=None):
             kwargs['division'] = lc.get('division', {}).get(raw) if raw else None
         elif field == 'district__district_name':
             kwargs['district'] = lc.get('district', {}).get(raw) if raw else None
+        elif field == 'zone__zone_name':
+            kwargs['zone'] = lc.get('zone', {}).get(raw) if raw else None
         elif field == 'sequence':
             kwargs[field] = int(raw) if str(raw).strip() else 1
         else:

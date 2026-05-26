@@ -1,10 +1,12 @@
 import random
 import string
+from decimal import Decimal
+
 from django.db import models
 from django.contrib.auth.models import User
-from masters.models import BaseModel, State, Division, District, Zone,City
+from masters.models import BaseModel, State, Division, District, Zone, City
 from tenant.models import TenantProfile
-
+from datetime import datetime, timedelta
 
 class CostCenterStatus(models.Model):
     cost_center_status_id = models.AutoField(primary_key=True)
@@ -94,6 +96,15 @@ class EmployeeType(SetupLookupBase):
         ]
 
 
+class EmployeeGroup(SetupLookupBase):
+    class Meta(SetupLookupBase.Meta):
+        verbose_name = 'Employee Group'
+        verbose_name_plural = 'Employee Groups'
+        constraints = [
+            models.UniqueConstraint(fields=['tenantProfile', 'name'], name='setup_employee_group_tenant_name_uniq')
+        ]
+
+
 class Designation(SetupLookupBase):
     class Meta(SetupLookupBase.Meta):
         verbose_name = 'Designation'
@@ -140,14 +151,33 @@ class LeaveType(SetupLookupBase):
 
 
 class ShiftCategory(SetupLookupBase):
-    how_many_hours = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    start_time = models.TimeField(null=True, blank=True)
+    end_time = models.TimeField(null=True, blank=True)
+    how_many_hours = models.DecimalField(max_digits=5,decimal_places=2,null=True,blank=True)
+    is_end_next_day = models.BooleanField(default=False)
 
     class Meta(SetupLookupBase.Meta):
         verbose_name = 'Shift Category'
         verbose_name_plural = 'Shift Categories'
         constraints = [
-            models.UniqueConstraint(fields=['tenantProfile', 'name'], name='setup_shift_category_tenant_name_uniq')
+            models.UniqueConstraint(
+                fields=['tenantProfile', 'name'],
+                name='setup_shift_category_tenant_name_uniq'
+            )
         ]
+
+    def save(self, *args, **kwargs):
+        if self.start_time and self.end_time:
+            today = datetime.today().date()
+            start_dt = datetime.combine(today, self.start_time)
+            end_dt = datetime.combine(today, self.end_time)
+            # Handle next day shift
+            if self.is_end_next_day or end_dt < start_dt:
+                end_dt += timedelta(days=1)
+            total_seconds = (end_dt - start_dt).total_seconds()
+            hours = total_seconds / 3600
+            self.how_many_hours = Decimal(str(round(hours, 2)))
+        super().save(*args, **kwargs)
 
 
 class ViolationType(SetupLookupBase):
@@ -176,6 +206,7 @@ class FRVType(SetupLookupBase):
             models.UniqueConstraint(fields=['tenantProfile', 'name'], name='setup_frv_type_tenant_name_uniq')
         ]
 
+
 class FRVMaintenanceType(SetupLookupBase):
     class Meta(SetupLookupBase.Meta):
         verbose_name = 'FRV Maintenance Type'
@@ -191,14 +222,9 @@ class PoliceStation(BaseModel):
     station_code = models.CharField(max_length=50, blank=True, null=True)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
-
-    state = models.ForeignKey(State, related_name='state_PoliceStation', on_delete=models.CASCADE, verbose_name="State") ##Remove
-    division = models.ForeignKey(Division, related_name='division_PoliceStation', on_delete=models.CASCADE, verbose_name="Division")  ##Remove
     district = models.ForeignKey(District, related_name='district_PoliceStation', on_delete=models.CASCADE, verbose_name="District")
-    zone = models.ForeignKey(Zone,blank=True, null=True, related_name='zone_PoliceStation', on_delete=models.CASCADE, verbose_name="Zone")  ##Remove
-    City = models.ForeignKey(City,blank=True, null=True, related_name='City_PoliceStation', on_delete=models.CASCADE, verbose_name="City")  ##Remove
     address = models.TextField(null=True, blank=True)
-    pincode = models.CharField(max_length=10,null=True, blank=True)
+    pincode = models.CharField(max_length=10, null=True, blank=True)
     picture_url = models.CharField(max_length=1000, null=True, blank=True)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
@@ -207,7 +233,6 @@ class PoliceStation(BaseModel):
     tenantProfile = models.ForeignKey(TenantProfile, related_name='tenantProfile_PoliceStation', on_delete=models.CASCADE, verbose_name="Tenant")
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="created_by_PoliceStation")
     updated_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name="updated_by_PoliceStation")
-    is_active = models.BooleanField(default=True)
 
     class Meta:
         db_table = 'police_station'
@@ -216,6 +241,7 @@ class PoliceStation(BaseModel):
     def __str__(self):
         return self.police_station_name
 
+
 class Holiday(BaseModel):
     holiday_id = models.AutoField(primary_key=True)
     holiday_name = models.CharField(max_length=500)
@@ -223,15 +249,27 @@ class Holiday(BaseModel):
     description = models.TextField(blank=True, null=True)
     is_national_holiday = models.BooleanField(default=False)
     tenantProfile = models.ForeignKey(TenantProfile, related_name='tenantProfile_Holiday', on_delete=models.CASCADE, verbose_name="Tenant")
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE,related_name="created_by_Holiday")
-    updated_by = models.ForeignKey(User, on_delete=models.CASCADE,null=True,blank=True,related_name="updated_by_Holiday")
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="created_by_Holiday")
+    updated_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name="updated_by_Holiday")
     is_active = models.BooleanField(default=True)
 
     class Meta:
         ordering = ['holiday_date']
         verbose_name = "Holiday"
         verbose_name_plural = "Holidays"
+
     def __str__(self):
         return f"{self.holiday_name} - {self.holiday_date}"
 
-##add Holiday  distict wise SS
+
+class HolidayDistrictWise(BaseModel):
+    holiday_district_wise_id = models.AutoField(primary_key=True)
+    holiday = models.ForeignKey(Holiday, related_name='holiday_HolidayDistrictWise', on_delete=models.CASCADE, verbose_name="Holiday")
+    district = models.ForeignKey(District, related_name='district_HolidayDistrictWise', on_delete=models.CASCADE, verbose_name="District")
+    tenantProfile = models.ForeignKey(TenantProfile, related_name='tenantProfile_HolidayDistrictWise', on_delete=models.CASCADE, verbose_name="Tenant")
+
+    class Meta:
+        ordering = ['holiday_district_wise_id']
+
+    def __str__(self):
+        return self.holiday.holiday_name

@@ -15,5 +15,16 @@ urlpatterns = [
     path('lookups/<str:slug>/add/', views.setup_lookup_form, name='setup-lookup-add'),
     path('lookups/<str:slug>/edit/<int:pk>/', views.setup_lookup_form, name='setup-lookup-edit'),
     path('lookups/<str:slug>/delete/', views.setup_lookup_delete, name='setup-lookup-delete'),
-
+    # Police Stations
+    path('police-stations/', views.police_station_list, name='setup-police-station-list'),
+    path('police-stations/add/', views.police_station_form, name='setup-police-station-add'),
+    path('police-stations/edit/<int:pk>/', views.police_station_form, name='setup-police-station-edit'),
+    path('police-stations/delete/', views.police_station_delete, name='setup-police-station-delete'),
+    # Holidays
+    path('holidays/', views.holiday_list, name='setup-holiday-list'),
+    path('holidays/add/', views.holiday_form, name='setup-holiday-add'),
+    path('holidays/edit/<int:pk>/', views.holiday_form, name='setup-holiday-edit'),
+    path('holidays/delete/', views.holiday_delete, name='setup-holiday-delete'),
+    path('holidays/<int:pk>/districts/', views.holiday_district_list, name='setup-holiday-district-list'),
+    path('holidays/<int:pk>/districts/save/', views.holiday_district_save, name='setup-holiday-district-save'),
 ]

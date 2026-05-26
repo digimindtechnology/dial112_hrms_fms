@@ -27,6 +27,7 @@
                     <th>District Name</th>
                     <th>State</th>
                     <th>Division</th>
+                    <th>Zone</th>
                     <th>Status</th>
                     <th>Actions</th>
                 </tr>
@@ -38,6 +39,7 @@
                     <td>{{ d.district_name }}</td>
                     <td>{{ d.state.state_name }}</td>
                     <td>{{ d.division.division_name|default:'-' }}</td>
+                    <td>{{ d.zone.zone_name|default:'-' }}</td>
                     <td><span class="badge bg-label-{% if d.is_active %}success{% else %}danger{% endif %}">{% if d.is_active %}Active{% else %}Inactive{% endif %}</span></td>
                     <td>
                         <button class="btn btn-icon btn-text-secondary waves-effect rounded-pill" onclick="openSetupForm('{% url 'AddUpdateDistrict' d.district_id %}')">

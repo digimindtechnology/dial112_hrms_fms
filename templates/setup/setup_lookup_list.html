@@ -26,8 +26,10 @@
                     <tr>
                         <th>Sr.</th>
                         <th>Name</th>
-                        {% if has_hours %}
-                            <th>How Many Hours</th>
+                        {% if has_time %}
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                            <th>Hours</th>
                         {% endif %}
                         <th>Description</th>
                         <th>Status</th>
@@ -39,7 +41,9 @@
                         <tr>
                             <td>{{ forloop.counter }}</td>
                             <td>{{ item.name }}</td>
-                            {% if has_hours %}
+                            {% if has_time %}
+                                <td>{{ item.start_time|default:'-' }}</td>
+                                <td>{{ item.end_time|default:'-' }}</td>
                                 <td>{{ item.how_many_hours|default:'-' }}</td>
                             {% endif %}
                             <td>{{ item.description|default:'-' }}</td>

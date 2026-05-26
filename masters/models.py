@@ -108,11 +108,11 @@ class State(models.Model):
 
     def __str__(self):
         return self.state_name
+
 class Division(models.Model):
     division_id = models.AutoField(primary_key=True)
     division_code = models.CharField(max_length=30, null=True, blank=True)
     division_name = models.CharField(max_length=30)
-
     state = models.ForeignKey(State, on_delete=models.CASCADE, related_name='state_Division')
     is_active = models.BooleanField(default=True)
 
@@ -124,11 +124,26 @@ class Division(models.Model):
 
     def __str__(self):
         return self.division_name
+
+class Zone(models.Model):
+    zone_id = models.AutoField(primary_key=True)
+    zone_name = models.CharField(max_length=100)
+    zone_name_hindi = models.CharField(max_length=100,null=True, blank=True)
+    state = models.ForeignKey(State, on_delete=models.CASCADE,related_name='state_Zone')
+    sequence= models.IntegerField(default=1)
+    is_active = models.BooleanField(default=True)
+    class Meta:
+        ordering = ('zone_name',)
+
+    def __str__(self):
+        return self.zone_name + ' - ' + self.state.state_name
+
 class District(models.Model):
     district_id = models.AutoField(primary_key=True)
     district_name = models.CharField(max_length=100)
-    state = models.ForeignKey(State, on_delete=models.CASCADE)
-    division = models.ForeignKey(Division, on_delete=models.CASCADE, null=True, blank=True)
+    state = models.ForeignKey(State, on_delete=models.CASCADE,related_name='state_District')
+    division = models.ForeignKey(Division, on_delete=models.CASCADE, null=True, blank=True,related_name='division_District')
+    zone = models.ForeignKey(Zone, on_delete=models.CASCADE, null=True, blank=True,related_name='zone_District')
     is_active = models.BooleanField(default=True)
 
     class Meta:
@@ -136,23 +151,13 @@ class District(models.Model):
         indexes = [
             models.Index(fields=['state']),
             models.Index(fields=['division']),
+            models.Index(fields=['zone']),
         ]
 
     def __str__(self):
         return self.district_name + ' - ' + self.state.state_name
-class Zone(models.Model):
-    zone_id = models.AutoField(primary_key=True)
-    zone_name = models.CharField(max_length=100)
-    zone_name_hindi = models.CharField(max_length=100,null=True, blank=True)
-    district = models.ForeignKey(District, on_delete=models.CASCADE,null=True,blank=True)
-    sequence= models.IntegerField(default=1)
-    is_active = models.BooleanField(default=True)
-    class Meta:
-        ordering = ('zone_name',)
 
-    def __str__(self):
-        district_name = self.district.district_name if self.district else 'N/A'
-        return self.zone_name + ' - ' + district_name
+
 class City(models.Model):
     city_id = models.AutoField(primary_key=True)
     city_name = models.CharField(max_length=100)

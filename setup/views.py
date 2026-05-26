@@ -1,9 +1,11 @@
 import csv
 import json
 import io
+from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from django.contrib.auth.decorators import login_required
 from django.db import DatabaseError
+from django.db.models import Count
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from accounts.base import Base
@@ -14,6 +16,7 @@ from setup.models import (
     CostCenterStatus,
     CostCenterBulkUploadHistory,
     EmployeeType,
+    EmployeeGroup,
     Designation,
     Grade,
     Language,
@@ -24,7 +27,11 @@ from setup.models import (
     TrainerType,
     FRVType,
     FRVMaintenanceType,
+    PoliceStation,
+    Holiday,
+    HolidayDistrictWise,
 )
+from masters.models import District
 from accounts.helpers.import_export_utils import parse_upload
 
 
@@ -37,12 +44,13 @@ def data_setup(request):
 
 SETUP_LOOKUPS = {
     'employee-type': {'model': EmployeeType, 'title': 'Employee Type', 'plural': 'Employee Types', 'icon': 'tabler-users-group'},
+    'employee-group': {'model': EmployeeGroup, 'title': 'Employee Group', 'plural': 'Employee Groups', 'icon': 'tabler-users'},
     'designation': {'model': Designation, 'title': 'Designation', 'plural': 'Designations', 'icon': 'tabler-id-badge-2'},
     'grade': {'model': Grade, 'title': 'Grade', 'plural': 'Grades', 'icon': 'tabler-layers-subtract'},
     'language': {'model': Language, 'title': 'Language', 'plural': 'Languages', 'icon': 'tabler-language'},
     'dialect': {'model': Dialect, 'title': 'Dialect', 'plural': 'Dialects', 'icon': 'tabler-message-language'},
     'leave-type': {'model': LeaveType, 'title': 'Leave Type', 'plural': 'Leave Types', 'icon': 'tabler-calendar-minus'},
-    'shift-category': {'model': ShiftCategory, 'title': 'Shift Category', 'plural': 'Shift Categories', 'icon': 'tabler-clock-hour-4', 'has_hours': True},
+    'shift-category': {'model': ShiftCategory, 'title': 'Shift Category', 'plural': 'Shift Categories', 'icon': 'tabler-clock-hour-4', 'has_time': True},
     'violation-type': {'model': ViolationType, 'title': 'Violation Type', 'plural': 'Violation Types', 'icon': 'tabler-alert-triangle'},
     'trainer-type': {'model': TrainerType, 'title': 'Trainer Type', 'plural': 'Trainer Types', 'icon': 'tabler-user-star'},
     'frv-type': {'model': FRVType, 'title': 'FRV Type', 'plural': 'FRV Types', 'icon': 'tabler-ambulance'},
@@ -78,7 +86,7 @@ def setup_lookup_list(request, slug):
         'items': items,
         'title': cfg['title'],
         'plural': cfg['plural'],
-        'has_hours': cfg.get('has_hours', False),
+        'has_time': cfg.get('has_time', False),
         'db_error': db_error,
     })
 
@@ -103,17 +111,26 @@ def setup_lookup_form(request, slug, pk=0):
         name = request.POST.get("name", "").strip()
         description = request.POST.get("description", "").strip()
         is_active = request.POST.get("is_active") == "on"
-        how_many_hours = None
         if not name:
             return JsonResponse({'success': False, 'error': f"{cfg['title']} name is required"})
 
-        if cfg.get('has_hours'):
-            hours_value = request.POST.get("how_many_hours", "").strip()
-            if hours_value:
+        start_time = None
+        end_time = None
+        is_end_next_day = False
+        if cfg.get('has_time'):
+            st_value = request.POST.get("start_time", "").strip()
+            et_value = request.POST.get("end_time", "").strip()
+            is_end_next_day = request.POST.get("is_end_next_day") == "on"
+            if st_value:
                 try:
-                    how_many_hours = Decimal(hours_value)
-                except InvalidOperation:
-                    return JsonResponse({'success': False, 'error': 'How many hours must be a valid number'})
+                    start_time = datetime.strptime(st_value, "%H:%M").time()
+                except ValueError:
+                    return JsonResponse({'success': False, 'error': 'Invalid start time format (use HH:MM)'})
+            if et_value:
+                try:
+                    end_time = datetime.strptime(et_value, "%H:%M").time()
+                except ValueError:
+                    return JsonResponse({'success': False, 'error': 'Invalid end time format (use HH:MM)'})
 
         tenant = _lookup_tenant(request)
         if not tenant:
@@ -130,8 +147,10 @@ def setup_lookup_form(request, slug, pk=0):
                 obj.name = name
                 obj.description = description or None
                 obj.is_active = is_active
-                if cfg.get('has_hours'):
-                    obj.how_many_hours = how_many_hours
+                if cfg.get('has_time'):
+                    obj.start_time = start_time
+                    obj.end_time = end_time
+                    obj.is_end_next_day = is_end_next_day
                 obj.updated_by = request.user
                 obj.save()
             else:
@@ -142,8 +161,10 @@ def setup_lookup_form(request, slug, pk=0):
                     'tenantProfile': tenant,
                     'created_by': request.user,
                 }
-                if cfg.get('has_hours'):
-                    create_kwargs['how_many_hours'] = how_many_hours
+                if cfg.get('has_time'):
+                    create_kwargs['start_time'] = start_time
+                    create_kwargs['end_time'] = end_time
+                    create_kwargs['is_end_next_day'] = is_end_next_day
                 model.objects.create(**create_kwargs)
             return JsonResponse({'success': True})
         except (DatabaseError, Exception) as e:
@@ -153,7 +174,7 @@ def setup_lookup_form(request, slug, pk=0):
         'slug': slug,
         'obj': obj,
         'title': cfg['title'],
-        'has_hours': cfg.get('has_hours', False),
+        'has_time': cfg.get('has_time', False),
     })
 
 
@@ -409,3 +430,267 @@ def cost_center_bulk_upload(request):
         msg += f", {len(errors)} errors"
 
     return JsonResponse({'success': True, 'message': msg, 'created': created, 'updated': updated, 'errors': len(errors)})
+
+
+# ─── Police Station ───────────────────────────────────────────────────────────
+
+@login_required
+@CheckRole(Base.Group.SetupGroup.value)
+def police_station_list(request):
+    items = PoliceStation.objects.filter(tenantProfile_id=request.tenantID).select_related('district').order_by('police_station_name')
+    districts = District.objects.filter(is_active=True).order_by('district_name')
+    return render(request, "setup/police_station_list.html", {'items': items, 'districts': districts})
+
+
+@login_required
+@CheckRole(Base.Group.SetupGroup.value)
+def police_station_form(request, pk=0):
+    obj = PoliceStation.objects.filter(police_station_id=pk, tenantProfile_id=request.tenantID).select_related('district').first() if pk else None
+    if pk and not obj:
+        return JsonResponse({'success': False, 'error': 'Police station not found'}, status=404)
+
+    districts = District.objects.filter(is_active=True).order_by('district_name')
+
+    if request.method == "POST":
+        name = request.POST.get("police_station_name", "").strip()
+        district_id = request.POST.get("district_id", "").strip()
+        station_code = request.POST.get("station_code", "").strip()
+        phone_number = request.POST.get("phone_number", "").strip()
+        email = request.POST.get("email", "").strip()
+        address = request.POST.get("address", "").strip()
+        pincode = request.POST.get("pincode", "").strip()
+        latitude = request.POST.get("latitude", "").strip()
+        longitude = request.POST.get("longitude", "").strip()
+        established_date = request.POST.get("established_date", "").strip()
+        is_active = request.POST.get("is_active") == "on"
+
+        if not name:
+            return JsonResponse({'success': False, 'error': 'Police station name is required'})
+        if not district_id:
+            return JsonResponse({'success': False, 'error': 'District is required'})
+
+        district = District.objects.filter(district_id=district_id).first()
+        if not district:
+            return JsonResponse({'success': False, 'error': 'Selected district does not exist'})
+
+        profile = Profile.objects.filter(user=request.user).select_related('tenantProfile').first()
+        tenant = profile.tenantProfile if profile else None
+        if not tenant:
+            return JsonResponse({'success': False, 'error': 'No tenant profile found for your account'})
+
+        lat = None
+        lon = None
+        if latitude:
+            try:
+                lat = Decimal(latitude)
+            except InvalidOperation:
+                return JsonResponse({'success': False, 'error': 'Invalid latitude value'})
+        if longitude:
+            try:
+                lon = Decimal(longitude)
+            except InvalidOperation:
+                return JsonResponse({'success': False, 'error': 'Invalid longitude value'})
+
+        est_date = None
+        if established_date:
+            try:
+                est_date = datetime.strptime(established_date, "%Y-%m-%d").date()
+            except ValueError:
+                return JsonResponse({'success': False, 'error': 'Invalid established date'})
+
+        try:
+            if obj:
+                obj.police_station_name = name
+                obj.district = district
+                obj.station_code = station_code or None
+                obj.phone_number = phone_number or None
+                obj.email = email or None
+                obj.address = address or None
+                obj.pincode = pincode or None
+                obj.latitude = lat
+                obj.longitude = lon
+                obj.established_date = est_date
+                obj.is_active = is_active
+                obj.updated_by = request.user
+                obj.save()
+            else:
+                PoliceStation.objects.create(
+                    police_station_name=name,
+                    district=district,
+                    station_code=station_code or None,
+                    phone_number=phone_number or None,
+                    email=email or None,
+                    address=address or None,
+                    pincode=pincode or None,
+                    latitude=lat,
+                    longitude=lon,
+                    established_date=est_date,
+                    is_active=is_active,
+                    tenantProfile=tenant,
+                    created_by=request.user,
+                )
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    return render(request, "setup/partials/_police_station_form.html", {'obj': obj, 'districts': districts})
+
+
+@login_required
+@CheckRole(Base.Group.SetupGroup.value)
+def police_station_delete(request):
+    pk = request.POST.get("pk")
+    PoliceStation.objects.filter(police_station_id=pk, tenantProfile_id=request.tenantID).delete()
+    return JsonResponse({'success': True})
+
+
+# ─── Holiday ──────────────────────────────────────────────────────────────────
+
+@login_required
+@CheckRole(Base.Group.SetupGroup.value)
+def holiday_list(request):
+    items = (Holiday.objects
+             .filter(tenantProfile_id=request.tenantID)
+             .prefetch_related('holiday_HolidayDistrictWise__district')
+             .order_by('holiday_date'))
+    return render(request, "setup/holiday_list.html", {'items': items})
+
+
+@login_required
+@CheckRole(Base.Group.SetupGroup.value)
+def holiday_form(request, pk=0):
+    obj = Holiday.objects.filter(holiday_id=pk, tenantProfile_id=request.tenantID).first() if pk else None
+    if pk and not obj:
+        return JsonResponse({'success': False, 'error': 'Holiday not found'}, status=404)
+
+    all_districts = District.objects.filter(is_active=True).order_by('district_name')
+
+    if request.method == "POST":
+        name = request.POST.get("holiday_name", "").strip()
+        holiday_date = request.POST.get("holiday_date", "").strip()
+        description = request.POST.get("description", "").strip()
+        is_national_holiday = request.POST.get("is_national_holiday") == "on"
+        is_active = request.POST.get("is_active") == "on"
+
+        if not name:
+            return JsonResponse({'success': False, 'error': 'Holiday name is required'})
+        if not holiday_date:
+            return JsonResponse({'success': False, 'error': 'Holiday date is required'})
+
+        try:
+            h_date = datetime.strptime(holiday_date, "%Y-%m-%d").date()
+        except ValueError:
+            return JsonResponse({'success': False, 'error': 'Invalid date format'})
+
+        profile = Profile.objects.filter(user=request.user).select_related('tenantProfile').first()
+        tenant = profile.tenantProfile if profile else None
+        if not tenant:
+            return JsonResponse({'success': False, 'error': 'No tenant profile found for your account'})
+
+        try:
+            if obj:
+                obj.holiday_name = name
+                obj.holiday_date = h_date
+                obj.description = description or None
+                obj.is_national_holiday = is_national_holiday
+                obj.is_active = is_active
+                obj.updated_by = request.user
+                obj.save()
+                holiday = obj
+            else:
+                holiday = Holiday.objects.create(
+                    holiday_name=name,
+                    holiday_date=h_date,
+                    description=description or None,
+                    is_national_holiday=is_national_holiday,
+                    is_active=is_active,
+                    tenantProfile=tenant,
+                    created_by=request.user,
+                )
+
+            # Sync district assignments
+            selected_ids = set()
+            for x in request.POST.getlist("district_ids"):
+                try:
+                    selected_ids.add(int(x))
+                except (ValueError, TypeError):
+                    pass
+            existing_ids = set(
+                HolidayDistrictWise.objects.filter(holiday=holiday).values_list('district_id', flat=True)
+            )
+            HolidayDistrictWise.objects.filter(holiday=holiday, district_id__in=existing_ids - selected_ids).delete()
+            for district in District.objects.filter(district_id__in=selected_ids - existing_ids):
+                HolidayDistrictWise.objects.create(holiday=holiday, district=district, tenantProfile=tenant)
+
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    assigned_ids = list(
+        HolidayDistrictWise.objects.filter(holiday=obj).values_list('district_id', flat=True)
+    ) if obj else []
+
+    return render(request, "setup/partials/_holiday_form.html", {
+        'obj': obj,
+        'all_districts': all_districts,
+        'assigned_ids': assigned_ids,
+    })
+
+
+@login_required
+@CheckRole(Base.Group.SetupGroup.value)
+def holiday_delete(request):
+    pk = request.POST.get("pk")
+    Holiday.objects.filter(holiday_id=pk, tenantProfile_id=request.tenantID).delete()
+    return JsonResponse({'success': True})
+
+
+@login_required
+@CheckRole(Base.Group.SetupGroup.value)
+def holiday_district_list(request, pk):
+    holiday = get_object_or_404(Holiday, holiday_id=pk, tenantProfile_id=request.tenantID)
+    assigned = HolidayDistrictWise.objects.filter(holiday=holiday).select_related('district')
+    assigned_ids = list(assigned.values_list('district_id', flat=True))
+    all_districts = District.objects.filter(is_active=True).order_by('district_name')
+    return render(request, "setup/partials/_holiday_district_list.html", {
+        'holiday': holiday,
+        'assigned': assigned,
+        'all_districts': all_districts,
+        'assigned_ids': assigned_ids,
+    })
+
+
+@login_required
+@CheckRole(Base.Group.SetupGroup.value)
+def holiday_district_save(request, pk):
+    """Full sync: replaces current district assignments with the submitted selection."""
+    if request.method != "POST":
+        return JsonResponse({'success': False, 'error': 'Invalid method'})
+    holiday = get_object_or_404(Holiday, holiday_id=pk, tenantProfile_id=request.tenantID)
+
+    raw_ids = request.POST.getlist("district_ids")
+    selected_ids = set()
+    for x in raw_ids:
+        try:
+            selected_ids.add(int(x))
+        except (ValueError, TypeError):
+            pass
+
+    profile = Profile.objects.filter(user=request.user).select_related('tenantProfile').first()
+    tenant = profile.tenantProfile if profile else None
+    if not tenant:
+        return JsonResponse({'success': False, 'error': 'No tenant profile found'})
+
+    existing_ids = set(
+        HolidayDistrictWise.objects.filter(holiday=holiday).values_list('district_id', flat=True)
+    )
+    to_add = selected_ids - existing_ids
+    to_remove = existing_ids - selected_ids
+
+    try:
+        HolidayDistrictWise.objects.filter(holiday=holiday, district_id__in=to_remove).delete()
+        for district in District.objects.filter(district_id__in=to_add):
+            HolidayDistrictWise.objects.create(holiday=holiday, district=district, tenantProfile=tenant)
+        return JsonResponse({'success': True, 'added': len(to_add), 'removed': len(to_remove)})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})

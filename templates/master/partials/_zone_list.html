@@ -26,7 +26,7 @@
                     <th>Sr.</th>
                     <th>Zone Name</th>
                     <th>Hindi Name</th>
-                    <th>District</th>
+                    <th>State</th>
                     <th>Sequence</th>
                     <th>Status</th>
                     <th>Actions</th>
@@ -38,7 +38,7 @@
                     <td>{{ forloop.counter }}</td>
                     <td>{{ z.zone_name }}</td>
                     <td>{{ z.zone_name_hindi|default:'-' }}</td>
-                    <td>{{ z.district.district_name|default:'-' }}</td>
+                    <td>{{ z.state.state_name|default:'-' }}</td>
                     <td>{{ z.sequence }}</td>
                     <td><span class="badge bg-label-{% if z.is_active %}success{% else %}danger{% endif %}">{% if z.is_active %}Active{% else %}Inactive{% endif %}</span></td>
                     <td>
