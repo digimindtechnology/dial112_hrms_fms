@@ -1,0 +1,93 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">{% if editapproval_rule %}Edit Approval Rule{% else %}Add Approval Rule{% endif %} for {{ approvertype.name }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <form id="frm_ApproveRule" method="POST"
+          action="{% url 'approveruleCreate' approvertype.pk %}{% if editapproval_rule %}?approverule_id={{ editapproval_rule.pk }}{% endif %}">
+        {% csrf_token %}
+        <input type="hidden" name="approveruleId" value="{{ editapproval_rule.pk|default:'0' }}">
+        <div class="modal-body">
+            <div class="mb-3">
+                <label class="form-label">Role <span class="text-danger">*</span></label>
+                <select name="role" class="form-select" required onchange="getUsersByRole(this.value)">
+                    <option value="">Select Role</option>
+                    {% for r in roles %}
+                    <option value="{{ r.pk }}" {% if editapproval_rule.role_id == r.pk %}selected{% endif %}>{{ r.role_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Approver <span class="text-danger">*</span></label>
+                <select name="approver" id="approver_select" class="form-select" required>
+                    <option value="">Select Approver</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Sequence <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" name="sequence" value="{{ editapproval_rule.sequence|default:'0' }}" required>
+            </div>
+            {% if editapproval_rule %}
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" name="is_active" id="approve_rule_active" {% if editapproval_rule.is_active %}checked{% endif %}>
+                <label class="form-check-label" for="approve_rule_active">Is Active</label>
+            </div>
+            {% endif %}
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary loading_spinner" data-original-text="Save">Save</button>
+        </div>
+    </form>
+</div>
+
+<script>
+function getUsersByRole(roleId, selectedApproverId=null) {
+    if(!roleId) {
+        document.getElementById('approver_select').innerHTML = '<option value="">Select Approver</option>';
+        return;
+    }
+    fetch('/approval-rules/getUser/' + roleId + '/')
+    .then(r => r.json())
+    .then(data => {
+        let options = '<option value="">Select Approver</option>';
+        if(data.users) {
+            data.users.forEach(u => {
+                let selected = (selectedApproverId && selectedApproverId == u.id) ? 'selected' : '';
+                options += `<option value="${u.id}" ${selected}>${u.name}</option>`;
+            });
+        }
+        document.getElementById('approver_select').innerHTML = options;
+    });
+}
+
+$('#frm_ApproveRule').on('submit', function (e) {
+    e.preventDefault();
+    var btn = $(this).find('.loading_spinner');
+    btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Processing..');
+
+    $.ajax({
+        url: $(this).attr('action'),
+        type: 'POST',
+        data: $(this).serialize(),
+        success: function (response) {
+            if (response.success) {
+                $('#Modal_ApproveRule').modal('hide');
+                Swal.fire({icon: 'success', title: 'Saved successfully', timer: 3000, showConfirmButton: false});
+                location.reload();
+            } else {
+                Swal.fire({icon: 'error', title: response.error || 'Something went wrong', timer: 3000, showConfirmButton: false});
+                btn.prop('disabled', false).text('Save');
+            }
+        },
+        error: function (xhr) {
+            Swal.fire({icon: 'error', title: 'Server error: ' + (xhr.responseText || 'Unknown'), timer: 3000, showConfirmButton: false});
+            btn.prop('disabled', false).text('Save');
+        }
+    });
+});
+
+{% if editapproval_rule and editapproval_rule.role_id %}
+getUsersByRole("{{ editapproval_rule.role_id }}", "{{ editapproval_rule.approver_id }}");
+{% endif %}
+</script>

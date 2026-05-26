@@ -1,0 +1,58 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">{% if approval_type %}Edit Approval Type{% else %}Add Approval Type{% endif %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <form id="frm_ApproveType" method="POST"
+          action="{% if approval_type %}{% url 'approve-type-update' approval_type.pk %}{% else %}{% url 'approve-type-create' %}{% endif %}">
+        {% csrf_token %}
+        <div class="modal-body">
+            <div class="mb-3">
+                <label class="form-label">Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="name" value="{{ approval_type.name|default:'' }}" required placeholder="Enter approval type name">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Sequence <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" name="sequence" value="{{ approval_type.sequence|default:'0' }}" required>
+            </div>
+            {% if approval_type %}
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" name="is_active" id="approve_type_active" {% if approval_type.is_active %}checked{% endif %}>
+                <label class="form-check-label" for="approve_type_active">Is Active</label>
+            </div>
+            {% endif %}
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary loading_spinner" data-original-text="Save">Save</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    $('#frm_ApproveType').on('submit', function (e) {
+        e.preventDefault();
+        var btn = $(this).find('.loading_spinner');
+        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Processing..');
+
+        $.ajax({
+            url: $(this).attr('action'),
+            type: 'POST',
+            data: $(this).serialize(),
+            success: function (response) {
+                if (response.success) {
+                    $('#Modal_ApproveType').modal('hide');
+                    Swal.fire({icon: 'success', title: 'Saved successfully', timer: 3000, showConfirmButton: false});
+                    location.reload();
+                } else {
+                    Swal.fire({icon: 'error', title: response.error || 'Something went wrong', timer: 3000, showConfirmButton: false});
+                    btn.prop('disabled', false).text('Save');
+                }
+            },
+            error: function (xhr) {
+                Swal.fire({icon: 'error', title: 'Server error: ' + (xhr.responseText || 'Unknown'), timer: 3000, showConfirmButton: false});
+                btn.prop('disabled', false).text('Save');
+            }
+        });
+    });
+</script>

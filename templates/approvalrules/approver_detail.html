@@ -1,0 +1,236 @@
+{% extends "layout/layout_base.html" %}
+{% load static %}
+
+{% block title %}Approval Rules - {{ approvertype.name }}{% endblock %}
+
+{% block page_css %}
+<style>
+    /* Premium Timeline & Layout Styling */
+    .workflow-timeline {
+        position: relative;
+        padding-left: 2.5rem;
+        margin-bottom: 0;
+        list-style: none;
+    }
+    .workflow-timeline::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 17px;
+        bottom: 8px;
+        width: 2px;
+        background: #e6e8eb;
+    }
+    [data-bs-theme="dark"] .workflow-timeline::before {
+        background: #474968;
+    }
+    .workflow-step {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    .workflow-step:last-child {
+        margin-bottom: 0;
+    }
+    .workflow-badge {
+        position: absolute;
+        left: -2.5rem;
+        top: 2px;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: #7367f0;
+        background: var(--bs-primary);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+        box-shadow: 0 4px 8px rgba(115, 103, 240, 0.25);
+        z-index: 1;
+    }
+    .workflow-badge-inactive {
+        background: #8592a3;
+        background: var(--bs-secondary);
+        box-shadow: none;
+    }
+    .workflow-card {
+        border: 1px solid #dbdade;
+        border-radius: 0.5rem;
+        padding: 1rem 1.25rem;
+        background: #fcfcfc;
+        transition: all 0.2s ease-in-out;
+    }
+    [data-bs-theme="dark"] .workflow-card {
+        border-color: #474968;
+        background: #2e2f47;
+    }
+    .workflow-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border-color: #7367f0;
+        border-color: var(--bs-primary);
+    }
+    [data-bs-theme="dark"] .workflow-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <!-- Header Block -->
+    <div class="d-flex align-items-center mb-4">
+        <div>
+            <h4 class="mb-0">Approval Workflow Details</h4>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 py-0" style="background: transparent; padding: 0;">
+                    <li class="breadcrumb-item"><a href="{% url 'approve-type-list' %}">Approval Types</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ approvertype.name }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Layout Grid -->
+    <div class="row">
+        <!-- Left Column: Info Card -->
+        <div class="col-xl-4 col-lg-5 col-md-5 col-12 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <!-- Icon, Title & Status -->
+                    <div class="d-flex align-items-center flex-column justify-content-center text-center border-bottom pb-4 mb-4">
+                        <div class="avatar avatar-xl bg-label-primary mb-3" style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+                            <i class="ti tabler-route ti-32px text-primary"></i>
+                        </div>
+                        <h5 class="mb-1 text-heading fw-semibold">{{ approvertype.name }}</h5>
+                        <span class="badge bg-label-{% if approvertype.is_active %}success{% else %}danger{% endif %} px-3 py-2 rounded-pill mt-2">
+                            {% if approvertype.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </div>
+
+                    <!-- Metadata Details -->
+                    <div class="info-container">
+                        <h6 class="pb-2 border-bottom mb-3 text-uppercase text-muted" style="font-size: 0.75rem; letter-spacing: 0.5px;">Details</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-3 d-flex justify-content-between">
+                                <span class="fw-medium text-heading">Sequence Number:</span>
+                                <span class="text-body">{{ approvertype.sequence }}</span>
+                            </li>
+                        </ul>
+                        
+                        <!-- Quick Actions inside the card -->
+                        <div class="d-flex flex-column gap-2 pt-3">
+                            <button class="btn btn-primary w-100" onclick="openApproveTypeForm({{ approvertype.pk }})">
+                                <i class="ti tabler-edit me-1"></i> Edit Approval Type
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Workflow Timeline -->
+        <div class="col-xl-8 col-lg-7 col-md-7 col-12 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center border-bottom">
+                    <div>
+                        <h5 class="card-title mb-0">Approval Workflow Steps</h5>
+                        <small class="text-muted">Define the sequential chain of approvals</small>
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="openApproveRuleForm(0)">
+                        <i class="ti tabler-plus me-1"></i> Add Rule
+                    </button>
+                </div>
+                <div class="card-body pt-4">
+                    {% if approverule %}
+                        <ul class="workflow-timeline">
+                            {% for rule in approverule %}
+                                <li class="workflow-step">
+                                    <div class="workflow-badge {% if not rule.is_active %}workflow-badge-inactive{% endif %}" title="Sequence {{ rule.sequence }}">
+                                        {{ rule.sequence }}
+                                    </div>
+                                    <div class="workflow-card d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                        <div class="d-flex flex-column">
+                                            <div class="d-flex align-items-center gap-2 mb-1">
+                                                <h6 class="mb-0 fw-semibold text-heading">{{ rule.role.role_name }}</h6>
+                                                <span class="badge bg-label-{% if rule.is_active %}success{% else %}danger{% endif %} btn-sm" style="font-size: 0.7rem; padding: 0.2em 0.5em;">
+                                                    {% if rule.is_active %}Active{% else %}Inactive{% endif %}
+                                                </span>
+                                            </div>
+                                            <div class="text-muted d-flex align-items-center gap-1" style="font-size: 0.85rem;">
+                                                <i class="ti tabler-user ti-xs"></i>
+                                                <span>
+                                                    Approver: 
+                                                    {% if rule.approver %}
+                                                        <strong class="text-heading">{{ rule.approver.get_full_name|default:rule.approver.username }}</strong>
+                                                    {% else %}
+                                                        <span class="badge bg-label-secondary" style="font-size: 0.7rem;">Any User in Role</span>
+                                                    {% endif %}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-icon btn-text-secondary waves-effect rounded-pill"
+                                                    onclick="openApproveRuleForm({{ rule.pk }})" title="Edit Rule">
+                                                <i class="ti tabler-edit ti-md"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <!-- Premium Empty State -->
+                        <div class="text-center py-5">
+                            <div class="avatar avatar-xl bg-label-secondary mx-auto mb-3" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+                                <i class="ti tabler-route-off ti-36px text-secondary"></i>
+                            </div>
+                            <h5 class="mb-1 text-heading">No Approval Rules Configured</h5>
+                            <p class="text-muted mb-4 mx-auto" style="max-width: 360px; font-size: 0.9rem;">There are currently no sequence steps defined for this approval type. Add your first approval step to construct the workflow.</p>
+                            <button class="btn btn-primary btn-sm" onclick="openApproveRuleForm(0)">
+                                <i class="ti tabler-plus me-1"></i> Add First Rule
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Approval Rule form modal -->
+    <div class="modal fade" id="Modal_ApproveRule" tabindex="-1" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+            <div id="div_ApproveRuleForm"></div>
+        </div>
+    </div>
+
+    <!-- Approval Type form modal -->
+    <div class="modal fade" id="Modal_ApproveType" tabindex="-1" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+            <div id="div_ApproveTypeForm"></div>
+        </div>
+    </div>
+
+    <script>
+        function openApproveRuleForm(pk) {
+            var url = '{% url "approveruleCreate" approvertype.pk %}';
+            if (pk) {
+                url += '?approverule_id=' + pk;
+            }
+            $.get(url, function (data) {
+                $('#div_ApproveRuleForm').html(data);
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('Modal_ApproveRule')).show();
+            });
+        }
+
+        function openApproveTypeForm(pk) {
+            var url = pk
+                ? '{% url "approve-type-update" 0 %}'.replace('/0/', '/' + pk + '/')
+                : '{% url "approve-type-create" %}';
+            $.get(url, function (data) {
+                $('#div_ApproveTypeForm').html(data);
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('Modal_ApproveType')).show();
+            });
+        }
+    </script>
+{% endblock %}

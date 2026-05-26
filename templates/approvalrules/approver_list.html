@@ -1,0 +1,38 @@
+{% extends 'layout/layout_base.html' %}
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card"><div class="card-body"><h6>Total: {{ status_counts.total }}</h6></div></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card"><div class="card-body"><h6>Pending: {{ status_counts.pending }}</h6></div></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card"><div class="card-body"><h6>Approved: {{ status_counts.approved }}</h6></div></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card"><div class="card-body"><h6>Rejected: {{ status_counts.rejected }}</h6></div></div>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title">My Approvals</h5>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead><tr><th>Type</th><th>Object ID</th><th>Status</th><th>Sequence</th><th>Date</th></tr></thead>
+            <tbody>
+            {% for a in approvers %}
+            <tr>
+                <td>{{ a.approval_type.name }}</td>
+                <td>{{ a.object_id }}</td>
+                <td>{{ a.status }}</td>
+                <td>{{ a.sequence }}</td>
+                <td>{{ a.created_date }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
