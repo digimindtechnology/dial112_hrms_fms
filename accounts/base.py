@@ -61,6 +61,9 @@ class Base(models.Model):
         TrainingManagementGroup = 'TrainingManagement'
         ViolationGroup = 'Violation'
         FRVManagementGroup = "FRVManagement"
+        FRVGuidelineGroup = "FRVGuideline"
+        FRVServiceCenterGroup = "FRVServiceCenter"
+        SelfRegistrationRecordsGroup = "SelfRegistrationRecords"
 
         TicketGroup = "Ticket"
         HelpdeskGroup = "Helpdesk"
