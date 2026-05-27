@@ -10,9 +10,7 @@ from accounts.models import Profile
 
 def ApprovalTypeList(request):
     try:
-        company_id = request.tenantID
         approvalTypeList = ApprovalType.objects.filter(is_active=True).order_by('sequence')
-
         context = {
             'approvalTypeList': approvalTypeList,
         }
@@ -89,9 +87,6 @@ def ApprovalTypeUpdate(request, pk):
 def approveruleCreateView(request, id):
     approvertype = get_object_or_404(ApprovalType, pk=id)
     roles = Role.objects.filter(is_active=True, tenantProfile_id=request.tenantID).exclude(role_name='Administrator').order_by('role_name')
-    print("approvertype", approvertype)
-    print("roles", roles)
-    print("tenantID", request.tenantID)
     approverule_id = request.GET.get('approverule_id') or request.POST.get('approveruleId', 0)
     editapproval_rule = None
     if approverule_id and approverule_id != '0':

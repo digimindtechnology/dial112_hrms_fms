@@ -1,0 +1,473 @@
+{% extends "layout/layout_base.html" %}
+{% load static %}
+
+{% block title %}{% if obj %}Edit Employee — {{ obj.full_name }}{% else %}Add New Employee{% endif %}{% endblock %}
+
+{% block page_css %}
+    <style>
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 0 12px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--bs-border-color);
+        }
+
+        .section-header .icon-wrap {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: var(--bs-primary-bg-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .section-header .icon-wrap i {
+            color: var(--bs-primary);
+            font-size: 18px;
+        }
+
+        .section-header h6 {
+            margin: 0;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            color: var(--bs-secondary-color);
+        }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .required-star {
+            color: #ea5455;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {% with fd=form_data %}
+
+        <!-- Page header -->
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h5 class="mb-1">{% if obj %}Edit Employee{% else %}Add New Employee{% endif %}</h5>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb breadcrumb-style1 mb-0" style="font-size:12px;">
+                        <li class="breadcrumb-item"><a href="{% url 'employee-list' %}">Employees</a></li>
+                        <li class="breadcrumb-item active">{% if obj %}{{ obj.full_name }}{% else %}New{% endif %}</li>
+                    </ol>
+                </nav>
+            </div>
+            {% if obj %}
+                <span class="badge bg-label-{% if obj.employment_status == 'Active' %}success{% elif obj.employment_status == 'Inactive' %}warning{% else %}danger{% endif %} fs-6 px-3 py-2">
+    <i class="ti tabler-circle-filled me-1" style="font-size:9px;"></i>{{ obj.employment_status }}
+  </span>
+            {% endif %}
+        </div>
+
+        <form id="empForm" class="needs-validation" novalidate method="POST"
+              action="{% if obj %}{% url 'employee-edit' obj.employee_unique_id %}{% else %}{% url 'employee-add' %}{% endif %}">
+            {% csrf_token %}
+
+            <div class="row g-4">
+
+                <!-- ── Full-width form ── -->
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body" style="padding: 24px 28px;">
+
+                            <!-- ═══ SECTION 1 — Personal Information ═══ -->
+                            <div class="section-header">
+                                <div class="icon-wrap"><i class="ti tabler-user"></i></div>
+                                <h6>Personal Information</h6>
+                            </div>
+                            <div class="row g-4 mb-2">
+
+                                <div class="col-md-4">
+                                    <label class="form-label">First Name <span class="required-star">*</span></label>
+                                    <input class="form-control" required type="text" name="first_name"
+                                           id="inp_first_name" value="{{ fd.first_name|default:'' }}" placeholder="First name">
+                                    <div class="invalid-feedback">First name is required.</div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Last Name <span class="required-star">*</span></label>
+                                    <input class="form-control" required type="text" name="last_name"
+                                           id="inp_last_name" value="{{ fd.last_name|default:'' }}" placeholder="Last name">
+                                    <div class="invalid-feedback">Last name is required.</div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Gender <span class="required-star">*</span></label>
+                                    <select class="select2 form-select" required name="gender_id">
+                                        <option value="">Select Gender</option>
+                                        {% for g in genders %}
+                                            <option value="{{ g.gender_id }}"
+                                                    {% if fd.gender_id == g.gender_id|stringformat:"s" %}selected{% endif %}>
+                                                {{ g.gender_name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="invalid-feedback">Please select gender.</div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Mobile <span class="required-star">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-phone"></i></span>
+                                        <input class="form-control" required type="text" name="mobile" maxlength="20"
+                                               value="{{ fd.mobile|default:'' }}" placeholder="Mobile number">
+                                    </div>
+                                    <div class="invalid-feedback">Mobile is required.</div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Email</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-mail"></i></span>
+                                        <input class="form-control" type="email" name="email"
+                                               value="{{ fd.email|default:'' }}" placeholder="Email address">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Date of Birth</label>
+                                    <input class="form-control" type="date" name="date_of_birth"
+                                           value="{{ fd.date_of_birth|default:'' }}">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Father's Name</label>
+                                    <input class="form-control" type="text" name="father_name"
+                                           value="{{ fd.father_name|default:'' }}" placeholder="Father's full name">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Mother's Name</label>
+                                    <input class="form-control" type="text" name="mother_name"
+                                           value="{{ fd.mother_name|default:'' }}" placeholder="Mother's full name">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Marital Status</label>
+                                    <select class="select2 form-select" name="marital_status">
+                                        <option value="">Select</option>
+                                        {% for val, label in marital_choices %}
+                                            <option value="{{ val }}" {% if fd.marital_status == val %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Blood Group</label>
+                                    <select class="select2 form-select" name="blood_group">
+                                        <option value="">Select</option>
+                                        {% for val, label in blood_groups %}
+                                            <option value="{{ val }}" {% if fd.blood_group == val %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Nationality</label>
+                                    <input class="form-control" type="text" name="nationality"
+                                           value="{{ fd.nationality|default:'Indian' }}" placeholder="e.g. Indian">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Religion</label>
+                                    <input class="form-control" type="text" name="religion"
+                                           value="{{ fd.religion|default:'' }}" placeholder="Enter religion">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Caste</label>
+                                    <select class="select2 form-select" name="caste_id">
+                                        <option value="">Select Caste</option>
+                                        {% for c in castes %}
+                                            <option value="{{ c.employee_caste_id }}"
+                                                    {% if fd.caste_id == c.employee_caste_id|stringformat:"s" %}selected{% endif %}>
+                                                {{ c.employee_caste_name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                            </div><!-- /row personal -->
+
+
+                            <!-- ═══ SECTION 2 — Employment Details ═══ -->
+                            <div class="section-header mt-4">
+                                <div class="icon-wrap"><i class="ti tabler-briefcase"></i></div>
+                                <h6>Employment Details</h6>
+                            </div>
+                            <div class="row g-4 mb-2">
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Employee Code</label>
+                                    <input class="form-control" type="text" name="employee_code" maxlength="20"
+                                           value="{{ fd.employee_code|default:'' }}" placeholder="e.g. EMP001">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Designation <span class="required-star">*</span></label>
+                                    <input class="form-control" required type="text" name="designation"
+                                           value="{{ fd.designation|default:'' }}" placeholder="Enter designation">
+                                    <div class="invalid-feedback">Designation is required.</div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Department</label>
+                                    <input class="form-control" type="text" name="department"
+                                           value="{{ fd.department|default:'' }}" placeholder="Enter department">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Joining Date <span class="required-star">*</span></label>
+                                    <input class="form-control" required type="date" name="joining_date"
+                                           value="{{ fd.joining_date|default:'' }}">
+                                    <div class="invalid-feedback">Joining date is required.</div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Employee Type</label>
+                                    <select class="select2 form-select" name="emp_type_id">
+                                        <option value="">Select Type</option>
+                                        {% for et in emp_types %}
+                                            <option value="{{ et.id }}"
+                                                    {% if fd.emp_type_id == et.id|stringformat:"s" %}selected{% endif %}>
+                                                {{ et.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Employment Status</label>
+                                    <select class="select2 form-select" name="employment_status">
+                                        {% for val, label in employment_statuses %}
+                                            <option value="{{ val }}" {% if fd.employment_status == val %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <label class="form-label">Work Location</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-building"></i></span>
+                                        <input class="form-control" type="text" name="work_location"
+                                               value="{{ fd.work_location|default:'' }}" placeholder="Office / Site location">
+                                    </div>
+                                </div>
+
+                            </div><!-- /row employment -->
+
+
+                            <!-- ═══ SECTION 3 — Identity Documents ═══ -->
+                            <div class="section-header mt-4">
+                                <div class="icon-wrap"><i class="ti tabler-id"></i></div>
+                                <h6>Identity Documents</h6>
+                            </div>
+                            <div class="row g-4 mb-2">
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Aadhaar Number</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-fingerprint"></i></span>
+                                        <input class="form-control" type="text" name="aadhaar_number" maxlength="12"
+                                               value="{{ fd.aadhaar_number|default:'' }}" placeholder="12-digit Aadhaar">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">PAN Number</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-credit-card"></i></span>
+                                        <input class="form-control" type="text" name="pan_number" maxlength="10"
+                                               value="{{ fd.pan_number|default:'' }}" placeholder="e.g. ABCDE1234F"
+                                               style="text-transform:uppercase">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Passport Number</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-world"></i></span>
+                                        <input class="form-control" type="text" name="passport_number" maxlength="20"
+                                               value="{{ fd.passport_number|default:'' }}" placeholder="Passport number">
+                                    </div>
+                                </div>
+
+                            </div><!-- /row identity -->
+
+
+                            <!-- ═══ SECTION 4 — Address ═══ -->
+                            <div class="section-header mt-4">
+                                <div class="icon-wrap"><i class="ti tabler-map-pin"></i></div>
+                                <h6>Address</h6>
+                            </div>
+                            <div class="row g-4 mb-2">
+
+                                <div class="col-md-4">
+                                    <label class="form-label">District</label>
+                                    <select class="select2 form-select" name="district_id">
+                                        <option value="">Select District</option>
+                                        {% for d in districts %}
+                                            <option value="{{ d.district_id }}"
+                                                    {% if fd.district_id == d.district_id|stringformat:"s" %}selected{% endif %}>
+                                                {{ d.district_name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">City</label>
+                                    <input class="form-control" type="text" name="city"
+                                           value="{{ fd.city|default:'' }}" placeholder="Enter city">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Postal Code</label>
+                                    <input class="form-control" type="text" name="postal_code" maxlength="10"
+                                           value="{{ fd.postal_code|default:'' }}" placeholder="e.g. 400001">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Current Address</label>
+                                    <textarea class="form-control" name="current_address" rows="3"
+                                              id="current_address" placeholder="Enter current address">{{ fd.current_address|default:'' }}</textarea>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label mb-0">Permanent Address</label>
+                                        <a class="text-primary" style="font-size:12px; cursor:pointer;" onclick="copyAddress()">
+                                            <i class="ti tabler-copy me-1"></i>Same as Current
+                                        </a>
+                                    </div>
+                                    <textarea class="form-control" name="permanent_address" rows="3"
+                                              id="permanent_address" placeholder="Enter permanent address">{{ fd.permanent_address|default:'' }}</textarea>
+                                </div>
+
+                            </div><!-- /row address -->
+
+
+                            <!-- ═══ SECTION 5 — Bank Details ═══ -->
+                            <div class="section-header mt-4">
+                                <div class="icon-wrap"><i class="ti tabler-building-bank"></i></div>
+                                <h6>Bank Details</h6>
+                            </div>
+                            <div class="row g-4 mb-2">
+
+                                <div class="col-md-3">
+                                    <label class="form-label">Bank Name</label>
+                                    <input class="form-control" type="text" name="bank_name"
+                                           value="{{ fd.bank_name|default:'' }}" placeholder="Bank name">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label">IFSC Code</label>
+                                    <input class="form-control" type="text" name="ifsc_code"
+                                           value="{{ fd.ifsc_code|default:'' }}" placeholder="e.g. SBIN0001234"
+                                           style="text-transform:uppercase">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label">Account Number</label>
+                                    <input class="form-control" type="text" name="bank_account_number"
+                                           value="{{ fd.bank_account_number|default:'' }}" placeholder="Account number">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label">Bank Branch Address</label>
+                                    <input class="form-control" type="text" name="bank_address"
+                                           value="{{ fd.bank_address|default:'' }}" placeholder="Branch address">
+                                </div>
+
+                            </div><!-- /row bank -->
+
+
+                            <!-- ═══ SECTION 6 — Compliance ═══ -->
+                            <div class="section-header mt-4">
+                                <div class="icon-wrap"><i class="ti tabler-shield-check"></i></div>
+                                <h6>Compliance</h6>
+                            </div>
+                            <div class="row g-4 mb-2">
+
+                                <div class="col-md-2">
+                                    <label class="form-label d-block">PF Eligible</label>
+                                    <div class="form-check form-switch mt-1">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               name="is_eligible_for_pf" id="is_eligible_for_pf"
+                                               {% if fd.is_eligible_for_pf == 'on' %}checked{% endif %}
+                                               onchange="togglePf(this)">
+                                        <label class="form-check-label" for="is_eligible_for_pf">Yes</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">PF Number</label>
+                                    <input class="form-control" type="text" name="pf_number" id="pf_number_field"
+                                           value="{{ fd.pf_number|default:'' }}" placeholder="Enter PF number">
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label class="form-label d-block">Gratuity Eligible</label>
+                                    <div class="form-check form-switch mt-1">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               name="is_gratuity" id="is_gratuity"
+                                               {% if fd.is_gratuity == 'on' %}checked{% endif %}>
+                                        <label class="form-check-label" for="is_gratuity">Yes</label>
+                                    </div>
+                                </div>
+
+                            </div><!-- /row compliance -->
+
+
+                            <!-- ═══ Form Actions ═══ -->
+                            <hr class="mt-4">
+                            <div class="d-flex align-items-center justify-content-end gap-3">
+
+                                <button type="submit" class="btn btn-primary loading_spinner waves-effect waves-light">
+                                    <i class="ti tabler-device-floppy me-1 btnText"></i>
+                                    <span class="btnText">{% if obj %}Update Employee{% else %}Save Employee{% endif %}</span>
+                                    <span class="btnLoader spinner-border spinner-border-sm visually-hidden ms-1" role="status"></span>
+                                </button>
+                                <a href="{% url 'employee-list' %}" class="btn btn-label-secondary waves-effect">
+                                    <i class="ti tabler-x me-1"></i>Cancel
+                                </a>
+                            </div>
+
+                        </div><!-- /card-body -->
+                    </div><!-- /card -->
+                </div><!-- /col-right -->
+
+            </div><!-- /row -->
+        </form>
+
+        {% include 'layout/dropdown_select.html' %}
+        <script>
+            function copyAddress() {
+                document.getElementById('permanent_address').value =
+                    document.getElementById('current_address').value;
+            }
+
+            function togglePf(cb) {
+                const f = document.getElementById('pf_number_field');
+                if (f) f.disabled = !cb.checked;
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                togglePf(document.getElementById('is_eligible_for_pf'));
+            });
+        </script>
+    {% endwith %}
+{% endblock %}
