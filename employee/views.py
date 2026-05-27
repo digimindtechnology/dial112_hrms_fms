@@ -1,8 +1,9 @@
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import JsonResponse
+from accounts.helpers.basicUtility import UploadFileData, GetFileUrl
 from accounts.helpers.message_helper import send_sweetalert
-from employee.models import EmployeeInfo, EmployeeCaste
+from employee.models import EmployeeInfo, EmployeeCaste, EmployeeEducation, EmployeeExperience
 from masters.models import Gender, District
 from setup.models import EmployeeType
 from datetime import datetime
@@ -10,13 +11,12 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 
 
+## _emp_context
 def _parse_date(value):
     try:
         return datetime.strptime(value.strip(), '%Y-%m-%d').date()
     except (ValueError, AttributeError):
         return None
-
-
 def _form_context(request, obj=None):
     return {
         'obj': obj,
@@ -24,14 +24,11 @@ def _form_context(request, obj=None):
         'marital_choices': EmployeeInfo.MARITAL_STATUS,
         'employment_statuses': EmployeeInfo.EMPLOYMENT_STATUS,
         'genders': Gender.objects.filter(is_active=True),
+        'castes': EmployeeCaste.objects.filter(is_active=True),
         'districts': District.objects.filter(is_active=True).order_by('district_name'),
         'emp_types': EmployeeType.objects.filter(tenantProfile_id=request.tenantID, is_active=True).order_by('name'),
-        'castes': EmployeeCaste.objects.filter(is_active=True),
     }
-
-
 def _obj_to_fd(obj):
-    """Serialize an EmployeeInfo instance to a form_data dict."""
     return {
         'first_name': obj.first_name or '',
         'last_name': obj.last_name or '',
@@ -71,9 +68,8 @@ def _obj_to_fd(obj):
         'is_eligible_for_pf': 'on' if obj.is_eligible_for_pf else '',
         'is_gratuity': 'on' if obj.is_gratuity else '',
         'pf_number': obj.pf_number or '',
+
     }
-
-
 def _post_to_fields(p):
     """Map POST data to EmployeeInfo field kwargs."""
     return dict(
@@ -116,15 +112,12 @@ def _post_to_fields(p):
         is_eligible_for_pf=p.get('is_eligible_for_pf') == 'on',
         pf_number=p.get('pf_number', '').strip(),
     )
-
+## _emp_context
 
 @login_required
 def employee_list(request):
     search_query = request.GET.get('search', '').strip()
-    qs = EmployeeInfo.objects.filter(
-        tenantProfile_id=request.tenantID
-    ).select_related('gender', 'empType', 'empStatus')
-
+    qs = EmployeeInfo.objects.filter(tenantProfile_id=request.tenantID).select_related('gender', 'empType', 'empStatus')
     if search_query:
         qs = qs.filter(
             Q(first_name__icontains=search_query) |
@@ -159,17 +152,17 @@ def employee_add(request):
         p = request.POST
         fd = p
         try:
-            obj = EmployeeInfo.objects.create(
-                **_post_to_fields(p),
-                empStatus_id=1,
-                tenantProfile_id=request.tenantID,
-                created_by=request.user,
-            )
+            obj = EmployeeInfo.objects.create(**_post_to_fields(p), empStatus_id=1, tenantProfile_id=request.tenantID, created_by=request.user, )
+            picture = request.FILES.get('picture')
+            if picture:
+                path = UploadFileData(request.tenantID, f'employees/{obj.employee_id}', picture)
+                if path:
+                    obj.picture = path
+                    obj.save(update_fields=['picture'])
             send_sweetalert(request, 'success', f'Employee {obj.full_name} created successfully.')
             return redirect('employee-list')
         except Exception as e:
             send_sweetalert(request, 'error', str(e))
-
     ctx = _form_context(request)
     ctx['form_data'] = fd
     return render(request, 'employee/employee_form.html', ctx)
@@ -178,14 +171,25 @@ def employee_add(request):
 @login_required
 def employee_update(request, emp_unique_id=''):
     obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
-
     if request.method == 'POST':
         p = request.POST
         try:
             for attr, val in _post_to_fields(p).items():
                 setattr(obj, attr, val)
+
             obj.updated_by = request.user
+            if obj.employment_status == 'Active' or obj.employment_status == 'active':
+                obj.is_active = True
+            else:
+                obj.is_active = False
             obj.save()
+
+            picture = request.FILES.get('picture')
+            if picture:
+                path = UploadFileData(request.tenantID, f'employees/{obj.employee_id}', picture)
+                if path:
+                    obj.picture = path
+                    obj.save(update_fields=['picture'])
             send_sweetalert(request, 'success', f'Employee {obj.full_name} updated successfully.')
             return redirect('employee-list')
         except Exception as e:
@@ -193,14 +197,141 @@ def employee_update(request, emp_unique_id=''):
             fd = p
     else:
         fd = _obj_to_fd(obj)
-
     ctx = _form_context(request, obj)
     ctx['form_data'] = fd
+    ctx['picture_url'] = GetFileUrl(obj.picture)
     return render(request, 'employee/employee_form.html', ctx)
+
+
+@login_required
+def employee_detail(request, emp_unique_id):
+    obj = get_object_or_404(EmployeeInfo.objects.select_related('gender', 'empType', 'empStatus', 'caste', 'district', 'tenantProfile'),
+                            employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID, )
+    return render(request, 'employee/employee_detail.html', {'obj': obj, 'picture_url': GetFileUrl(obj.picture)})
 
 
 @login_required
 def employee_delete(request):
     pk = request.POST.get('pk')
     EmployeeInfo.objects.filter(employee_id=pk, tenantProfile_id=request.tenantID).delete()
+    return JsonResponse({'success': True})
+
+
+# ── Education ──────────────────────────────────────────────
+
+@login_required
+def education_list(request, emp_unique_id):
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    educations = obj.educations.order_by('-passing_year')
+    return render(request, 'employee/partials/_education_list.html', {'obj': obj, 'educations': educations})
+
+
+@login_required
+def education_form(request, emp_unique_id, pk=0):
+    edu = None
+    cert_url = ''
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    if pk:
+        edu = get_object_or_404(EmployeeEducation, employee_education_id=pk, employee=obj)
+        cert_url = GetFileUrl(edu.certificate_file)
+    return render(request, 'employee/partials/_education_form.html', {'obj': obj, 'edu': edu, 'cert_url': cert_url})
+
+
+@login_required
+def education_save(request, emp_unique_id):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'})
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    p = request.POST
+    pk = p.get('pk', '').strip()
+    try:
+        fields = dict(qualification=p.get('qualification', '').strip(),
+                      institution_name=p.get('institution_name', '').strip(),
+                      board_university=p.get('board_university', '').strip(),
+                      passing_year=int(p.get('passing_year') or 0),
+                      percentage=p.get('percentage', '').strip() or None, )
+        if pk:
+            edu = get_object_or_404(EmployeeEducation, employee_education_id=pk, employee=obj)
+            for attr, val in fields.items():
+                setattr(edu, attr, val)
+            edu.updated_by = request.user
+            edu.save()
+        else:
+            edu = EmployeeEducation.objects.create(**fields, employee=obj, created_by=request.user)
+        cert = request.FILES.get('certificate_file')
+        if cert:
+            path = UploadFileData(request.tenantID, f'education/{obj.employee_id}', cert)
+            if path:
+                edu.certificate_file = path
+                edu.save(update_fields=['certificate_file'])
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+def education_delete(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False})
+    pk = request.POST.get('pk')
+    EmployeeEducation.objects.filter(employee_education_id=pk, employee__tenantProfile_id=request.tenantID, ).delete()
+    return JsonResponse({'success': True})
+
+
+# ── Experience ─────────────────────────────────────────────
+
+@login_required
+def experience_list(request, emp_unique_id):
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    experiences = obj.experiences.order_by('-start_date')
+    return render(request, 'employee/partials/_experience_list.html', {'obj': obj, 'experiences': experiences})
+
+
+@login_required
+def experience_form(request, emp_unique_id, pk=0):
+    exp = None
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    if pk:
+        exp = get_object_or_404(EmployeeExperience, employee_experience_id=pk, employee=obj)
+    return render(request, 'employee/partials/_experience_form.html', {'obj': obj, 'exp': exp})
+
+
+@login_required
+def experience_save(request, emp_unique_id):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'})
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    p = request.POST
+    pk = p.get('pk', '').strip()
+    try:
+        fields = dict(
+            organization_name=p.get('organization_name', '').strip(),
+            department=p.get('department', '').strip(),
+            designation=p.get('designation', '').strip(),
+            start_date=_parse_date(p.get('start_date', '')),
+            end_date=_parse_date(p.get('end_date', '')),
+            last_salary=p.get('last_salary', '').strip() or None,
+            reason_for_leaving=p.get('reason_for_leaving', '').strip(),
+            reference_name=p.get('reference_name', '').strip(),
+            reference_contact=p.get('reference_contact', '').strip(),
+        )
+        if pk:
+            exp = get_object_or_404(EmployeeExperience, employee_experience_id=pk, employee=obj)
+            for attr, val in fields.items():
+                setattr(exp, attr, val)
+            exp.updated_by = request.user
+            exp.save()
+        else:
+            EmployeeExperience.objects.create(**fields, employee=obj, created_by=request.user)
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+def experience_delete(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False})
+    pk = request.POST.get('pk')
+    EmployeeExperience.objects.filter(employee_experience_id=pk, employee__tenantProfile_id=request.tenantID).delete()
     return JsonResponse({'success': True})

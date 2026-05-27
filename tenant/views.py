@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from accounts.helpers.basicUtility import DeleteFileFromS3, UploadFileData
+from accounts.helpers.basicUtility import  UploadFileData
 from accounts.base import Base
 from accounts.helpers.decorators import CheckRole
 from accounts.helpers.message_helper import send_sweetalert
@@ -129,7 +129,6 @@ def tenant_create(request):
                         old = getattr(tenant, field)
                         setattr(tenant, field, path)
                         tenant.save()
-                        DeleteFileFromS3(old)
 
                 upload(files.get("uploadTenantLogFile"), "logo", "tenant_logo_s3_url")
                 upload(files.get("uploadTenantIconFile"), "logo", "tenant_favicon_s3_url")
@@ -261,7 +260,6 @@ def tenant_settings_account(request):
                                     raise ValueError("Logo upload failed")
                                 tenant.tenant_logo_s3_url = logo_path
                                 tenant.save()
-                                DeleteFileFromS3(old_logo)
 
                             except Exception as e:
                                 print("Logo Upload Error:", str(e))
@@ -275,7 +273,6 @@ def tenant_settings_account(request):
                                     raise ValueError("Favicon upload failed")
                                 tenant.tenant_favicon_s3_url = favicon_path
                                 tenant.save()
-                                DeleteFileFromS3(old_favicon)
 
                             except Exception as e:
                                 print("Favicon Upload Error:", str(e))

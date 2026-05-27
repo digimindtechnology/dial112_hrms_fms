@@ -67,40 +67,47 @@
             </div>
             {% if obj %}
                 <span class="badge bg-label-{% if obj.employment_status == 'Active' %}success{% elif obj.employment_status == 'Inactive' %}warning{% else %}danger{% endif %} fs-6 px-3 py-2">
-    <i class="ti tabler-circle-filled me-1" style="font-size:9px;"></i>{{ obj.employment_status }}
-  </span>
+                    <i class="ti tabler-circle-filled me-1" style="font-size:9px;"></i>{{ obj.employment_status }}
+                </span>
             {% endif %}
         </div>
 
-        <form id="empForm" class="needs-validation" novalidate method="POST"
+        <form id="empForm" class="needs-validation" novalidate method="POST" enctype="multipart/form-data" id="formEmployee"
               action="{% if obj %}{% url 'employee-edit' obj.employee_unique_id %}{% else %}{% url 'employee-add' %}{% endif %}">
             {% csrf_token %}
 
             <div class="row g-4">
-
-                <!-- ── Full-width form ── -->
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body" style="padding: 24px 28px;">
+
 
                             <!-- ═══ SECTION 1 — Personal Information ═══ -->
                             <div class="section-header">
                                 <div class="icon-wrap"><i class="ti tabler-user"></i></div>
                                 <h6>Personal Information</h6>
                             </div>
+
+
                             <div class="row g-4 mb-2">
 
                                 <div class="col-md-4">
                                     <label class="form-label">First Name <span class="required-star">*</span></label>
-                                    <input class="form-control" required type="text" name="first_name"
-                                           id="inp_first_name" value="{{ fd.first_name|default:'' }}" placeholder="First name">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-user"></i></span>
+                                        <input class="form-control" required type="text" name="first_name"
+                                               id="inp_first_name" value="{{ fd.first_name|default:'' }}" placeholder="First name">
+                                    </div>
                                     <div class="invalid-feedback">First name is required.</div>
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label">Last Name <span class="required-star">*</span></label>
-                                    <input class="form-control" required type="text" name="last_name"
-                                           id="inp_last_name" value="{{ fd.last_name|default:'' }}" placeholder="Last name">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-user"></i></span>
+                                        <input class="form-control" required type="text" name="last_name"
+                                               id="inp_last_name" value="{{ fd.last_name|default:'' }}" placeholder="Last name">
+                                    </div>
                                     <div class="invalid-feedback">Last name is required.</div>
                                 </div>
 
@@ -139,23 +146,32 @@
 
                                 <div class="col-md-4">
                                     <label class="form-label">Date of Birth</label>
-                                    <input class="form-control" type="date" name="date_of_birth"
-                                           value="{{ fd.date_of_birth|default:'' }}">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-calendar"></i></span>
+                                        <input class="form-control" type="date" name="date_of_birth"
+                                               value="{{ fd.date_of_birth|default:'' }}">
+                                    </div>
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label">Father's Name</label>
-                                    <input class="form-control" type="text" name="father_name"
-                                           value="{{ fd.father_name|default:'' }}" placeholder="Father's full name">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-user-circle"></i></span>
+                                        <input class="form-control" type="text" name="father_name"
+                                               value="{{ fd.father_name|default:'' }}" placeholder="Father's full name">
+                                    </div>
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label">Mother's Name</label>
-                                    <input class="form-control" type="text" name="mother_name"
-                                           value="{{ fd.mother_name|default:'' }}" placeholder="Mother's full name">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-user-circle"></i></span>
+                                        <input class="form-control" type="text" name="mother_name"
+                                               value="{{ fd.mother_name|default:'' }}" placeholder="Mother's full name">
+                                    </div>
                                 </div>
 
-                                <div class="col-md-4">
+                                <div class="col-md-2">
                                     <label class="form-label">Marital Status</label>
                                     <select class="select2 form-select" name="marital_status">
                                         <option value="">Select</option>
@@ -165,7 +181,7 @@
                                     </select>
                                 </div>
 
-                                <div class="col-md-4">
+                                <div class="col-md-2">
                                     <label class="form-label">Blood Group</label>
                                     <select class="select2 form-select" name="blood_group">
                                         <option value="">Select</option>
@@ -177,14 +193,20 @@
 
                                 <div class="col-md-4">
                                     <label class="form-label">Nationality</label>
-                                    <input class="form-control" type="text" name="nationality"
-                                           value="{{ fd.nationality|default:'Indian' }}" placeholder="e.g. Indian">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-flag"></i></span>
+                                        <input class="form-control" type="text" name="nationality"
+                                               value="{{ fd.nationality|default:'Indian' }}" placeholder="e.g. Indian">
+                                    </div>
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label">Religion</label>
-                                    <input class="form-control" type="text" name="religion"
-                                           value="{{ fd.religion|default:'' }}" placeholder="Enter religion">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-star"></i></span>
+                                        <input class="form-control" type="text" name="religion"
+                                               value="{{ fd.religion|default:'' }}" placeholder="Enter religion">
+                                    </div>
                                 </div>
 
                                 <div class="col-md-4">
@@ -212,27 +234,39 @@
 
                                 <div class="col-md-4">
                                     <label class="form-label">Employee Code</label>
-                                    <input class="form-control" type="text" name="employee_code" maxlength="20"
-                                           value="{{ fd.employee_code|default:'' }}" placeholder="e.g. EMP001">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-hash"></i></span>
+                                        <input class="form-control" type="text" name="employee_code" maxlength="20"
+                                               value="{{ fd.employee_code|default:'' }}" placeholder="e.g. EMP001">
+                                    </div>
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label">Designation <span class="required-star">*</span></label>
-                                    <input class="form-control" required type="text" name="designation"
-                                           value="{{ fd.designation|default:'' }}" placeholder="Enter designation">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-award"></i></span>
+                                        <input class="form-control" required type="text" name="designation"
+                                               value="{{ fd.designation|default:'' }}" placeholder="Enter designation">
+                                    </div>
                                     <div class="invalid-feedback">Designation is required.</div>
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label">Department</label>
-                                    <input class="form-control" type="text" name="department"
-                                           value="{{ fd.department|default:'' }}" placeholder="Enter department">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-layout-grid"></i></span>
+                                        <input class="form-control" type="text" name="department"
+                                               value="{{ fd.department|default:'' }}" placeholder="Enter department">
+                                    </div>
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label">Joining Date <span class="required-star">*</span></label>
-                                    <input class="form-control" required type="date" name="joining_date"
-                                           value="{{ fd.joining_date|default:'' }}">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-calendar-event"></i></span>
+                                        <input class="form-control" required type="date" name="joining_date"
+                                               value="{{ fd.joining_date|default:'' }}">
+                                    </div>
                                     <div class="invalid-feedback">Joining date is required.</div>
                                 </div>
 
@@ -330,30 +364,36 @@
 
                                 <div class="col-md-4">
                                     <label class="form-label">City</label>
-                                    <input class="form-control" type="text" name="city"
-                                           value="{{ fd.city|default:'' }}" placeholder="Enter city">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-map-pin"></i></span>
+                                        <input class="form-control" type="text" name="city"
+                                               value="{{ fd.city|default:'' }}" placeholder="Enter city">
+                                    </div>
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label">Postal Code</label>
-                                    <input class="form-control" type="text" name="postal_code" maxlength="10"
-                                           value="{{ fd.postal_code|default:'' }}" placeholder="e.g. 400001">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-mailbox"></i></span>
+                                        <input class="form-control" type="text" name="postal_code" maxlength="10"
+                                               value="{{ fd.postal_code|default:'' }}" placeholder="e.g. 400001">
+                                    </div>
                                 </div>
 
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <label class="form-label">Current Address</label>
-                                    <textarea class="form-control" name="current_address" rows="3"
+                                    <textarea class="form-control" name="current_address"
                                               id="current_address" placeholder="Enter current address">{{ fd.current_address|default:'' }}</textarea>
                                 </div>
 
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
                                         <label class="form-label mb-0">Permanent Address</label>
                                         <a class="text-primary" style="font-size:12px; cursor:pointer;" onclick="copyAddress()">
                                             <i class="ti tabler-copy me-1"></i>Same as Current
                                         </a>
                                     </div>
-                                    <textarea class="form-control" name="permanent_address" rows="3"
+                                    <textarea class="form-control" name="permanent_address"
                                               id="permanent_address" placeholder="Enter permanent address">{{ fd.permanent_address|default:'' }}</textarea>
                                 </div>
 
@@ -369,27 +409,39 @@
 
                                 <div class="col-md-3">
                                     <label class="form-label">Bank Name</label>
-                                    <input class="form-control" type="text" name="bank_name"
-                                           value="{{ fd.bank_name|default:'' }}" placeholder="Bank name">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-building-bank"></i></span>
+                                        <input class="form-control" type="text" name="bank_name"
+                                               value="{{ fd.bank_name|default:'' }}" placeholder="Bank name">
+                                    </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <label class="form-label">IFSC Code</label>
-                                    <input class="form-control" type="text" name="ifsc_code"
-                                           value="{{ fd.ifsc_code|default:'' }}" placeholder="e.g. SBIN0001234"
-                                           style="text-transform:uppercase">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-code"></i></span>
+                                        <input class="form-control" type="text" name="ifsc_code"
+                                               value="{{ fd.ifsc_code|default:'' }}" placeholder="e.g. SBIN0001234"
+                                               style="text-transform:uppercase">
+                                    </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <label class="form-label">Account Number</label>
-                                    <input class="form-control" type="text" name="bank_account_number"
-                                           value="{{ fd.bank_account_number|default:'' }}" placeholder="Account number">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-wallet"></i></span>
+                                        <input class="form-control" type="text" name="bank_account_number"
+                                               value="{{ fd.bank_account_number|default:'' }}" placeholder="Account number">
+                                    </div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <label class="form-label">Bank Branch Address</label>
-                                    <input class="form-control" type="text" name="bank_address"
-                                           value="{{ fd.bank_address|default:'' }}" placeholder="Branch address">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-map-pin"></i></span>
+                                        <input class="form-control" type="text" name="bank_address"
+                                               value="{{ fd.bank_address|default:'' }}" placeholder="Branch address">
+                                    </div>
                                 </div>
 
                             </div><!-- /row bank -->
@@ -401,6 +453,15 @@
                                 <h6>Compliance</h6>
                             </div>
                             <div class="row g-4 mb-2">
+                                <div class="col-md-2">
+                                    <label class="form-label d-block">Gratuity Eligible</label>
+                                    <div class="form-check form-switch mt-1">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               name="is_gratuity" id="is_gratuity"
+                                               {% if fd.is_gratuity == 'on' %}checked{% endif %}>
+                                        <label class="form-check-label" for="is_gratuity">Yes</label>
+                                    </div>
+                                </div>
 
                                 <div class="col-md-2">
                                     <label class="form-label d-block">PF Eligible</label>
@@ -415,17 +476,52 @@
 
                                 <div class="col-md-4">
                                     <label class="form-label">PF Number</label>
-                                    <input class="form-control" type="text" name="pf_number" id="pf_number_field"
-                                           value="{{ fd.pf_number|default:'' }}" placeholder="Enter PF number">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ti tabler-file-text"></i></span>
+                                        <input class="form-control" type="text" name="pf_number" id="pf_number_field"
+                                               value="{{ fd.pf_number|default:'' }}" placeholder="Enter PF number">
+                                    </div>
                                 </div>
 
-                                <div class="col-md-2">
-                                    <label class="form-label d-block">Gratuity Eligible</label>
-                                    <div class="form-check form-switch mt-1">
-                                        <input class="form-check-input" type="checkbox" role="switch"
-                                               name="is_gratuity" id="is_gratuity"
-                                               {% if fd.is_gratuity == 'on' %}checked{% endif %}>
-                                        <label class="form-check-label" for="is_gratuity">Yes</label>
+                                <!-- Photo upload -->
+                                <div class="col-md-4">
+                                    <div class="d-flex align-items-center ">
+                                        <div class="position-relative" style="width:60px;height:60px;flex-shrink:0;">
+                                            {% if picture_url %}
+                                                <img id="pic-preview" src="{{ picture_url }}" alt="Photo"
+                                                     class="rounded-circle border"
+                                                     style="width:60px;height:60px;object-fit:cover;">
+                                            {% else %}
+                                                <div id="pic-placeholder"
+                                                     class="rounded-circle d-flex align-items-center justify-content-center"
+                                                     style="width:84px;height:84px;background:var(--bs-primary-bg-subtle);">
+                                                    {% if obj %}
+                                                        <span style="font-size:26px;font-weight:700;color:var(--bs-primary);line-height:1;">
+                                                    {{ obj.first_name|first|upper }}{{ obj.last_name|first|upper }}
+                                                </span>
+                                                    {% else %}
+                                                        <i class="ti tabler-user" style="font-size:30px;color:var(--bs-primary);"></i>
+                                                    {% endif %}
+                                                </div>
+                                                <img id="pic-preview" src="" alt="Photo"
+                                                     class="rounded-circle border d-none"
+                                                     style="width:84px;height:84px;object-fit:cover;">
+                                            {% endif %}
+                                            <label for="picture"
+                                                   class="position-absolute bottom-0 end-0 bg-primary rounded-circle d-flex align-items-center justify-content-center"
+                                                   style="width:26px;height:26px;cursor:pointer;border:2px solid #fff;" title="Change photo">
+                                                <i class="ti tabler-camera" style="font-size:13px;color:#fff;"></i>
+                                            </label>
+                                            <input type="file" name="picture" id="picture" accept="image/*" class="d-none"
+                                                   onchange="previewPic(this)">
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold mb-1" style="font-size:13px;">Employee Photo</div>
+                                            <div class="text-muted" style="font-size:12px;">JPG, PNG or GIF. Max 2MB.</div>
+                                            {% if picture_url %}
+                                                <div class="text-muted mt-1" style="font-size:11px;">Click the camera icon to change.</div>
+                                            {% endif %}
+                                        </div>
                                     </div>
                                 </div>
 
@@ -448,13 +544,26 @@
 
                         </div><!-- /card-body -->
                     </div><!-- /card -->
-                </div><!-- /col-right -->
+                </div>
 
             </div><!-- /row -->
         </form>
 
         {% include 'layout/dropdown_select.html' %}
         <script>
+            function previewPic(input) {
+                if (!input.files || !input.files[0]) return;
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const preview = document.getElementById('pic-preview');
+                    const placeholder = document.getElementById('pic-placeholder');
+                    preview.src = e.target.result;
+                    preview.classList.remove('d-none');
+                    if (placeholder) placeholder.classList.add('d-none');
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+
             function copyAddress() {
                 document.getElementById('permanent_address').value =
                     document.getElementById('current_address').value;

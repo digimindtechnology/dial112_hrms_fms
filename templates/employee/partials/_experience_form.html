@@ -1,0 +1,122 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">
+            <i class="ti tabler-briefcase me-2"></i>
+            {% if exp %}Edit Experience{% else %}Add Experience{% endif %}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+        <form id="frm_Experience" class="needs-validation row g-4" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="pk" value="{{ exp.employee_experience_id|default:'' }}">
+
+            <div class="col-12">
+                <label class="form-label">Organization Name <span class="text-danger">*</span></label>
+                <input type="text" name="organization_name" required class="form-control"
+                       value="{{ exp.organization_name|default:'' }}"
+                       placeholder="e.g. Acme Pvt Ltd">
+                <div class="invalid-feedback">Organization name is required.</div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Department <span class="text-danger">*</span></label>
+                <input type="text" name="department" required class="form-control"
+                       value="{{ exp.department|default:'' }}"
+                       placeholder="e.g. Operations">
+                <div class="invalid-feedback">Department is required.</div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Designation <span class="text-danger">*</span></label>
+                <input type="text" name="designation" required class="form-control"
+                       value="{{ exp.designation|default:'' }}"
+                       placeholder="e.g. Senior Officer">
+                <div class="invalid-feedback">Designation is required.</div>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Start Date <span class="text-danger">*</span></label>
+                <input type="date" name="start_date" required class="form-control"
+                       value="{{ exp.start_date|date:'Y-m-d'|default:'' }}">
+                <div class="invalid-feedback">Start date is required.</div>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">End Date <span class="text-danger">*</span></label>
+                <input type="date" name="end_date" required class="form-control"
+                       value="{{ exp.end_date|date:'Y-m-d'|default:'' }}">
+                <div class="invalid-feedback">End date is required.</div>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Last Salary</label>
+                <input type="number" name="last_salary" class="form-control"
+                       min="0" step="0.01"
+                       value="{{ exp.last_salary|default:'' }}"
+                       placeholder="e.g. 25000.00">
+            </div>
+
+            <div class="col-12">
+                <label class="form-label">Reason for Leaving</label>
+                <textarea name="reason_for_leaving" class="form-control" rows="2"
+                          placeholder="Brief reason for leaving">{{ exp.reason_for_leaving|default:'' }}</textarea>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Reference Name</label>
+                <input type="text" name="reference_name" class="form-control"
+                       value="{{ exp.reference_name|default:'' }}"
+                       placeholder="Contact person name">
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Reference Contact</label>
+                <input type="text" name="reference_contact" class="form-control"
+                       value="{{ exp.reference_contact|default:'' }}"
+                       placeholder="Mobile / Email">
+            </div>
+
+            <div class="col-12 d-flex justify-content-end gap-2 pt-2">
+                <button type="button" class="btn btn-primary waves-effect waves-light"
+                        onclick="SaveExperience('{{ obj.employee_unique_id }}')">
+                    <i class="ti tabler-device-floppy me-1"></i>
+                    {% if exp %}Update{% else %}Save{% endif %}
+                </button>
+                <button type="button" class="btn btn-label-secondary waves-effect"
+                        data-bs-dismiss="modal">
+                    <i class="ti tabler-x me-1"></i>Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+function SaveExperience(empUniqueId) {
+    const form = document.getElementById('frm_Experience');
+    if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+        return;
+    }
+    const formData = new FormData(form);
+    $.ajax({
+        type: 'POST',
+        url: '/employee/' + empUniqueId + '/experience/save/',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (resp) {
+            if (resp.success) {
+                $('#Modal_BindPartialPages').modal('hide');
+                Swal.fire({icon: 'success', title: 'Experience Save successfully', timer: 2000, showConfirmButton: false});
+                LoadExperienceList(empUniqueId);
+            } else {
+                 Swal.fire({icon: 'error', title: resp.error || 'Save failed', timer: 3000, showConfirmButton: false});
+            }
+        },
+        error: function () {
+             Swal.fire({icon: 'info', title: 'Request failed. Please try again.', timer: 3000, showConfirmButton: false});
+        }
+    });
+}
+</script>

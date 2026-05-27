@@ -1,0 +1,508 @@
+{% extends "layout/layout_base.html" %}
+{% load static %}
+
+{% block title %}{{ obj.full_name }}, Emp Profile{% endblock %}
+
+{% block page_css %}
+<style>
+  .profile-banner {
+    height: 100px;
+    background: linear-gradient(135deg, var(--bs-primary) 0%, #9c8cfc 100%);
+    border-radius: 8px 8px 0 0;
+    position: relative;
+  }
+  .profile-avatar {
+    width: 76px; height: 76px; border-radius: 50%;
+    background: #fff;
+    color: var(--bs-primary);
+    font-size: 32px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    border: 4px solid #fff;
+    box-shadow: 0 4px 16px rgba(0,0,0,.15);
+    position: absolute;
+    bottom: -48px;
+    left: 28px;
+  }
+  .profile-header-body {
+    padding: 45px 28px 20px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .quick-stat {
+    text-align: center;
+    padding: 14px 20px;
+    border-right: 1px solid var(--bs-border-color);
+    flex: 1;
+  }
+  .quick-stat:last-child { border-right: none; }
+  .quick-stat .qs-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--bs-secondary-color); margin-bottom: 4px; }
+  .quick-stat .qs-value { font-size: 14px; font-weight: 600; color: var(--bs-heading-color); }
+
+  .section-divider {
+    display: flex; align-items: center; gap: 10px;
+    padding: 18px 0 12px;
+    margin-bottom: 4px;
+  }
+  .section-divider .sd-icon {
+    width: 30px; height: 30px; border-radius: 7px;
+    background: var(--bs-primary-bg-subtle);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .section-divider .sd-icon i { color: var(--bs-primary); font-size: 16px; }
+  .section-divider span {
+    font-size: 11.5px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .7px; color: var(--bs-secondary-color);
+  }
+
+  .field-row {
+    display: flex; flex-direction: column;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--bs-border-color);
+  }
+  .field-row:last-child { border-bottom: none; }
+  .field-label { font-size: 11.5px; color: var(--bs-secondary-color); font-weight: 500; margin-bottom: 2px; }
+  .field-value { font-size: 13.5px; color: var(--bs-heading-color); font-weight: 500; }
+
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+  .info-grid .field-row { padding: 10px 0; }
+
+  @media (max-width: 576px) {
+    .info-grid { grid-template-columns: 1fr; }
+    .quick-stat { border-right: none; border-bottom: 1px solid var(--bs-border-color); }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h5 class="mb-1">Employee Profile</h5>
+    <ol class="breadcrumb breadcrumb-style1 mb-0" style="font-size:12px;">
+      <li class="breadcrumb-item"><a href="{% url 'employee-list' %}">Employees</a></li>
+      <li class="breadcrumb-item active">{{ obj.full_name }}</li>
+    </ol>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'employee-list' %}" class="btn btn-sm btn-label-secondary waves-effect">
+      <i class="ti tabler-arrow-left me-1"></i>Back
+    </a>
+    <a href="{% url 'employee-edit' obj.employee_unique_id %}" class="btn btn-sm btn-primary waves-effect">
+      <i class="ti tabler-edit me-1"></i>Edit
+    </a>
+  </div>
+</div>
+
+<div class="card">
+
+  <!-- Banner + Avatar -->
+  <div class="profile-banner">
+    <div class="profile-avatar">
+      {% if picture_url %}
+        <img src="{{ picture_url }}" alt="{{ obj.full_name }}"
+             style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+      {% else %}
+        {{ obj.first_name|first|upper }}{{ obj.last_name|first|upper }}
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Name / Title row -->
+  <div class="profile-header-body">
+    <div>
+      <h4 class="mb-1 fw-bold">{{ obj.full_name }}</h4>
+      <div class="d-flex flex-wrap gap-3 align-items-center mt-1">
+        <span class="text-muted" style="font-size:13px;">
+          <i class="ti tabler-award me-1"></i>{{ obj.designation }}
+        </span>
+        {% if obj.department %}
+        <span class="text-muted" style="font-size:13px;">
+          <i class="ti tabler-layout-grid me-1"></i>{{ obj.department }}
+        </span>
+        {% endif %}
+        {% if obj.work_location %}
+        <span class="text-muted" style="font-size:13px;">
+          <i class="ti tabler-building me-1"></i>{{ obj.work_location }}
+        </span>
+        {% endif %}
+      </div>
+      <div class="d-flex flex-wrap gap-2 mt-2">
+        {% if obj.mobile %}
+        <span class="badge bg-label-secondary"><i class="ti tabler-phone me-1"></i>{{ obj.mobile }}</span>
+        {% endif %}
+        {% if obj.email %}
+        <span class="badge bg-label-secondary"><i class="ti tabler-mail me-1"></i>{{ obj.email }}</span>
+        {% endif %}
+      </div>
+    </div>
+    <span class="badge bg-label-{% if obj.employment_status == 'Active' %}success{% elif obj.employment_status == 'Inactive' %}warning{% else %}danger{% endif %} px-3 py-2 fs-6">
+      <i class="ti tabler-circle-filled me-1" style="font-size:8px;"></i>{{ obj.employment_status }}
+    </span>
+  </div>
+
+  <!-- Quick stats bar -->
+  <div class="d-flex border-top border-bottom flex-wrap">
+    <div class="quick-stat">
+      <div class="qs-label">Employee Code</div>
+      <div class="qs-value">{{ obj.employee_code|default:"—" }}</div>
+    </div>
+    <div class="quick-stat">
+      <div class="qs-label">Joining Date</div>
+      <div class="qs-value">{{ obj.joining_date|default:"—" }}</div>
+    </div>
+    <div class="quick-stat">
+      <div class="qs-label">Employee Type</div>
+      <div class="qs-value">{{ obj.empType.name|default:"—" }}</div>
+    </div>
+    <div class="quick-stat">
+      <div class="qs-label">Blood Group</div>
+      <div class="qs-value">{{ obj.blood_group|default:"—" }}</div>
+    </div>
+    <div class="quick-stat">
+      <div class="qs-label">Nationality</div>
+      <div class="qs-value">{{ obj.nationality|default:"—" }}</div>
+    </div>
+    <div class="quick-stat">
+      <div class="qs-label">Employee Status</div>
+      <div class="qs-value">
+        {% if obj.empStatus %}
+          <span class="badge {{ obj.empStatus.employee_status_css|default:'bg-label-secondary' }}">
+            {{ obj.empStatus.employee_status_name }}
+          </span>
+        {% else %}—{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ── All sections inside the card body ── -->
+  <div class="card-body px-4">
+
+    <div class="row g-0">
+
+      <!-- ════ LEFT COLUMN ════ -->
+      <div class="col-lg-6 pe-lg-4">
+
+        <!-- Personal Information -->
+        <div class="section-divider">
+          <div class="sd-icon"><i class="ti tabler-user"></i></div>
+          <span>Personal Information</span>
+        </div>
+        <div class="info-grid">
+          <div class="field-row">
+            <div class="field-label">Date of Birth</div>
+            <div class="field-value">{{ obj.date_of_birth|default:"—" }}</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Gender</div>
+            <div class="field-value">{{ obj.gender.gender_name|default:"—" }}</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Marital Status</div>
+            <div class="field-value">{{ obj.marital_status|default:"—" }}</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Caste</div>
+            <div class="field-value">{{ obj.caste.employee_caste_name|default:"—" }}</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Religion</div>
+            <div class="field-value">{{ obj.religion|default:"—" }}</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Father's Name</div>
+            <div class="field-value">{{ obj.father_name|default:"—" }}</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Mother's Name</div>
+            <div class="field-value">{{ obj.mother_name|default:"—" }}</div>
+          </div>
+        </div>
+
+        <!-- Identity Documents -->
+        <div class="section-divider mt-2">
+          <div class="sd-icon"><i class="ti tabler-id"></i></div>
+          <span>Identity Documents</span>
+        </div>
+        <div class="info-grid">
+          <div class="field-row">
+            <div class="field-label">Aadhaar Number</div>
+            <div class="field-value">{{ obj.aadhaar_number|default:"—" }}</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">PAN Number</div>
+            <div class="field-value">{{ obj.pan_number|default:"—" }}</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Passport Number</div>
+            <div class="field-value">{{ obj.passport_number|default:"—" }}</div>
+          </div>
+        </div>
+
+        <!-- Address -->
+        <div class="section-divider mt-2">
+          <div class="sd-icon"><i class="ti tabler-map-pin"></i></div>
+          <span>Address</span>
+        </div>
+        <div class="info-grid">
+          <div class="field-row">
+            <div class="field-label">District</div>
+            <div class="field-value">{{ obj.district.district_name|default:"—" }}</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">City</div>
+            <div class="field-value">{{ obj.city|default:"—" }}</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Postal Code</div>
+            <div class="field-value">{{ obj.postal_code|default:"—" }}</div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-label">Current Address</div>
+          <div class="field-value">{{ obj.current_address|default:"—" }}</div>
+        </div>
+        <div class="field-row">
+          <div class="field-label">Permanent Address</div>
+          <div class="field-value">{{ obj.permanent_address|default:"—" }}</div>
+        </div>
+
+      </div><!-- /left -->
+
+      <!-- vertical divider -->
+      <div class="col-lg-1 d-none d-lg-flex justify-content-center">
+        <div style="width:1px; background: var(--bs-border-color); min-height: 100%;"></div>
+      </div>
+
+      <!-- ════ RIGHT COLUMN ════ -->
+      <div class="col-lg-5 ps-lg-4">
+
+        <!-- Employment Details -->
+        <div class="section-divider">
+          <div class="sd-icon"><i class="ti tabler-briefcase"></i></div>
+          <span>Employment Details</span>
+        </div>
+        <div class="info-grid">
+          <div class="field-row">
+            <div class="field-label">Employee Code</div>
+            <div class="field-value">{{ obj.employee_code|default:"—" }}</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Designation</div>
+            <div class="field-value">{{ obj.designation|default:"—" }}</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Department</div>
+            <div class="field-value">{{ obj.department|default:"—" }}</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Joining Date</div>
+            <div class="field-value">{{ obj.joining_date|default:"—" }}</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Employee Type</div>
+            <div class="field-value">{{ obj.empType.name|default:"—" }}</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Work Location</div>
+            <div class="field-value">{{ obj.work_location|default:"—" }}</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Employment Status</div>
+            <div class="field-value">
+              <span class="badge bg-label-{% if obj.employment_status == 'Active' %}success{% elif obj.employment_status == 'Inactive' %}warning{% else %}danger{% endif %}">
+                {{ obj.employment_status }}
+              </span>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Employee Status</div>
+            <div class="field-value">
+              {% if obj.empStatus %}
+                <span class="badge {{ obj.empStatus.employee_status_css|default:'bg-label-secondary' }}">
+                  {{ obj.empStatus.employee_status_name }}
+                </span>
+              {% else %}—{% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Bank Details -->
+        <div class="section-divider mt-2">
+          <div class="sd-icon"><i class="ti tabler-building-bank"></i></div>
+          <span>Bank Details</span>
+        </div>
+        <div class="info-grid">
+          <div class="field-row">
+            <div class="field-label">Bank Name</div>
+            <div class="field-value">{{ obj.bank_name|default:"—" }}</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">IFSC Code</div>
+            <div class="field-value">{{ obj.ifsc_code|default:"—" }}</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Account Number</div>
+            <div class="field-value">{{ obj.bank_account_number|default:"—" }}</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Branch Address</div>
+            <div class="field-value">{{ obj.bank_address|default:"—" }}</div>
+          </div>
+        </div>
+
+        <!-- Compliance -->
+        <div class="section-divider mt-2">
+          <div class="sd-icon"><i class="ti tabler-shield-check"></i></div>
+          <span>Compliance</span>
+        </div>
+        <div class="info-grid">
+          <div class="field-row">
+            <div class="field-label">PF Eligible</div>
+            <div class="field-value">
+              {% if obj.is_eligible_for_pf %}
+                <span class="badge bg-label-success">Yes</span>
+              {% else %}
+                <span class="badge bg-label-secondary">No</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">PF Number</div>
+            <div class="field-value">{{ obj.pf_number|default:"—" }}</div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Gratuity Eligible</div>
+            <div class="field-value">
+              {% if obj.is_gratuity %}
+                <span class="badge bg-label-success">Yes</span>
+              {% else %}
+                <span class="badge bg-label-secondary">No</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /right -->
+
+    </div><!-- /row -->
+
+  </div><!-- /card-body -->
+</div>
+
+<!-- ── Education Card ── -->
+<div class="card mt-4">
+  <div class="card-header border-bottom d-flex align-items-center justify-content-between py-3">
+    <div class="d-flex align-items-center gap-2">
+      <div class="sd-icon"><i class="ti tabler-school"></i></div>
+      <span style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--bs-secondary-color);">Education</span>
+    </div>
+    <button class="btn btn-primary btn-sm waves-effect waves-light" onclick="OpenEducationForm('{{ obj.employee_unique_id }}', 0)">
+      <i class="ti tabler-plus me-1"></i>Add Education
+    </button>
+  </div>
+  <div class="card-body p-0">
+    <div id="div_EducationList"></div>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    LoadEducationList('{{ obj.employee_unique_id }}');
+  });
+
+  function LoadEducationList(empUniqueId) {
+    $('#div_EducationList').load('/employee/' + empUniqueId + '/education/list/');
+  }
+
+  function OpenEducationForm(empUniqueId, pk) {
+    $('#div_BindPartialPages').load('/employee/' + empUniqueId + '/education/form/' + pk + '/',
+      function () { $('#Modal_BindPartialPages').modal('show'); }
+    );
+  }
+
+  function DeleteEducation(pk, empUniqueId) {
+    Swal.fire({
+      title: 'Delete Education?',
+      text: 'This education record will be permanently deleted.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#d33',
+    }).then(function (result) {
+      if (!result.isConfirmed) return;
+      $.post('{% url "education-delete" %}', {
+        pk: pk,
+        csrfmiddlewaretoken: '{{ csrf_token }}'
+      }, function (resp) {
+        if (resp.success) {
+          Swal.fire({icon: 'success', title: 'Deleted successfully', timer: 2000, showConfirmButton: false});
+          LoadEducationList(empUniqueId);
+        } else {
+          Swal.fire({icon: 'error', title: resp.error || 'Delete failed', timer: 3000, showConfirmButton: false});
+        }
+      });
+    });
+  }
+</script>
+
+<!-- ── Experience Card ── -->
+<div class="card mt-4">
+  <div class="card-header border-bottom d-flex align-items-center justify-content-between py-3">
+    <div class="d-flex align-items-center gap-2">
+      <div class="sd-icon"><i class="ti tabler-briefcase"></i></div>
+      <span style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--bs-secondary-color);">Work Experience</span>
+    </div>
+    <button class="btn btn-primary btn-sm waves-effect waves-light" onclick="OpenExperienceForm('{{ obj.employee_unique_id }}', 0)">
+      <i class="ti tabler-plus me-1"></i>Add Experience
+    </button>
+  </div>
+  <div class="card-body p-0">
+    <div id="div_ExperienceList"></div>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    LoadExperienceList('{{ obj.employee_unique_id }}');
+  });
+
+  function LoadExperienceList(empUniqueId) {
+    $('#div_ExperienceList').load('/employee/' + empUniqueId + '/experience/list/');
+  }
+
+  function OpenExperienceForm(empUniqueId, pk) {
+    $('#div_BindPartialPages').load('/employee/' + empUniqueId + '/experience/form/' + pk + '/',
+      function () { $('#Modal_BindPartialPages').modal('show'); }
+    );
+  }
+
+  function DeleteExperience(pk, empUniqueId) {
+    Swal.fire({
+      title: 'Delete Experience?',
+      text: 'This experience record will be permanently deleted.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#d33',
+    }).then(function (result) {
+      if (!result.isConfirmed) return;
+      $.post('{% url "experience-delete" %}', {
+        pk: pk,
+        csrfmiddlewaretoken: '{{ csrf_token }}'
+      }, function (resp) {
+        if (resp.success) {
+          Swal.fire({icon: 'success', title: 'Deleted successfully', timer: 2000, showConfirmButton: false});
+          LoadExperienceList(empUniqueId);
+        } else {
+          Swal.fire({icon: 'error', title: resp.error || 'Delete failed', timer: 3000, showConfirmButton: false});
+        }
+      });
+    });
+  }
+</script>
+
+{% endblock %}

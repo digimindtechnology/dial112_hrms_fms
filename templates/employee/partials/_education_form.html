@@ -1,0 +1,109 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">
+            <i class="ti tabler-school me-2"></i>
+            {% if edu %}Edit Education{% else %}Add Education{% endif %}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+        <form id="frm_Education" class="needs-validation row g-4" novalidate enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="pk" value="{{ edu.employee_education_id|default:'' }}">
+
+            <div class="col-12">
+                <label class="form-label">Qualification <span class="text-danger">*</span></label>
+                <input type="text" name="qualification" required class="form-control"
+                       value="{{ edu.qualification|default:'' }}"
+                       placeholder="e.g. B.Sc., M.Tech, 10th, 12th">
+                <div class="invalid-feedback">Qualification is required.</div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Institution Name <span class="text-danger">*</span></label>
+                <input type="text" name="institution_name" required class="form-control"
+                       value="{{ edu.institution_name|default:'' }}"
+                       placeholder="School / College name">
+                <div class="invalid-feedback">Institution name is required.</div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Board / University <span class="text-danger">*</span></label>
+                <input type="text" name="board_university" required class="form-control"
+                       value="{{ edu.board_university|default:'' }}"
+                       placeholder="e.g. CBSE, Mumbai University">
+                <div class="invalid-feedback">Board / University is required.</div>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Passing Year <span class="text-danger">*</span></label>
+                <input type="number" name="passing_year" required class="form-control"
+                       min="1950" max="2099"
+                       value="{{ edu.passing_year|default:'' }}"
+                       placeholder="e.g. 2020">
+                <div class="invalid-feedback">Passing year is required.</div>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Percentage / CGPA</label>
+                <input type="number" name="percentage" class="form-control"
+                       min="0" max="100" step="0.01"
+                       value="{{ edu.percentage|default:'' }}"
+                       placeholder="e.g. 75.50">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Certificate</label>
+                <input type="file" name="certificate_file" class="form-control"
+                       accept=".pdf,.jpg,.jpeg,.png">
+                {% if cert_url %}
+                <div class="mt-1" style="font-size:12px;">
+                    <i class="ti tabler-paperclip me-1"></i>
+                    <a href="{{ cert_url }}" target="_blank" class="text-primary">View existing</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="col-12 d-flex justify-content-end gap-2 pt-2">
+                <button type="button" class="btn btn-primary waves-effect waves-light"
+                        onclick="SaveEducation('{{ obj.employee_unique_id }}')">
+                    <i class="ti tabler-device-floppy me-1"></i>
+                    {% if edu %}Update{% else %}Save{% endif %}
+                </button>
+                <button type="button" class="btn btn-label-secondary waves-effect"
+                        data-bs-dismiss="modal">
+                    <i class="ti tabler-x me-1"></i>Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+function SaveEducation(empUniqueId) {
+    const form = document.getElementById('frm_Education');
+    if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+        return;
+    }
+    const formData = new FormData(form);
+    $.ajax({
+        type: 'POST',
+        url: '/employee/' + empUniqueId + '/education/save/',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (resp) {
+            if (resp.success) {
+                $('#Modal_BindPartialPages').modal('hide');
+                Swal.fire({icon: 'success', title: 'Education Save successfully', timer: 2000, showConfirmButton: false});
+                LoadEducationList(empUniqueId);
+            } else {
+                Swal.fire({icon: 'error', title: resp.error || 'Save failed', timer: 3000, showConfirmButton: false});
+            }
+        },
+        error: function () {
+            Swal.fire({icon: 'info', title: 'Request failed. Please try again.', timer: 3000, showConfirmButton: false});
+        }
+    });
+}
+</script>

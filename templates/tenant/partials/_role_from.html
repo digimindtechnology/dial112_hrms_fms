@@ -5,52 +5,52 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         <div class="text-center mb-2">
             {% if roleData.role_id %}
-            <h4 class="mb-2">Update Role</h4>
-            <p>Update Role And Set role permissions</p>
+                <h4 class="mb-2">Update Role</h4>
+                <p>Update Role And Set role permissions</p>
             {% else %}
-            <h4 class="mb-2">Add New Role</h4>
-            <p>Add Role And Set role permissions</p>
+                <h4 class="mb-2">Add New Role</h4>
+                <p>Add Role And Set role permissions</p>
             {% endif %}
         </div>
         <form class="needs-validation row g-6" novalidate id="frm_AddUpdateRole">
             {% csrf_token %}
-            <input type="hidden" name="role_id" value="{{roleData.role_id}}">
+            <input type="hidden" name="role_id" value="{{ roleData.role_id }}">
             <div class="col-12">
                 <label class="form-label">Role Name</label>
-                <input type="text" id="role_name" name="role_name" required class="form-control" value="{{roleData.role_name}}" placeholder="Enter a role name" tabindex="-1"/>
+                <input type="text" id="role_name" name="role_name" required class="form-control" value="{{ roleData.role_name }}" placeholder="Enter a role name" tabindex="-1"/>
                 <div class="valid-feedback"> Looks good!</div>
                 <div class="invalid-feedback"> Please enter Role.</div>
             </div>
             <div class="col-6">
                 <label class="form-label">Short Role Name</label>
-                <input type="text" id="role_short_name" name="role_short_name" required class="form-control" value="{{roleData.role_short_name}}" placeholder="Enter a Short Role Name" tabindex="-1"/>
+                <input type="text" id="role_short_name" name="role_short_name" required class="form-control" value="{{ roleData.role_short_name }}" placeholder="Enter a Short Role Name" tabindex="-1"/>
                 <div class="valid-feedback"> Looks good!</div>
                 <div class="invalid-feedback"> Please enter Short Role.</div>
             </div>
 
             <div class="col-3">
                 <label class="form-label">Sequence</label>
-                <input type="number" min="0" id="sequence" name="sequence" value="{{roleData.sequence}}" required class="form-control" placeholder="Enter a sequence" tabindex="-1"/>
+                <input type="number" min="0" id="sequence" name="sequence" value="{{ roleData.sequence }}" required class="form-control" placeholder="Enter a sequence" tabindex="-1"/>
                 <div class="valid-feedback"> Looks good!</div>
                 <div class="invalid-feedback"> Please enter Sequence.</div>
             </div>
 
-              <div class="col-3">
+            <div class="col-3">
                 <label class="form-label">System Role No</label>
-                <input type="number" min="0" id="system_role_id" name="system_role_id" value="{{roleData.system_role_id}}" required class="form-control" placeholder="Enter a System Role No" tabindex="-1"/>
+                <input type="number" min="0" id="system_role_id" name="system_role_id" value="{{ roleData.system_role_id }}" required class="form-control" placeholder="Enter a System Role No" tabindex="-1"/>
                 <div class="valid-feedback"> Looks good!</div>
                 <div class="invalid-feedback"> Please enter Sequence.</div>
             </div>
 
             <div class="col-12">
-                <h5 class="mb-6">Select Groups Permissions</h5>
+                <h5 class="mb-2">Select Groups Permissions</h5>
                 <!-- Permission table -->
                 <div class="table-responsive">
                     <table class="table table-flush-spacing">
                         <tbody>
-                        <tr>
-                            <td class="text-nowrap fw-medium text-heading">All Access <i class="ti tabler-info-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="Allows a full access to the system"></i></td>
-                            <td>
+                        <tr style="background: #a9a9a933;">
+                            <th class="text-nowrap fw-medium text-heading px-1">All Access <i class="ti tabler-info-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="Allows a full access to the system"></i></th>
+                            <th>
                                 <div class="d-flex justify-content-end">
                                     <div class="form-check mb-0">
                                         <input class="form-check-input checkAll" type="checkbox" id="selectAll"/>
@@ -59,29 +59,34 @@
                                         </label>
                                     </div>
                                 </div>
-                            </td>
+                            </th>
                         </tr>
-                         {% for s in selectedGroupList %}
+                        </tbody>
+                    </table>
+                </div>
+                  <div class="table-responsive" style="height: 200px;">
+                    <table class="table table-flush-spacing">
+                        <tbody>
+                        {% for s in selectedGroupList %}
                             <tr>
-                                <td class="text-nowrap fw-medium text-heading">{{s.name}}</td>
+                                <td class="text-nowrap fw-medium text-heading">{{ s.name }}</td>
                                 <td>
                                     <div class="d-flex justify-content-end">
                                         <div class="form-check mb-0 me-4 me-lg-12">
-                                            <input class="form-check-input checkBoxClass" checked type="checkbox" name="groupCheckbox_{{s.id}}"/>
+                                            <input class="form-check-input checkBoxClass" checked type="checkbox" name="groupCheckbox_{{ s.id }}"/>
                                             <label class="form-check-label">Access</label>
                                         </div>
                                     </div>
                                 </td>
                             </tr>
                         {% endfor %}
-
                         {% for entry in groupList %}
                             <tr>
-                                <td class="text-nowrap fw-medium text-heading">{{entry.name}}</td>
+                                <td class="text-nowrap fw-medium text-heading">{{ entry.name }}</td>
                                 <td>
                                     <div class="d-flex justify-content-end">
                                         <div class="form-check mb-0 me-4 me-lg-12">
-                                            <input class="form-check-input checkBoxClass" type="checkbox" name="groupCheckbox_{{entry.id}}"/>
+                                            <input class="form-check-input checkBoxClass" type="checkbox" name="groupCheckbox_{{ entry.id }}"/>
                                             <label class="form-check-label">Access</label>
                                         </div>
                                     </div>
@@ -104,37 +109,36 @@
 
 
 <script type="text/javascript">
-     function FunAddUpdateRole(){
+    function FunAddUpdateRole() {
         const form = document.querySelector('.needs-validation');
         if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-                form.classList.add('was-validated');
-          }
-          else {
+            event.preventDefault();
+            event.stopPropagation();
+            form.classList.add('was-validated');
+        } else {
             var confirmSubmit = confirm("Are you sure you want to submit this form?");
             if (!confirmSubmit) {
-              event.preventDefault();
+                event.preventDefault();
+            } else {
+                AddUpdateRoleDataPost();
             }
-            else{
-                 AddUpdateRoleDataPost();
-            }
-          }
-     }
+        }
+    }
 
-    function AddUpdateRoleDataPost(){
+    function AddUpdateRoleDataPost() {
         $.ajax({
-          type: "POST",
-          url: "{% url 'AddUpdateRoleDataPost' %}",
-          data: $("#frm_AddUpdateRole").serialize(),
-          success: function(response) {
-                 alert(response.message);
-                 $('#RoleFrom_Modal').modal('toggle');
-                 LoadRoleList();
-          }
+            type: "POST",
+            url: "{% url 'AddUpdateRoleDataPost' %}",
+            data: $("#frm_AddUpdateRole").serialize(),
+            success: function (response) {
+                alert(response.message);
+                $('#RoleFrom_Modal').modal('toggle');
+                LoadRoleList();
+            }
         });
     }
-$(document).ready(function () {
+
+    $(document).ready(function () {
         $(".checkAll").click(function () {
             $(".checkBoxClass").attr('checked', this.checked);
         });

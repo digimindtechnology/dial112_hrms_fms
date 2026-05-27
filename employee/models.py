@@ -63,12 +63,15 @@ class EmployeeRecruitmentCategory(models.Model):
 
 
 ##Main Table
+MARITAL_STATUS = [('Single', 'Single'), ('Married', 'Married'), ]
+EMPLOYMENT_STATUS = [('Active', 'Active'), ('Inactive', 'Inactive'), ('Resigned', 'Resigned'), ('Terminated', 'Terminated'), ]
+BLOOD_GROUPS = [('A+', 'A+'), ('A-', 'A-'), ('B+', 'B+'), ('B-', 'B-'), ('O+', 'O+'), ('O-', 'O-'), ('AB+', 'AB+'), ('AB-', 'AB-'), ]
+
 
 class EmployeeInfo(BaseModel):
-    MARITAL_STATUS = [('Single', 'Single'), ('Married', 'Married'), ]
-    EMPLOYMENT_STATUS = [('Active', 'Active'), ('Inactive', 'Inactive'), ('Resigned', 'Resigned'), ('Terminated', 'Terminated'), ]
-    BLOOD_GROUPS = [('A+', 'A+'), ('A-', 'A-'), ('B+', 'B+'), ('B-', 'B-'), ('O+', 'O+'), ('O-', 'O-'), ('AB+', 'AB+'), ('AB-', 'AB-'), ]
-
+    MARITAL_STATUS = MARITAL_STATUS
+    EMPLOYMENT_STATUS = EMPLOYMENT_STATUS
+    BLOOD_GROUPS = BLOOD_GROUPS
     employee_id = models.AutoField(primary_key=True)
     employee_unique_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     employee_code = models.CharField(max_length=20, null=True, blank=True)
@@ -331,4 +334,66 @@ class EmployeeActivityLog(BaseModel):
     def __str__(self):
         return str(self.employee_activity_log_id)
 
+
 ##Main Table
+
+
+class TempSelfRegEmployee(BaseModel):
+    MARITAL_STATUS = MARITAL_STATUS
+    EMPLOYMENT_STATUS = EMPLOYMENT_STATUS
+    BLOOD_GROUPS = BLOOD_GROUPS
+
+    temp_self_reg_employee_id = models.AutoField(primary_key=True)
+    temp_self_reg_employee_unique_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
+    employee_code = models.CharField(max_length=20, null=True, blank=True)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    email = models.EmailField(null=True, blank=True)
+    mobile = models.CharField(max_length=20)
+
+    date_of_birth = models.DateField(null=True, blank=True)
+    gender = models.ForeignKey(Gender, on_delete=models.CASCADE)
+    picture = models.CharField(max_length=500, blank=True, null=True)  ##media/company_doc/1/temp_employees/....
+
+    father_name = models.CharField(max_length=100, blank=True)
+    mother_name = models.CharField(max_length=100, blank=True)
+
+    marital_status = models.CharField(max_length=20, choices=MARITAL_STATUS, blank=True)
+    blood_group = models.CharField(max_length=5, choices=BLOOD_GROUPS, blank=True)
+    nationality = models.CharField(max_length=50, default='Indian')
+
+    aadhaar_number = models.CharField(max_length=12, unique=True, blank=True, null=True)
+    pan_number = models.CharField(max_length=10, unique=True, blank=True, null=True)
+    passport_number = models.CharField(max_length=20, unique=True, blank=True, null=True)
+
+    religion = models.CharField(max_length=100, blank=True)
+    caste = models.ForeignKey(EmployeeCaste, related_name='caste_TempSelfRegEmployee', null=True, blank=True, on_delete=models.CASCADE)
+    empType = models.ForeignKey(EmployeeType, related_name='empType_TempSelfRegEmployee', null=True, blank=True, on_delete=models.CASCADE)
+
+    district = models.ForeignKey(District, related_name='district_TempSelfRegEmployee', null=True, blank=True, on_delete=models.CASCADE)
+    city = models.CharField(max_length=50, null=True, blank=True)
+    postal_code = models.CharField(max_length=10, null=True, blank=True)
+    current_address = models.TextField(null=True, blank=True)
+    permanent_address = models.TextField(null=True, blank=True)
+
+    department = models.CharField(max_length=100, null=True, blank=True)
+    designation = models.CharField(max_length=100)
+    joining_date = models.DateField()
+
+    employment_status = models.CharField(max_length=20, choices=EMPLOYMENT_STATUS, default='Active')
+    work_location = models.CharField(max_length=100, blank=True)
+
+    bank_name = models.CharField(max_length=100, blank=True)
+    bank_address = models.CharField(max_length=500, blank=True)
+    bank_account_number = models.CharField(max_length=30, blank=True)
+    ifsc_code = models.CharField(max_length=20, blank=True)
+
+    is_gratuity = models.BooleanField(default=False)
+    is_eligible_for_pf = models.BooleanField(default=False)
+    pf_number = models.CharField(max_length=20, blank=True)
+
+    employeeInfo = models.ForeignKey(EmployeeInfo, blank=True, null=True, on_delete=models.SET_NULL, related_name="employeeInfo_TempSelfRegEmployee")
+    created_by_name = models.CharField(max_length=50, default='Self')
+
+    def __str__(self):
+        return f"{self.temp_self_reg_employee_id} - {self.first_name} {self.last_name}"

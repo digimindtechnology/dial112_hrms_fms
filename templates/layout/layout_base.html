@@ -38,7 +38,7 @@
         }
 
         .swal2-container .swal2-modal.swal2-popup .swal2-title {
-            font-size: 22px !important;
+            font-size: 18px !important;
             line-height: 1.375;
             margin-block: 1.875rem 1rem;
             max-inline-size: none;
@@ -498,9 +498,11 @@
     <div class="layout-overlay layout-menu-toggle"></div>
     <input type="hidden" id="hdn_IS_RunServer" value="{{ IS_RunServer }}">
     <input type="hidden" id="hdn_AUTO_LOGOUT" value="{{ AUTO_LOGOUT }}">
-    <div class="modal fade" id="Modal_BindPartialPages" aria-hidden="true">
-        <div class="modal-dialog" id="div_BindPartialPages"></div>
-    </div>
+
+<div class="modal fade" id="Modal_BindPartialPages" tabindex="-1" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div id="div_BindPartialPages"></div>
+  </div>
 </div>
 
 <!-- / Layout wrapper -->
