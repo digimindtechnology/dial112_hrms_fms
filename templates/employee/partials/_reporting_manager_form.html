@@ -1,0 +1,79 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">
+            <i class="ti tabler-user-check me-2"></i>
+            {% if manager %}Edit Reporting Manager{% else %}Add Reporting Manager{% endif %}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+        <form id="frm_ReportingManager" class="needs-validation row g-4" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="pk" value="{{ manager.employee_reporting_manager_id|default:'' }}">
+
+            <div class="col-12">
+                <label class="form-label">Reporting Manager <span class="text-danger">*</span></label>
+                <select name="reporting_manager_id" required class="form-select">
+                    <option value="">Select Manager</option>
+                    {% for profile in users %}
+                        <option value="{{ profile.user_id }}"
+                            {% if manager.reporting_manager_id == profile.user_id %}selected{% endif %}>
+                            {{ profile.user.get_full_name|default:profile.user.username }} ({{ profile.user.username }})
+                        </option>
+                    {% endfor %}
+                </select>
+                <div class="invalid-feedback">Please select a reporting manager.</div>
+            </div>
+
+            <div class="col-12">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch"
+                           name="is_current" id="chk_is_current"
+                           {% if not manager or manager.is_current %}checked{% endif %}>
+                    <label class="form-check-label" for="chk_is_current">Current Reporting Manager</label>
+                </div>
+            </div>
+
+            <div class="col-12 d-flex justify-content-end gap-2 pt-2">
+                <button type="button" class="btn btn-primary waves-effect waves-light"
+                        onclick="SaveReportingManager('{{ obj.employee_unique_id }}')">
+                    <i class="ti tabler-device-floppy me-1"></i>
+                    {% if manager %}Update{% else %}Save{% endif %}
+                </button>
+                <button type="button" class="btn btn-label-secondary waves-effect"
+                        data-bs-dismiss="modal">
+                    <i class="ti tabler-x me-1"></i>Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+function SaveReportingManager(empUniqueId) {
+    const form = document.getElementById('frm_ReportingManager');
+    if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+        return;
+    }
+    const formData = new FormData(form);
+    $.ajax({
+        type: 'POST',
+        url: '/employee/' + empUniqueId + '/reporting-manager/save/',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (resp) {
+            if (resp.success) {
+                $('#Modal_BindPartialPages').modal('hide');
+                Swal.fire({icon: 'success', title: 'Saved successfully', timer: 2000, showConfirmButton: false});
+                LoadReportingManagerList(empUniqueId);
+            } else {
+                Swal.fire({icon: 'error', title: resp.error || 'Save failed', timer: 3000, showConfirmButton: false});
+            }
+        },
+        error: function () {
+            Swal.fire({icon: 'info', title: 'Request failed. Please try again.', timer: 3000, showConfirmButton: false});
+        }
+    });
+}
+</script>

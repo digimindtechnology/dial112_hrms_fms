@@ -1,0 +1,68 @@
+{% if job_histories %}
+<div class="jh-timeline">
+    {% for job in job_histories %}
+    <div class="jh-item">
+
+        <!-- Timeline node -->
+        <div class="jh-node" title="{% if forloop.first %}Latest{% else %}Previous{% endif %}"></div>
+
+        <div class="jh-box">
+
+            <!-- Post + grade -->
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="jh-post">
+                    <i class="ti tabler-briefcase me-2 text-primary" style="font-size:15px;"></i>{{ job.post }}
+                </div>
+                {% if job.grade %}
+                    <span class="badge bg-label-primary" style="font-size:11px;">
+                        <i class="ti tabler-medal me-1"></i>{{ job.grade }}
+                    </span>
+                {% endif %}
+            </div>
+
+            <!-- Date milestones -->
+            <div class="jh-milestones">
+                <div class="jh-milestone">
+                    <span class="jh-milestone-label">
+                        <i class="ti tabler-calendar-check text-success me-1"></i>Joining Date
+                    </span>
+                    <span class="jh-milestone-value">{{ job.joining_date|default:"—" }}</span>
+                </div>
+                <div class="jh-milestone">
+                    <span class="jh-milestone-label">
+                        <i class="ti tabler-calendar-time text-warning me-1"></i>Probation End
+                    </span>
+                    <span class="jh-milestone-value">{{ job.probation_end_date|default:"—" }}</span>
+                </div>
+                <div class="jh-milestone">
+                    <span class="jh-milestone-label">
+                        <i class="ti tabler-calendar-star text-info me-1"></i>Confirmation
+                    </span>
+                    <span class="jh-milestone-value">{{ job.confirmation_date|default:"—" }}</span>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="jh-actions">
+                <a href="#" class="btn btn-sm btn-label-info waves-effect"
+                   onclick="OpenJobHistoryForm('{{ obj.employee_unique_id }}', {{ job.employee_job_history_id }}); return false;">
+                    <i class="ti tabler-edit me-1"></i>Edit
+                </a>
+                <button class="btn btn-sm btn-label-danger waves-effect"
+                        onclick="DeleteJobHistory({{ job.employee_job_history_id }}, '{{ obj.employee_unique_id }}')">
+                    <i class="ti tabler-trash me-1"></i>Delete
+                </button>
+            </div>
+
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state-grid">
+    <i class="ti tabler-timeline"></i>
+    <p>No job history records added yet.<br>
+       <span style="font-size:12px;">Click <strong>Add Job History</strong> to add the first entry.</span>
+    </p>
+</div>
+{% endif %}

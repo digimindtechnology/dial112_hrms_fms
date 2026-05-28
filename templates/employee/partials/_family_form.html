@@ -1,0 +1,121 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">
+            <i class="ti tabler-users me-2"></i>
+            {% if member %}Edit Family Member{% else %}Add Family Member{% endif %}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+        <form id="frm_Family" class="needs-validation row g-4" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="pk" value="{{ member.employee_family_detail_id|default:'' }}">
+
+            <div class="col-md-6">
+                <label class="form-label">Member Name <span class="text-danger">*</span></label>
+                <input type="text" name="family_member_name" required class="form-control"
+                       value="{{ member.family_member_name|default:'' }}"
+                       placeholder="Full name">
+                <div class="invalid-feedback">Name is required.</div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Relationship <span class="text-danger">*</span></label>
+                <select name="relationship" required class="form-select">
+                    <option value="">Select Relationship</option>
+                    {% for val, label in relation_choices %}
+                        <option value="{{ val }}" {% if member.relationship == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <div class="invalid-feedback">Relationship is required.</div>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Date of Birth</label>
+                <input type="date" name="date_of_birth" class="form-control"
+                       value="{{ member.date_of_birth|date:'Y-m-d'|default:'' }}">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Gender</label>
+                <select name="gender_id" class="form-select">
+                    <option value="">Select Gender</option>
+                    {% for g in genders %}
+                        <option value="{{ g.gender_id }}" {% if member.gender_id == g.gender_id %}selected{% endif %}>{{ g.gender_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Mobile Number</label>
+                <input type="text" name="mobile_number" class="form-control"
+                       value="{{ member.mobile_number|default:'' }}"
+                       placeholder="Mobile number">
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Occupation</label>
+                <input type="text" name="occupation" class="form-control"
+                       value="{{ member.occupation|default:'' }}"
+                       placeholder="e.g. Teacher, Engineer">
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Aadhaar Number</label>
+                <input type="text" name="aadhaar_number" class="form-control" maxlength="12"
+                       value="{{ member.aadhaar_number|default:'' }}"
+                       placeholder="12-digit Aadhaar">
+            </div>
+
+            <div class="col-12">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch"
+                           name="is_emergency_contact" id="chk_emergency"
+                           {% if member.is_emergency_contact %}checked{% endif %}>
+                    <label class="form-check-label" for="chk_emergency">Mark as Emergency Contact</label>
+                </div>
+            </div>
+
+            <div class="col-12 d-flex justify-content-end gap-2 pt-2">
+                <button type="button" class="btn btn-primary waves-effect waves-light"
+                        onclick="SaveFamily('{{ obj.employee_unique_id }}')">
+                    <i class="ti tabler-device-floppy me-1"></i>
+                    {% if member %}Update{% else %}Save{% endif %}
+                </button>
+                <button type="button" class="btn btn-label-secondary waves-effect"
+                        data-bs-dismiss="modal">
+                    <i class="ti tabler-x me-1"></i>Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+function SaveFamily(empUniqueId) {
+    const form = document.getElementById('frm_Family');
+    if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+        return;
+    }
+    const formData = new FormData(form);
+    $.ajax({
+        type: 'POST',
+        url: '/employee/' + empUniqueId + '/family/save/',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (resp) {
+            if (resp.success) {
+                $('#Modal_BindPartialPages').modal('hide');
+                Swal.fire({icon: 'success', title: 'Saved successfully', timer: 2000, showConfirmButton: false});
+                LoadFamilyList(empUniqueId);
+            } else {
+                Swal.fire({icon: 'error', title: resp.error || 'Save failed', timer: 3000, showConfirmButton: false});
+            }
+        },
+        error: function () {
+            Swal.fire({icon: 'info', title: 'Request failed. Please try again.', timer: 3000, showConfirmButton: false});
+        }
+    });
+}
+</script>

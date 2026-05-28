@@ -1,11 +1,17 @@
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import JsonResponse
+from django.urls import reverse
+
 from accounts.helpers.basicUtility import UploadFileData, GetFileUrl
 from accounts.helpers.message_helper import send_sweetalert
-from employee.models import EmployeeInfo, EmployeeCaste, EmployeeEducation, EmployeeExperience
+from employee.models import (EmployeeInfo, EmployeeCaste, EmployeeEducation, EmployeeExperience,
+                             EmployeeCertification, EmployeeLanguage, EmployeeFamilyDetail,
+                             EmployeeJobHistory, EmployeeDocument, EmployeeReportingManager)
 from masters.models import Gender, District
-from setup.models import EmployeeType
+from setup.models import EmployeeType, EmployeeCategory
+from accounts.models import Profile
+from django.contrib.auth.models import User as AuthUser
 from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
@@ -17,6 +23,8 @@ def _parse_date(value):
         return datetime.strptime(value.strip(), '%Y-%m-%d').date()
     except (ValueError, AttributeError):
         return None
+
+
 def _form_context(request, obj=None):
     return {
         'obj': obj,
@@ -27,7 +35,10 @@ def _form_context(request, obj=None):
         'castes': EmployeeCaste.objects.filter(is_active=True),
         'districts': District.objects.filter(is_active=True).order_by('district_name'),
         'emp_types': EmployeeType.objects.filter(tenantProfile_id=request.tenantID, is_active=True).order_by('name'),
+        'emp_categories': EmployeeCategory.objects.filter(tenantProfile_id=request.tenantID, is_active=True).order_by('name'),
     }
+
+
 def _obj_to_fd(obj):
     return {
         'first_name': obj.first_name or '',
@@ -48,6 +59,7 @@ def _obj_to_fd(obj):
         'passport_number': obj.passport_number or '',
         'caste_id': str(obj.caste_id) if obj.caste_id else '',
         'emp_type_id': str(obj.empType_id) if obj.empType_id else '',
+        'emp_category_id': str(obj.empCategory_id) if obj.empCategory_id else '',
         'district_id': str(obj.district_id) if obj.district_id else '',
         'city': obj.city or '',
         'postal_code': obj.postal_code or '',
@@ -70,6 +82,8 @@ def _obj_to_fd(obj):
         'pf_number': obj.pf_number or '',
 
     }
+
+
 def _post_to_fields(p):
     """Map POST data to EmployeeInfo field kwargs."""
     return dict(
@@ -93,6 +107,7 @@ def _post_to_fields(p):
         passport_number=p.get('passport_number', '').strip() or None,
         caste_id=p.get('caste_id', '').strip() or None,
         empType_id=p.get('emp_type_id', '').strip() or None,
+        empCategory_id=p.get('emp_category_id', '').strip() or None,
         district_id=p.get('district_id', '').strip() or None,
         city=p.get('city', '').strip(),
         postal_code=p.get('postal_code', '').strip() or None,
@@ -112,12 +127,18 @@ def _post_to_fields(p):
         is_eligible_for_pf=p.get('is_eligible_for_pf') == 'on',
         pf_number=p.get('pf_number', '').strip(),
     )
+
+
 ## _emp_context
 
 @login_required
 def employee_list(request):
     search_query = request.GET.get('search', '').strip()
+    empCatId = request.GET.get('empcat', None)
     qs = EmployeeInfo.objects.filter(tenantProfile_id=request.tenantID).select_related('gender', 'empType', 'empStatus')
+    if empCatId:
+        qs = qs.filter(empCategory_id=int(empCatId))
+
     if search_query:
         qs = qs.filter(
             Q(first_name__icontains=search_query) |
@@ -136,6 +157,7 @@ def employee_list(request):
     page_obj = paginator.get_page(request.GET.get('page'))
 
     return render(request, 'employee/employee_list.html', {
+        'empCatId':empCatId,
         'page_obj': page_obj,
         'paginator': paginator,
         'search_query': search_query,
@@ -148,6 +170,7 @@ def employee_list(request):
 @login_required
 def employee_add(request):
     fd = {}
+    empCatId = request.GET.get('empcat', '')
     if request.method == 'POST':
         p = request.POST
         fd = p
@@ -160,11 +183,12 @@ def employee_add(request):
                     obj.picture = path
                     obj.save(update_fields=['picture'])
             send_sweetalert(request, 'success', f'Employee {obj.full_name} created successfully.')
-            return redirect('employee-list')
+            return redirect(f"{reverse('employee-list')}?empcat={obj.empCategory_id}")
         except Exception as e:
             send_sweetalert(request, 'error', str(e))
     ctx = _form_context(request)
     ctx['form_data'] = fd
+    ctx['empCatId'] = empCatId
     return render(request, 'employee/employee_form.html', ctx)
 
 
@@ -191,7 +215,7 @@ def employee_update(request, emp_unique_id=''):
                     obj.picture = path
                     obj.save(update_fields=['picture'])
             send_sweetalert(request, 'success', f'Employee {obj.full_name} updated successfully.')
-            return redirect('employee-list')
+            return redirect(f"{reverse('employee-list')}?empcat={obj.empCategory_id}")
         except Exception as e:
             send_sweetalert(request, 'error', str(e))
             fd = p
@@ -200,12 +224,13 @@ def employee_update(request, emp_unique_id=''):
     ctx = _form_context(request, obj)
     ctx['form_data'] = fd
     ctx['picture_url'] = GetFileUrl(obj.picture)
+    ctx['empCatId'] = obj.empCategory_id
     return render(request, 'employee/employee_form.html', ctx)
 
 
 @login_required
 def employee_detail(request, emp_unique_id):
-    obj = get_object_or_404(EmployeeInfo.objects.select_related('gender', 'empType', 'empStatus', 'caste', 'district', 'tenantProfile'),
+    obj = get_object_or_404(EmployeeInfo.objects.select_related('gender', 'empType', 'empCategory', 'empStatus', 'caste', 'district', 'tenantProfile'),
                             employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID, )
     return render(request, 'employee/employee_detail.html', {'obj': obj, 'picture_url': GetFileUrl(obj.picture)})
 
@@ -334,4 +359,407 @@ def experience_delete(request):
         return JsonResponse({'success': False})
     pk = request.POST.get('pk')
     EmployeeExperience.objects.filter(employee_experience_id=pk, employee__tenantProfile_id=request.tenantID).delete()
+    return JsonResponse({'success': True})
+
+
+# ── Duplicate Check ────────────────────────────────────────
+
+@login_required
+def employee_check_duplicate(request):
+    if request.method != 'POST':
+        return JsonResponse({'exists': False})
+
+    field = request.POST.get('field', '').strip()
+    value = request.POST.get('value', '').strip()
+    exclude_id = request.POST.get('exclude_id', '').strip()
+
+    if not field or not value:
+        return JsonResponse({'exists': False})
+
+    found_in = []
+    emp_qs = EmployeeInfo.objects.filter(tenantProfile_id=request.tenantID)
+    if exclude_id:
+        emp_qs = emp_qs.exclude(employee_id=exclude_id)
+
+    if field == 'mobile':
+        if emp_qs.filter(mobile=value).exists():
+            found_in.append('Employee records')
+        if Profile.objects.filter(mobile=value).exists():
+            found_in.append('User profiles')
+
+    elif field == 'email':
+        if emp_qs.filter(email__iexact=value).exists():
+            found_in.append('Employee records')
+        user_qs = AuthUser.objects.filter(email__iexact=value)
+        if exclude_id:
+            try:
+                emp = EmployeeInfo.objects.get(employee_id=exclude_id)
+                if emp.user_id:
+                    user_qs = user_qs.exclude(pk=emp.user_id)
+            except EmployeeInfo.DoesNotExist:
+                pass
+        if user_qs.exists():
+            found_in.append('User accounts')
+
+    elif field == 'aadhaar_number':
+        if emp_qs.filter(aadhaar_number=value).exists():
+            found_in.append('Employee records')
+
+    elif field == 'pan_number':
+        if emp_qs.filter(pan_number=value.upper()).exists():
+            found_in.append('Employee records')
+
+    elif field == 'passport_number':
+        if emp_qs.filter(passport_number=value).exists():
+            found_in.append('Employee records')
+
+    return JsonResponse({'exists': bool(found_in), 'found_in': found_in})
+
+
+# ── Certification ──────────────────────────────────────────
+
+@login_required
+def certification_list(request, emp_unique_id):
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    certifications = obj.certifications.order_by('-issue_date')
+    return render(request, 'employee/partials/_certification_list.html', {'obj': obj, 'certifications': certifications})
+
+
+@login_required
+def certification_form(request, emp_unique_id, pk=0):
+    cert = None
+    cert_url = ''
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    if pk:
+        cert = get_object_or_404(EmployeeCertification, employee_certification_id=pk, employee=obj)
+        cert_url = GetFileUrl(cert.certificate_file)
+    return render(request, 'employee/partials/_certification_form.html', {'obj': obj, 'cert': cert, 'cert_url': cert_url})
+
+
+@login_required
+def certification_save(request, emp_unique_id):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'})
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    p = request.POST
+    pk = p.get('pk', '').strip()
+    try:
+        fields = dict(
+            certification_name=p.get('certification_name', '').strip(),
+            issuing_organization=p.get('issuing_organization', '').strip(),
+            issue_date=_parse_date(p.get('issue_date', '')),
+            expiry_date=_parse_date(p.get('expiry_date', '')),
+        )
+        if pk:
+            cert = get_object_or_404(EmployeeCertification, employee_certification_id=pk, employee=obj)
+            for attr, val in fields.items():
+                setattr(cert, attr, val)
+            cert.updated_by = request.user
+            cert.save()
+        else:
+            cert = EmployeeCertification.objects.create(**fields, employee=obj, created_by=request.user)
+        file = request.FILES.get('certificate_file')
+        if file:
+            path = UploadFileData(request.tenantID, f'certification/{obj.employee_id}', file)
+            if path:
+                cert.certificate_file = path
+                cert.save(update_fields=['certificate_file'])
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+def certification_delete(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False})
+    pk = request.POST.get('pk')
+    EmployeeCertification.objects.filter(employee_certification_id=pk, employee__tenantProfile_id=request.tenantID).delete()
+    return JsonResponse({'success': True})
+
+
+# ── Language ───────────────────────────────────────────────
+
+@login_required
+def language_list(request, emp_unique_id):
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    languages = obj.languages.order_by('-is_mother_tongue', 'language_name')
+    return render(request, 'employee/partials/_language_list.html', {'obj': obj, 'languages': languages})
+
+
+@login_required
+def language_form(request, emp_unique_id, pk=0):
+    lang = None
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    if pk:
+        lang = get_object_or_404(EmployeeLanguage, employee_language_id=pk, employee=obj)
+    return render(request, 'employee/partials/_language_form.html', {'obj': obj, 'lang': lang})
+
+
+@login_required
+def language_save(request, emp_unique_id):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'})
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    p = request.POST
+    pk = p.get('pk', '').strip()
+    try:
+        fields = dict(
+            language_name=p.get('language_name', '').strip(),
+            can_read=p.get('can_read') == 'on',
+            can_write=p.get('can_write') == 'on',
+            can_speak=p.get('can_speak') == 'on',
+            is_mother_tongue=p.get('is_mother_tongue') == 'on',
+        )
+        if pk:
+            lang = get_object_or_404(EmployeeLanguage, employee_language_id=pk, employee=obj)
+            for attr, val in fields.items():
+                setattr(lang, attr, val)
+            lang.updated_by = request.user
+            lang.save()
+        else:
+            EmployeeLanguage.objects.create(**fields, employee=obj, created_by=request.user)
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+def language_delete(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False})
+    pk = request.POST.get('pk')
+    EmployeeLanguage.objects.filter(employee_language_id=pk, employee__tenantProfile_id=request.tenantID).delete()
+    return JsonResponse({'success': True})
+
+
+# ── Family Detail ──────────────────────────────────────────
+
+@login_required
+def family_list(request, emp_unique_id):
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    family_details = obj.family_details.select_related('gender').order_by('family_member_name')
+    return render(request, 'employee/partials/_family_list.html', {'obj': obj, 'family_details': family_details})
+
+
+@login_required
+def family_form(request, emp_unique_id, pk=0):
+    member = None
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    if pk:
+        member = get_object_or_404(EmployeeFamilyDetail, employee_family_detail_id=pk, employee=obj)
+    return render(request, 'employee/partials/_family_form.html', {
+        'obj': obj,
+        'member': member,
+        'relation_choices': EmployeeFamilyDetail.RELATION_CHOICES,
+        'genders': Gender.objects.filter(is_active=True),
+    })
+
+
+@login_required
+def family_save(request, emp_unique_id):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'})
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    p = request.POST
+    pk = p.get('pk', '').strip()
+    try:
+        fields = dict(
+            family_member_name=p.get('family_member_name', '').strip(),
+            relationship=p.get('relationship', '').strip(),
+            date_of_birth=_parse_date(p.get('date_of_birth', '')),
+            gender_id=p.get('gender_id', '').strip() or None,
+            mobile_number=p.get('mobile_number', '').strip() or None,
+            occupation=p.get('occupation', '').strip(),
+            aadhaar_number=p.get('aadhaar_number', '').strip() or None,
+            is_emergency_contact=p.get('is_emergency_contact') == 'on',
+        )
+        if pk:
+            member = get_object_or_404(EmployeeFamilyDetail, employee_family_detail_id=pk, employee=obj)
+            for attr, val in fields.items():
+                setattr(member, attr, val)
+            member.updated_by = request.user
+            member.save()
+        else:
+            EmployeeFamilyDetail.objects.create(**fields, employee=obj, created_by=request.user)
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+def family_delete(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False})
+    pk = request.POST.get('pk')
+    EmployeeFamilyDetail.objects.filter(employee_family_detail_id=pk, employee__tenantProfile_id=request.tenantID).delete()
+    return JsonResponse({'success': True})
+
+
+# ── Job History ────────────────────────────────────────────
+
+@login_required
+def job_history_list(request, emp_unique_id):
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    job_histories = obj.job_history.order_by('-joining_date')
+    return render(request, 'employee/partials/_job_history_list.html', {'obj': obj, 'job_histories': job_histories})
+
+
+@login_required
+def job_history_form(request, emp_unique_id, pk=0):
+    job = None
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    if pk:
+        job = get_object_or_404(EmployeeJobHistory, employee_job_history_id=pk, employee=obj)
+    return render(request, 'employee/partials/_job_history_form.html', {'obj': obj, 'job': job})
+
+
+@login_required
+def job_history_save(request, emp_unique_id):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'})
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    p = request.POST
+    pk = p.get('pk', '').strip()
+    try:
+        fields = dict(
+            post=p.get('post', '').strip(),
+            grade=p.get('grade', '').strip(),
+            joining_date=_parse_date(p.get('joining_date', '')),
+            probation_end_date=_parse_date(p.get('probation_end_date', '')),
+            confirmation_date=_parse_date(p.get('confirmation_date', '')),
+        )
+        if pk:
+            job = get_object_or_404(EmployeeJobHistory, employee_job_history_id=pk, employee=obj)
+            for attr, val in fields.items():
+                setattr(job, attr, val)
+            job.updated_by = request.user
+            job.save()
+        else:
+            EmployeeJobHistory.objects.create(**fields, employee=obj, created_by=request.user)
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+def job_history_delete(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False})
+    pk = request.POST.get('pk')
+    EmployeeJobHistory.objects.filter(employee_job_history_id=pk, employee__tenantProfile_id=request.tenantID).delete()
+    return JsonResponse({'success': True})
+
+
+# ── Document ───────────────────────────────────────────────
+
+@login_required
+def document_list(request, emp_unique_id):
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    documents = obj.employee_documents.order_by('-issue_date')
+    return render(request, 'employee/partials/_document_list.html', {'obj': obj, 'documents': documents})
+
+
+@login_required
+def document_form(request, emp_unique_id, pk=0):
+    doc = None
+    file_url = ''
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    if pk:
+        doc = get_object_or_404(EmployeeDocument, employee_document_id=pk, employee=obj)
+        file_url = GetFileUrl(doc.file_doc)
+    return render(request, 'employee/partials/_document_form.html', {'obj': obj, 'doc': doc, 'file_url': file_url})
+
+
+@login_required
+def document_save(request, emp_unique_id):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'})
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    p = request.POST
+    pk = p.get('pk', '').strip()
+    try:
+        fields = dict(
+            document_name=p.get('document_name', '').strip(),
+            issue_date=_parse_date(p.get('issue_date', '')),
+            expiry_date=_parse_date(p.get('expiry_date', '')),
+        )
+        if pk:
+            doc = get_object_or_404(EmployeeDocument, employee_document_id=pk, employee=obj)
+            for attr, val in fields.items():
+                setattr(doc, attr, val)
+            doc.updated_by = request.user
+            doc.save()
+        else:
+            doc = EmployeeDocument.objects.create(**fields, employee=obj, created_by=request.user)
+        file = request.FILES.get('file_doc')
+        if file:
+            path = UploadFileData(request.tenantID, f'documents/{obj.employee_id}', file)
+            if path:
+                doc.file_doc = path
+                doc.save(update_fields=['file_doc'])
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+def document_delete(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False})
+    pk = request.POST.get('pk')
+    EmployeeDocument.objects.filter(employee_document_id=pk, employee__tenantProfile_id=request.tenantID).delete()
+    return JsonResponse({'success': True})
+
+
+# ── Reporting Manager ──────────────────────────────────────
+
+@login_required
+def reporting_manager_list(request, emp_unique_id):
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    managers = obj.employee_reporting_managers.select_related('reporting_manager').order_by('-is_current', 'employee_reporting_manager_id')
+    return render(request, 'employee/partials/_reporting_manager_list.html', {'obj': obj, 'managers': managers})
+
+
+@login_required
+def reporting_manager_form(request, emp_unique_id, pk=0):
+    manager = None
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    if pk:
+        manager = get_object_or_404(EmployeeReportingManager, employee_reporting_manager_id=pk, employee=obj)
+    users = Profile.objects.filter(tenantProfile_id=request.tenantID).select_related('user').order_by('user__first_name', 'user__last_name')
+    return render(request, 'employee/partials/_reporting_manager_form.html', {'obj': obj, 'manager': manager, 'users': users})
+
+
+@login_required
+def reporting_manager_save(request, emp_unique_id):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'})
+    obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+    p = request.POST
+    pk = p.get('pk', '').strip()
+    try:
+        fields = dict(
+            reporting_manager_id=p.get('reporting_manager_id', '').strip() or None,
+            is_current=p.get('is_current') == 'on',
+        )
+        if pk:
+            mgr = get_object_or_404(EmployeeReportingManager, employee_reporting_manager_id=pk, employee=obj)
+            for attr, val in fields.items():
+                setattr(mgr, attr, val)
+            mgr.updated_by = request.user
+            mgr.save()
+        else:
+            EmployeeReportingManager.objects.create(**fields, employee=obj, created_by=request.user)
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+def reporting_manager_delete(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False})
+    pk = request.POST.get('pk')
+    EmployeeReportingManager.objects.filter(employee_reporting_manager_id=pk, employee__tenantProfile_id=request.tenantID).delete()
     return JsonResponse({'success': True})

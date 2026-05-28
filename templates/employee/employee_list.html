@@ -84,9 +84,15 @@
                             </a>
                         {% endif %}
                     </form>
-                    <a href="{% url 'employee-add' %}" class="btn btn-primary btn-sm">
-                        <i class="ti tabler-plus me-1"></i> Add Employee
-                    </a>
+                    {% if empCatId %}
+                        <a href="/employee/add/?empcat={{ empCatId }}" class="btn btn-primary btn-sm">
+                            <i class="ti tabler-plus me-1"></i> Add Employee
+                        </a>
+                    {% else %}
+                         <a href="/employee/add/" class="btn btn-primary btn-sm">
+                            <i class="ti tabler-plus me-1"></i> Add Employee
+                        </a>
+                    {% endif %}
                 </div>
             </div>
 

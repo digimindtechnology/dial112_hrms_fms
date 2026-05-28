@@ -1,49 +1,82 @@
 {% load ui_filter_tags %}
-<div class="table-responsive">
-    <table class="table table-bordered mb-0" >
-        <thead class="table-light">
-            <tr class="text-nowrap">
-                <th>#</th>
-                <th>Organization</th>
-                <th>Department</th>
-                <th>Designation</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Last Salary</th>
-                <th style="width:80px;">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for exp in experiences %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td class="fw-medium">{{ exp.organization_name }}</td>
-                <td>{{ exp.department|default:"—" }}</td>
-                <td>{{ exp.designation|default:"—" }}</td>
-                <td>{{ exp.start_date|dyn_date:request.date_format_value}}</td>
-                <td>{{ exp.end_date|dyn_date:request.date_format_value }}</td>
-                <td>{{ exp.last_salary|default:"—" }}</td>
-                <td class="text-nowrap">
-                    <a href="#" class="badge bg-label-info rounded"
-                       onclick="OpenExperienceForm('{{ obj.employee_unique_id }}', {{ exp.employee_experience_id }}); return false;"
-                       title="Edit">
-                        <i class="ti tabler-edit ti-md"></i>
-                    </a>
-                    <button class="badge bg-label-danger rounded"
-                            onclick="DeleteExperience({{ exp.employee_experience_id }}, '{{ obj.employee_unique_id }}')"
-                            title="Delete">
-                        <i class="ti tabler-trash ti-md"></i>
-                    </button>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="8" class="text-center py-5 text-muted">
-                    <i class="ti tabler-briefcase d-block mb-2" style="font-size:28px;"></i>
-                    No experience records added yet.
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+{% if experiences %}
+<div class="exp-list">
+    {% for exp in experiences %}
+
+    {% with org_initial=exp.organization_name|slice:":1"|upper %}
+    {% with color_idx=forloop.counter0|divisibleby:6 %}
+
+    <div class="exp-row">
+
+        <!-- Org badge with cycling colours -->
+        {% if forloop.counter0|divisibleby:6 %}
+            <div class="exp-org-badge" style="background:linear-gradient(135deg,#696cff,#9c8cfc);">{{ org_initial }}</div>
+        {% elif forloop.counter == 2 %}
+            <div class="exp-org-badge" style="background:linear-gradient(135deg,#28a745,#48c774);">{{ org_initial }}</div>
+        {% elif forloop.counter == 3 %}
+            <div class="exp-org-badge" style="background:linear-gradient(135deg,#17a2b8,#4ec9dd);">{{ org_initial }}</div>
+        {% elif forloop.counter == 4 %}
+            <div class="exp-org-badge" style="background:linear-gradient(135deg,#fd7e14,#ffa94d);">{{ org_initial }}</div>
+        {% elif forloop.counter == 5 %}
+            <div class="exp-org-badge" style="background:linear-gradient(135deg,#e83e8c,#f472b6);">{{ org_initial }}</div>
+        {% else %}
+            <div class="exp-org-badge" style="background:linear-gradient(135deg,#6f42c1,#9c6fde);">{{ org_initial }}</div>
+        {% endif %}
+
+        <!-- Content -->
+        <div class="flex-fill" style="min-width:0;">
+
+            <div class="exp-designation">{{ exp.designation|default:exp.organization_name }}</div>
+            <div class="exp-org-name">
+                <i class="ti tabler-building me-1" style="font-size:12px;"></i>{{ exp.organization_name }}
+            </div>
+
+            <div class="exp-meta">
+                {% if exp.department %}
+                <span class="ep-chip">
+                    <i class="ti tabler-layout-grid"></i>{{ exp.department }}
+                </span>
+                {% endif %}
+                <span class="ep-chip">
+                    <i class="ti tabler-calendar"></i>
+                    {{ exp.start_date|dyn_date:request.date_format_value }}
+                    &nbsp;→&nbsp;
+                    {% if exp.end_date %}{{ exp.end_date|dyn_date:request.date_format_value }}{% else %}<strong>Present</strong>{% endif %}
+                </span>
+                {% if exp.last_salary %}
+                <span class="ep-chip">
+                    <i class="ti tabler-currency-rupee"></i>{{ exp.last_salary }}
+                </span>
+                {% endif %}
+                {% if exp.reason_for_leaving %}
+                <span class="ep-chip">
+                    <i class="ti tabler-logout"></i>{{ exp.reason_for_leaving }}
+                </span>
+                {% endif %}
+            </div>
+
+            <div class="exp-actions">
+                <a href="#" class="btn btn-sm btn-label-info waves-effect"
+                   onclick="OpenExperienceForm('{{ obj.employee_unique_id }}', {{ exp.employee_experience_id }}); return false;">
+                    <i class="ti tabler-edit me-1"></i>Edit
+                </a>
+                <button class="btn btn-sm btn-label-danger waves-effect"
+                        onclick="DeleteExperience({{ exp.employee_experience_id }}, '{{ obj.employee_unique_id }}')">
+                    <i class="ti tabler-trash me-1"></i>Delete
+                </button>
+            </div>
+
+        </div>
+    </div>
+    {% endwith %}
+    {% endwith %}
+    {% endfor %}
 </div>
+{% else %}
+<div class="empty-state-grid">
+    <i class="ti tabler-briefcase-off"></i>
+    <p>No experience records added yet.<br>
+       <span style="font-size:12px;">Click <strong>Add Experience</strong> to add the first entry.</span>
+    </p>
+</div>
+{% endif %}

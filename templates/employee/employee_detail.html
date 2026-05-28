@@ -1,508 +1,956 @@
 {% extends "layout/layout_base.html" %}
 {% load static %}
-
-{% block title %}{{ obj.full_name }}, Emp Profile{% endblock %}
+{% block title %}{{ obj.full_name }}, Profile{% endblock %}
 
 {% block page_css %}
-<style>
-  .profile-banner {
-    height: 100px;
-    background: linear-gradient(135deg, var(--bs-primary) 0%, #9c8cfc 100%);
-    border-radius: 8px 8px 0 0;
-    position: relative;
-  }
-  .profile-avatar {
-    width: 76px; height: 76px; border-radius: 50%;
-    background: #fff;
-    color: var(--bs-primary);
-    font-size: 32px; font-weight: 700;
-    display: flex; align-items: center; justify-content: center;
-    border: 4px solid #fff;
-    box-shadow: 0 4px 16px rgba(0,0,0,.15);
-    position: absolute;
-    bottom: -48px;
-    left: 28px;
-  }
-  .profile-header-body {
-    padding: 45px 28px 20px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-  .quick-stat {
-    text-align: center;
-    padding: 14px 20px;
-    border-right: 1px solid var(--bs-border-color);
-    flex: 1;
-  }
-  .quick-stat:last-child { border-right: none; }
-  .quick-stat .qs-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--bs-secondary-color); margin-bottom: 4px; }
-  .quick-stat .qs-value { font-size: 14px; font-weight: 600; color: var(--bs-heading-color); }
+    <style>
+        /* ── Profile header ── */
+        .profile-banner { height: 100px; background: linear-gradient(135deg, var(--bs-primary) 0%, #9c8cfc 100%); border-radius: 8px 8px 0 0; position: relative; }
+        .profile-avatar { width: 90px; height: 90px; border-radius: 50%; background: #fff; color: var(--bs-primary); font-size: 32px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 4px solid #fff; box-shadow: 0 4px 16px rgba(0,0,0,.15); position: absolute; bottom: -48px; left: 28px; }
+        .profile-header-body { padding: 45px 28px 20px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 
-  .section-divider {
-    display: flex; align-items: center; gap: 10px;
-    padding: 18px 0 12px;
-    margin-bottom: 4px;
-  }
-  .section-divider .sd-icon {
-    width: 30px; height: 30px; border-radius: 7px;
-    background: var(--bs-primary-bg-subtle);
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  }
-  .section-divider .sd-icon i { color: var(--bs-primary); font-size: 16px; }
-  .section-divider span {
-    font-size: 11.5px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .7px; color: var(--bs-secondary-color);
-  }
+        /* ── Quick stats ── */
+        .quick-stat { text-align: center; padding: 14px 20px; border-right: 1px solid var(--bs-border-color); flex: 1; }
+        .quick-stat:last-child { border-right: none; }
+        .quick-stat .qs-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--bs-secondary-color); margin-bottom: 4px; }
+        .quick-stat .qs-value { font-size: 14px; font-weight: 600; color: var(--bs-heading-color); }
 
-  .field-row {
-    display: flex; flex-direction: column;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--bs-border-color);
-  }
-  .field-row:last-child { border-bottom: none; }
-  .field-label { font-size: 11.5px; color: var(--bs-secondary-color); font-weight: 500; margin-bottom: 2px; }
-  .field-value { font-size: 13.5px; color: var(--bs-heading-color); font-weight: 500; }
+        /* ── Section divider ── */
+        .section-divider { display: flex; align-items: center; gap: 10px; padding: 18px 0 12px; margin-bottom: 4px; }
+        .section-divider .sd-icon, .sd-icon { width: 30px; height: 30px; border-radius: 7px; background: var(--bs-primary-bg-subtle); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .section-divider .sd-icon i, .sd-icon i { color: var(--bs-primary); font-size: 16px; }
+        .section-divider span { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; color: var(--bs-secondary-color); }
 
-  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
-  .info-grid .field-row { padding: 10px 0; }
+        /* ── Field display ── */
+        .field-row { display: flex; flex-direction: column; padding: 10px 0; border-bottom: 1px solid var(--bs-border-color); }
+        .field-row:last-child { border-bottom: none; }
+        .field-label { font-size: 11.5px; color: var(--bs-secondary-color); font-weight: 500; margin-bottom: 2px; }
+        .field-value { font-size: 13.5px; color: var(--bs-heading-color); font-weight: 500; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
 
-  @media (max-width: 576px) {
-    .info-grid { grid-template-columns: 1fr; }
-    .quick-stat { border-right: none; border-bottom: 1px solid var(--bs-border-color); }
-  }
-</style>
+        @media (max-width: 576px) {
+            .info-grid { grid-template-columns: 1fr; }
+            .quick-stat { border-right: none; border-bottom: 1px solid var(--bs-border-color); }
+        }
+
+        /* ── Shared EP row sections ── */
+        .ep-list-wrap { border-radius: 0 0 10px 10px; overflow: hidden; }
+        .ep-row { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-bottom: 1px solid var(--bs-border-color); border-left: 4px solid transparent; transition: background .15s; background: var(--bs-card-bg); }
+        .ep-row:last-child { border-bottom: none; }
+        .ep-row:hover { background: var(--bs-primary-bg-subtle); }
+        .ep-row.border-valid   { border-left-color: #28a745; }
+        .ep-row.border-expired { border-left-color: #dc3545; }
+        .ep-row.border-muted   { border-left-color: #adb5bd; }
+        .ep-row.border-accent  { border-left-color: #696cff; }
+        .ep-icon { width: 46px; height: 46px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+        .ep-title { font-size: 13.5px; font-weight: 700; color: var(--bs-heading-color); line-height: 1.3; word-break: break-word; }
+        .ep-sub   { font-size: 12px; color: var(--bs-secondary-color); margin-top: 2px; }
+        .ep-chip  { display: inline-flex; align-items: center; gap: 4px; font-size: 11px;  background: var(--bs-tertiary-bg, rgba(0,0,0,.04)); border: 1px solid var(--bs-border-color); border-radius: 20px; padding: 2px 8px; }
+        .ep-chip i { font-size: 12px; }
+        .ep-actions { display: flex; align-items: center; gap: 5px; margin-left: auto; flex-shrink: 0; }
+
+        /* ── Manager avatar ── */
+        .mgr-avatar { width: 46px; height: 46px; border-radius: 50%; background: var(--bs-primary-bg-subtle); color: var(--bs-primary); font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 2px solid var(--bs-primary-border-subtle, rgba(105,108,255,.3)); }
+        .ep-row.border-muted .mgr-avatar { background: var(--bs-secondary-bg-subtle, rgba(0,0,0,.05)); color: var(--bs-secondary-color); border-color: var(--bs-border-color); }
+
+        /* ── Language badge ── */
+        .lang-badge { width: 46px; height: 46px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; flex-shrink: 0; letter-spacing: -1px; }
+
+        /* ── Skill chips ── */
+        .skill-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 600; border-radius: 20px; padding: 3px 9px; }
+        .skill-chip.skill-on  { background: rgba(40,167,69,.12); color: #28a745; border: 1px solid rgba(40,167,69,.25); }
+        .skill-chip.skill-off { background: var(--bs-tertiary-bg, rgba(0,0,0,.04));  border: 1px solid var(--bs-border-color); }
+
+        /* ── Education (resume row) ── */
+        .edu-list-wrap { display: flex; flex-direction: column; }
+        .edu-hcard { display: flex; border-bottom: 1px solid var(--bs-border-color); background: var(--bs-card-bg); transition: background .15s; }
+        .edu-hcard:last-child { border-bottom: none; }
+        .edu-hcard:hover { background: var(--bs-primary-bg-subtle); }
+        .edu-hcard-left { width: 82px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 6px; padding: 18px 10px 14px; border-right: 1px solid var(--bs-border-color); }
+        .edu-icon-circle { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+        .edu-year-tag { font-size: 12px; font-weight: 700; color: var(--bs-heading-color); text-align: center; background: var(--bs-tertiary-bg, rgba(0,0,0,.04)); border: 1px solid var(--bs-border-color); border-radius: 6px; padding: 2px 6px; width: 100%; }
+        .edu-hcard-right { flex: 1; min-width: 0; padding: 14px 18px; display: flex; flex-direction: column; gap: 4px; }
+        .edu-hcard-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+        .edu-qual  { font-size: 14px; font-weight: 700; color: var(--bs-heading-color); line-height: 1.3; }
+        .edu-inst  { font-size: 12.5px; color: var(--bs-heading-color); font-weight: 500; }
+        .edu-board { font-size: 11.5px; color: var(--bs-secondary-color); margin-top: 1px; }
+        .edu-hcard-footer { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--bs-border-color); }
+        .edu-pct-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 600; color: var(--bs-heading-color); background: var(--bs-tertiary-bg, rgba(0,0,0,.04)); border: 1px solid var(--bs-border-color); border-radius: 20px; padding: 3px 10px; }
+        .edu-hcard-actions { display: flex; gap: 5px; margin-left: auto; }
+
+        /* ── Work Experience ── */
+        .exp-row { display: flex; gap: 14px; padding: 16px 20px; border-bottom: 1px solid var(--bs-border-color); transition: background .15s; background: var(--bs-card-bg); }
+        .exp-row:last-child { border-bottom: none; }
+        .exp-row:hover { background: var(--bs-primary-bg-subtle); }
+        .exp-org-badge { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; flex-shrink: 0; color: #fff; letter-spacing: -1px; }
+        .exp-designation { font-size: 14px; font-weight: 700; color: var(--bs-heading-color); line-height: 1.3; }
+        .exp-org-name    { font-size: 12.5px; font-weight: 600; color: var(--bs-primary); margin-top: 1px; }
+        .exp-meta    { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; }
+        .exp-actions { display: flex; gap: 5px; margin-top: 10px; }
+
+        /* ── Job History Timeline ── */
+        .jh-timeline { position: relative; padding: 20px 20px 20px 52px; }
+        .jh-timeline::before { content: ''; position: absolute; top: 28px; bottom: 28px; left: 35px; width: 2px; background: var(--bs-border-color); border-radius: 2px; }
+        .jh-item { position: relative; margin-bottom: 16px; }
+        .jh-item:last-child { margin-bottom: 0; }
+        .jh-node { position: absolute; left: -25px; top: 18px; width: 14px; height: 14px; border-radius: 50%; background: var(--bs-primary); border: 3px solid var(--bs-card-bg); box-shadow: 0 0 0 2px var(--bs-primary); z-index: 1; }
+        .jh-item:first-child .jh-node { background: #28a745; box-shadow: 0 0 0 2px #28a745; }
+        .jh-box { border: 1px solid var(--bs-border-color); border-radius: 10px; padding: 14px 16px; background: var(--bs-card-bg); transition: box-shadow .2s, border-color .2s; }
+        .jh-box:hover { box-shadow: 0 4px 16px rgba(0,0,0,.09); border-color: var(--bs-primary); }
+        .jh-post { font-size: 14px; font-weight: 700; color: var(--bs-heading-color); }
+        .jh-milestones { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .jh-milestone { display: inline-flex; flex-direction: column; gap: 2px; background: var(--bs-tertiary-bg, rgba(0,0,0,.03)); border: 1px solid var(--bs-border-color); border-radius: 8px; padding: 6px 12px; }
+        .jh-milestone-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
+        .jh-milestone-value { font-size: 12.5px; font-weight: 600; color: var(--bs-heading-color); }
+        .jh-actions { display: flex; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--bs-border-color); }
+
+        /* ── Empty state ── */
+        .empty-state-grid { padding: 48px 24px; text-align: center; color: var(--bs-secondary-color); }
+        .empty-state-grid i { font-size: 40px; margin-bottom: 10px; display: block; opacity: .4; }
+        .empty-state-grid p { font-size: 13px; margin: 0; }
+
+        /* ── Family contact cards ── */
+        .family-card { border: 1px solid var(--bs-border-color); border-radius: 12px; overflow: hidden; height: 100%; display: flex; flex-direction: column; transition: box-shadow .2s, border-color .2s; background: var(--bs-card-bg); }
+        .family-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.09); border-color: var(--bs-primary); }
+        .family-card-header { padding: 16px; display: flex; align-items: center; gap: 12px; position: relative; border-bottom: 1px solid var(--bs-border-color); }
+        .family-avatar { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; flex-shrink: 0; }
+        .family-card-header .fc-name     { font-size: 14px; font-weight: 700; color: var(--bs-heading-color); line-height: 1.2; }
+        .family-card-header .fc-relation { font-size: 11px; color: var(--bs-secondary-color); margin-top: 2px; }
+        .family-emergency-badge { position: absolute; top: 10px; right: 12px; font-size: 10px; }
+        .family-card-body { padding: 12px 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; flex: 1; }
+        .fc-field { display: flex; flex-direction: column; gap: 2px; }
+        .fc-field-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; color: var(--bs-secondary-color); }
+        .fc-field-value { font-size: 12.5px; font-weight: 500; color: var(--bs-heading-color); }
+        .family-card-footer { padding: 10px 14px; border-top: 1px solid var(--bs-border-color); display: flex; gap: 6px; }
+    </style>
 {% endblock %}
 
 {% block content %}
 
-<!-- Breadcrumb -->
-<div class="d-flex align-items-center justify-content-between mb-4">
-  <div>
-    <h5 class="mb-1">Employee Profile</h5>
-    <ol class="breadcrumb breadcrumb-style1 mb-0" style="font-size:12px;">
-      <li class="breadcrumb-item"><a href="{% url 'employee-list' %}">Employees</a></li>
-      <li class="breadcrumb-item active">{{ obj.full_name }}</li>
-    </ol>
-  </div>
-  <div class="d-flex gap-2">
-    <a href="{% url 'employee-list' %}" class="btn btn-sm btn-label-secondary waves-effect">
-      <i class="ti tabler-arrow-left me-1"></i>Back
-    </a>
-    <a href="{% url 'employee-edit' obj.employee_unique_id %}" class="btn btn-sm btn-primary waves-effect">
-      <i class="ti tabler-edit me-1"></i>Edit
-    </a>
-  </div>
-</div>
-
-<div class="card">
-
-  <!-- Banner + Avatar -->
-  <div class="profile-banner">
-    <div class="profile-avatar">
-      {% if picture_url %}
-        <img src="{{ picture_url }}" alt="{{ obj.full_name }}"
-             style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
-      {% else %}
-        {{ obj.first_name|first|upper }}{{ obj.last_name|first|upper }}
-      {% endif %}
+    <!-- ── Basic Info ── -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h5 class="mb-1">Employee Profile</h5>
+            <ol class="breadcrumb breadcrumb-style1 mb-0" style="font-size:12px;">
+                <li class="breadcrumb-item"><a href="{% url 'employee-list' %}">Employees</a></li>
+                <li class="breadcrumb-item active">{{ obj.full_name }}</li>
+            </ol>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'employee-list' %}" class="btn btn-sm btn-label-secondary waves-effect">
+                <i class="ti tabler-arrow-left me-1"></i>Back
+            </a>
+            <a href="{% url 'employee-edit' obj.employee_unique_id %}" class="btn btn-sm btn-primary waves-effect">
+                <i class="ti tabler-edit me-1"></i>Edit
+            </a>
+        </div>
     </div>
-  </div>
+    <div class="card">
 
-  <!-- Name / Title row -->
-  <div class="profile-header-body">
-    <div>
-      <h4 class="mb-1 fw-bold">{{ obj.full_name }}</h4>
-      <div class="d-flex flex-wrap gap-3 align-items-center mt-1">
-        <span class="text-muted" style="font-size:13px;">
+        <!-- Banner + Avatar -->
+        <div class="profile-banner">
+            <div class="profile-avatar">
+                {% if picture_url %}
+                    <img src="{{ picture_url }}" alt="{{ obj.full_name }}"
+                         style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                {% else %}
+                    {{ obj.first_name|first|upper }}{{ obj.last_name|first|upper }}
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Name / Title row -->
+        <div class="profile-header-body">
+            <div>
+                <h4 class="mb-1 fw-bold">{{ obj.full_name }}</h4>
+                <div class="d-flex flex-wrap gap-3 align-items-center mt-1">
+        <span class="text-muted" style="font-size:14px;">
           <i class="ti tabler-award me-1"></i>{{ obj.designation }}
         </span>
-        {% if obj.department %}
-        <span class="text-muted" style="font-size:13px;">
+                    {% if obj.department %}
+                        <span class="text-muted" style="font-size:14px;">
           <i class="ti tabler-layout-grid me-1"></i>{{ obj.department }}
         </span>
-        {% endif %}
-        {% if obj.work_location %}
-        <span class="text-muted" style="font-size:13px;">
+                    {% endif %}
+                    {% if obj.work_location %}
+                        <span class="text-muted" style="font-size:14px;">
           <i class="ti tabler-building me-1"></i>{{ obj.work_location }}
         </span>
-        {% endif %}
-      </div>
-      <div class="d-flex flex-wrap gap-2 mt-2">
-        {% if obj.mobile %}
-        <span class="badge bg-label-secondary"><i class="ti tabler-phone me-1"></i>{{ obj.mobile }}</span>
-        {% endif %}
-        {% if obj.email %}
-        <span class="badge bg-label-secondary"><i class="ti tabler-mail me-1"></i>{{ obj.email }}</span>
-        {% endif %}
-      </div>
-    </div>
-    <span class="badge bg-label-{% if obj.employment_status == 'Active' %}success{% elif obj.employment_status == 'Inactive' %}warning{% else %}danger{% endif %} px-3 py-2 fs-6">
+                    {% endif %}
+                </div>
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                    {% if obj.mobile %}
+                        <span class="badge bg-label-primary"><i class="ti tabler-phone me-1"></i>{{ obj.mobile }}</span>
+                    {% endif %}
+                    {% if obj.email %}
+                        <span class="badge bg-label-primary"><i class="ti tabler-mail me-1"></i>{{ obj.email }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            <span class="badge bg-label-{% if obj.employment_status == 'Active' %}success{% elif obj.employment_status == 'Inactive' %}warning{% else %}danger{% endif %} px-3 py-2 fs-6">
       <i class="ti tabler-circle-filled me-1" style="font-size:8px;"></i>{{ obj.employment_status }}
     </span>
-  </div>
+        </div>
 
-  <!-- Quick stats bar -->
-  <div class="d-flex border-top border-bottom flex-wrap">
-    <div class="quick-stat">
-      <div class="qs-label">Employee Code</div>
-      <div class="qs-value">{{ obj.employee_code|default:"—" }}</div>
-    </div>
-    <div class="quick-stat">
-      <div class="qs-label">Joining Date</div>
-      <div class="qs-value">{{ obj.joining_date|default:"—" }}</div>
-    </div>
-    <div class="quick-stat">
-      <div class="qs-label">Employee Type</div>
-      <div class="qs-value">{{ obj.empType.name|default:"—" }}</div>
-    </div>
-    <div class="quick-stat">
-      <div class="qs-label">Blood Group</div>
-      <div class="qs-value">{{ obj.blood_group|default:"—" }}</div>
-    </div>
-    <div class="quick-stat">
-      <div class="qs-label">Nationality</div>
-      <div class="qs-value">{{ obj.nationality|default:"—" }}</div>
-    </div>
-    <div class="quick-stat">
-      <div class="qs-label">Employee Status</div>
-      <div class="qs-value">
-        {% if obj.empStatus %}
-          <span class="badge {{ obj.empStatus.employee_status_css|default:'bg-label-secondary' }}">
+        <!-- Quick stats bar -->
+        <div class="d-flex border-top border-bottom flex-wrap">
+            <div class="quick-stat">
+                <div class="qs-label">Emp Code</div>
+                <div class="qs-value">{{ obj.employee_code|default:"—" }}</div>
+            </div>
+            <div class="quick-stat">
+                <div class="qs-label">Joining Date</div>
+                <div class="qs-value">{{ obj.joining_date|default:"—" }}</div>
+            </div>
+            <div class="quick-stat">
+                <div class="qs-label">Employee Type</div>
+                <div class="qs-value">{{ obj.empType.name|default:"—" }}</div>
+            </div>
+            <div class="quick-stat">
+                <div class="qs-label">Employee Category</div>
+                <div class="qs-value">{{ obj.empCategory.name|default:"—" }}</div>
+            </div>
+            <div class="quick-stat">
+                <div class="qs-label">Blood Group</div>
+                <div class="qs-value">{{ obj.blood_group|default:"—" }}</div>
+            </div>
+            <div class="quick-stat">
+                <div class="qs-label">Nationality</div>
+                <div class="qs-value">{{ obj.nationality|default:"—" }}</div>
+            </div>
+            <div class="quick-stat">
+                <div class="qs-label">Emp Status</div>
+                <div class="qs-value">
+                    {% if obj.empStatus %}
+                        <span class="badge {{ obj.empStatus.employee_status_css|default:'bg-label-secondary' }}">
             {{ obj.empStatus.employee_status_name }}
           </span>
-        {% else %}—{% endif %}
-      </div>
-    </div>
-  </div>
-
-  <!-- ── All sections inside the card body ── -->
-  <div class="card-body px-4">
-
-    <div class="row g-0">
-
-      <!-- ════ LEFT COLUMN ════ -->
-      <div class="col-lg-6 pe-lg-4">
-
-        <!-- Personal Information -->
-        <div class="section-divider">
-          <div class="sd-icon"><i class="ti tabler-user"></i></div>
-          <span>Personal Information</span>
-        </div>
-        <div class="info-grid">
-          <div class="field-row">
-            <div class="field-label">Date of Birth</div>
-            <div class="field-value">{{ obj.date_of_birth|default:"—" }}</div>
-          </div>
-          <div class="field-row">
-            <div class="field-label">Gender</div>
-            <div class="field-value">{{ obj.gender.gender_name|default:"—" }}</div>
-          </div>
-          <div class="field-row">
-            <div class="field-label">Marital Status</div>
-            <div class="field-value">{{ obj.marital_status|default:"—" }}</div>
-          </div>
-          <div class="field-row">
-            <div class="field-label">Caste</div>
-            <div class="field-value">{{ obj.caste.employee_caste_name|default:"—" }}</div>
-          </div>
-          <div class="field-row">
-            <div class="field-label">Religion</div>
-            <div class="field-value">{{ obj.religion|default:"—" }}</div>
-          </div>
-          <div class="field-row">
-            <div class="field-label">Father's Name</div>
-            <div class="field-value">{{ obj.father_name|default:"—" }}</div>
-          </div>
-          <div class="field-row">
-            <div class="field-label">Mother's Name</div>
-            <div class="field-value">{{ obj.mother_name|default:"—" }}</div>
-          </div>
+                    {% else %}—{% endif %}
+                </div>
+            </div>
         </div>
 
-        <!-- Identity Documents -->
-        <div class="section-divider mt-2">
-          <div class="sd-icon"><i class="ti tabler-id"></i></div>
-          <span>Identity Documents</span>
-        </div>
-        <div class="info-grid">
-          <div class="field-row">
-            <div class="field-label">Aadhaar Number</div>
-            <div class="field-value">{{ obj.aadhaar_number|default:"—" }}</div>
-          </div>
-          <div class="field-row">
-            <div class="field-label">PAN Number</div>
-            <div class="field-value">{{ obj.pan_number|default:"—" }}</div>
-          </div>
-          <div class="field-row">
-            <div class="field-label">Passport Number</div>
-            <div class="field-value">{{ obj.passport_number|default:"—" }}</div>
-          </div>
-        </div>
+        <!-- ── All sections inside the card body ── -->
+        <div class="card-body px-4">
 
-        <!-- Address -->
-        <div class="section-divider mt-2">
-          <div class="sd-icon"><i class="ti tabler-map-pin"></i></div>
-          <span>Address</span>
-        </div>
-        <div class="info-grid">
-          <div class="field-row">
-            <div class="field-label">District</div>
-            <div class="field-value">{{ obj.district.district_name|default:"—" }}</div>
-          </div>
-          <div class="field-row">
-            <div class="field-label">City</div>
-            <div class="field-value">{{ obj.city|default:"—" }}</div>
-          </div>
-          <div class="field-row">
-            <div class="field-label">Postal Code</div>
-            <div class="field-value">{{ obj.postal_code|default:"—" }}</div>
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field-label">Current Address</div>
-          <div class="field-value">{{ obj.current_address|default:"—" }}</div>
-        </div>
-        <div class="field-row">
-          <div class="field-label">Permanent Address</div>
-          <div class="field-value">{{ obj.permanent_address|default:"—" }}</div>
-        </div>
+            <div class="row g-0">
 
-      </div><!-- /left -->
+                <!-- ════ LEFT COLUMN ════ -->
+                <div class="col-lg-6 pe-lg-4">
 
-      <!-- vertical divider -->
-      <div class="col-lg-1 d-none d-lg-flex justify-content-center">
-        <div style="width:1px; background: var(--bs-border-color); min-height: 100%;"></div>
-      </div>
+                    <!-- Personal Information -->
+                    <div class="section-divider">
+                        <div class="sd-icon"><i class="ti tabler-user"></i></div>
+                        <span>Personal Information</span>
+                    </div>
+                    <div class="info-grid">
+                        <div class="field-row">
+                            <div class="field-label">Date of Birth</div>
+                            <div class="field-value">{{ obj.date_of_birth|default:"—" }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-label">Gender</div>
+                            <div class="field-value">{{ obj.gender.gender_name|default:"—" }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-label">Marital Status</div>
+                            <div class="field-value">{{ obj.marital_status|default:"—" }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-label">Caste</div>
+                            <div class="field-value">{{ obj.caste.employee_caste_name|default:"—" }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-label">Religion</div>
+                            <div class="field-value">{{ obj.religion|default:"—" }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-label">Father's Name</div>
+                            <div class="field-value">{{ obj.father_name|default:"—" }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-label">Mother's Name</div>
+                            <div class="field-value">{{ obj.mother_name|default:"—" }}</div>
+                        </div>
+                    </div>
 
-      <!-- ════ RIGHT COLUMN ════ -->
-      <div class="col-lg-5 ps-lg-4">
+                    <!-- Identity Documents -->
+                    <div class="section-divider mt-2">
+                        <div class="sd-icon"><i class="ti tabler-id"></i></div>
+                        <span>Identity Documents</span>
+                    </div>
+                    <div class="info-grid">
+                        <div class="field-row">
+                            <div class="field-label">Aadhaar Number</div>
+                            <div class="field-value">{{ obj.aadhaar_number|default:"—" }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-label">PAN Number</div>
+                            <div class="field-value">{{ obj.pan_number|default:"—" }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-label">Passport Number</div>
+                            <div class="field-value">{{ obj.passport_number|default:"—" }}</div>
+                        </div>
+                    </div>
 
-        <!-- Employment Details -->
-        <div class="section-divider">
-          <div class="sd-icon"><i class="ti tabler-briefcase"></i></div>
-          <span>Employment Details</span>
-        </div>
-        <div class="info-grid">
-          <div class="field-row">
-            <div class="field-label">Employee Code</div>
-            <div class="field-value">{{ obj.employee_code|default:"—" }}</div>
-          </div>
-          <div class="field-row">
-            <div class="field-label">Designation</div>
-            <div class="field-value">{{ obj.designation|default:"—" }}</div>
-          </div>
-          <div class="field-row">
-            <div class="field-label">Department</div>
-            <div class="field-value">{{ obj.department|default:"—" }}</div>
-          </div>
-          <div class="field-row">
-            <div class="field-label">Joining Date</div>
-            <div class="field-value">{{ obj.joining_date|default:"—" }}</div>
-          </div>
-          <div class="field-row">
-            <div class="field-label">Employee Type</div>
-            <div class="field-value">{{ obj.empType.name|default:"—" }}</div>
-          </div>
-          <div class="field-row">
-            <div class="field-label">Work Location</div>
-            <div class="field-value">{{ obj.work_location|default:"—" }}</div>
-          </div>
-          <div class="field-row">
-            <div class="field-label">Employment Status</div>
-            <div class="field-value">
+                    <!-- Address -->
+                    <div class="section-divider mt-2">
+                        <div class="sd-icon"><i class="ti tabler-map-pin"></i></div>
+                        <span>Address</span>
+                    </div>
+                    <div class="info-grid">
+                        <div class="field-row">
+                            <div class="field-label">District</div>
+                            <div class="field-value">{{ obj.district.district_name|default:"—" }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-label">City</div>
+                            <div class="field-value">{{ obj.city|default:"—" }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-label">Postal Code</div>
+                            <div class="field-value">{{ obj.postal_code|default:"—" }}</div>
+                        </div>
+                    </div>
+                    <div class="field-row">
+                        <div class="field-label">Current Address</div>
+                        <div class="field-value">{{ obj.current_address|default:"—" }}</div>
+                    </div>
+                    <div class="field-row">
+                        <div class="field-label">Permanent Address</div>
+                        <div class="field-value">{{ obj.permanent_address|default:"—" }}</div>
+                    </div>
+
+                </div><!-- /left -->
+
+                <!-- vertical divider -->
+                <div class="col-lg-1 d-none d-lg-flex justify-content-center">
+                    <div style="width:1px; background: var(--bs-border-color); min-height: 100%;"></div>
+                </div>
+
+                <!-- ════ RIGHT COLUMN ════ -->
+                <div class="col-lg-5 ps-lg-4">
+
+                    <!-- Employment Details -->
+                    <div class="section-divider">
+                        <div class="sd-icon"><i class="ti tabler-briefcase"></i></div>
+                        <span>Employment Details</span>
+                    </div>
+                    <div class="info-grid">
+                        <div class="field-row">
+                            <div class="field-label">Employee Code</div>
+                            <div class="field-value">{{ obj.employee_code|default:"—" }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-label">Designation</div>
+                            <div class="field-value">{{ obj.designation|default:"—" }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-label">Department</div>
+                            <div class="field-value">{{ obj.department|default:"—" }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-label">Joining Date</div>
+                            <div class="field-value">{{ obj.joining_date|default:"—" }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-label">Employee Type</div>
+                            <div class="field-value">{{ obj.empType.name|default:"—" }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-label">Employee Category</div>
+                            <div class="field-value">{{ obj.empCategory.name|default:"—" }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-label">Work Location</div>
+                            <div class="field-value">{{ obj.work_location|default:"—" }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-label">Employment Status</div>
+                            <div class="field-value">
               <span class="badge bg-label-{% if obj.employment_status == 'Active' %}success{% elif obj.employment_status == 'Inactive' %}warning{% else %}danger{% endif %}">
                 {{ obj.employment_status }}
               </span>
-            </div>
-          </div>
-          <div class="field-row">
-            <div class="field-label">Employee Status</div>
-            <div class="field-value">
-              {% if obj.empStatus %}
-                <span class="badge {{ obj.empStatus.employee_status_css|default:'bg-label-secondary' }}">
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-label">Employee Status</div>
+                            <div class="field-value">
+                                {% if obj.empStatus %}
+                                    <span class="badge {{ obj.empStatus.employee_status_css|default:'bg-label-secondary' }}">
                   {{ obj.empStatus.employee_status_name }}
                 </span>
-              {% else %}—{% endif %}
-            </div>
-          </div>
-        </div>
+                                {% else %}—{% endif %}
+                            </div>
+                        </div>
+                    </div>
 
-        <!-- Bank Details -->
-        <div class="section-divider mt-2">
-          <div class="sd-icon"><i class="ti tabler-building-bank"></i></div>
-          <span>Bank Details</span>
-        </div>
-        <div class="info-grid">
-          <div class="field-row">
-            <div class="field-label">Bank Name</div>
-            <div class="field-value">{{ obj.bank_name|default:"—" }}</div>
-          </div>
-          <div class="field-row">
-            <div class="field-label">IFSC Code</div>
-            <div class="field-value">{{ obj.ifsc_code|default:"—" }}</div>
-          </div>
-          <div class="field-row">
-            <div class="field-label">Account Number</div>
-            <div class="field-value">{{ obj.bank_account_number|default:"—" }}</div>
-          </div>
-          <div class="field-row">
-            <div class="field-label">Branch Address</div>
-            <div class="field-value">{{ obj.bank_address|default:"—" }}</div>
-          </div>
-        </div>
+                    <!-- Bank Details -->
+                    <div class="section-divider mt-2">
+                        <div class="sd-icon"><i class="ti tabler-building-bank"></i></div>
+                        <span>Bank Details</span>
+                    </div>
+                    <div class="info-grid">
+                        <div class="field-row">
+                            <div class="field-label">Bank Name</div>
+                            <div class="field-value">{{ obj.bank_name|default:"—" }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-label">IFSC Code</div>
+                            <div class="field-value">{{ obj.ifsc_code|default:"—" }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-label">Account Number</div>
+                            <div class="field-value">{{ obj.bank_account_number|default:"—" }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-label">Branch Address</div>
+                            <div class="field-value">{{ obj.bank_address|default:"—" }}</div>
+                        </div>
+                    </div>
 
-        <!-- Compliance -->
-        <div class="section-divider mt-2">
-          <div class="sd-icon"><i class="ti tabler-shield-check"></i></div>
-          <span>Compliance</span>
-        </div>
-        <div class="info-grid">
-          <div class="field-row">
-            <div class="field-label">PF Eligible</div>
-            <div class="field-value">
-              {% if obj.is_eligible_for_pf %}
-                <span class="badge bg-label-success">Yes</span>
-              {% else %}
-                <span class="badge bg-label-secondary">No</span>
-              {% endif %}
-            </div>
-          </div>
-          <div class="field-row">
-            <div class="field-label">PF Number</div>
-            <div class="field-value">{{ obj.pf_number|default:"—" }}</div>
-          </div>
-          <div class="field-row">
-            <div class="field-label">Gratuity Eligible</div>
-            <div class="field-value">
-              {% if obj.is_gratuity %}
-                <span class="badge bg-label-success">Yes</span>
-              {% else %}
-                <span class="badge bg-label-secondary">No</span>
-              {% endif %}
-            </div>
-          </div>
-        </div>
+                    <!-- Compliance -->
+                    <div class="section-divider mt-2">
+                        <div class="sd-icon"><i class="ti tabler-shield-check"></i></div>
+                        <span>Compliance</span>
+                    </div>
+                    <div class="info-grid">
+                        <div class="field-row">
+                            <div class="field-label">PF Eligible</div>
+                            <div class="field-value">
+                                {% if obj.is_eligible_for_pf %}
+                                    <span class="badge bg-label-success">Yes</span>
+                                {% else %}
+                                    <span class="badge bg-label-secondary">No</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-label">PF Number</div>
+                            <div class="field-value">{{ obj.pf_number|default:"—" }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-label">Gratuity Eligible</div>
+                            <div class="field-value">
+                                {% if obj.is_gratuity %}
+                                    <span class="badge bg-label-success">Yes</span>
+                                {% else %}
+                                    <span class="badge bg-label-secondary">No</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
 
-      </div><!-- /right -->
+                </div><!-- /right -->
 
-    </div><!-- /row -->
+            </div><!-- /row -->
 
-  </div><!-- /card-body -->
-</div>
-
-<!-- ── Education Card ── -->
-<div class="card mt-4 d-none">
-  <div class="card-header border-bottom d-flex align-items-center justify-content-between py-3">
-    <div class="d-flex align-items-center gap-2">
-      <div class="sd-icon"><i class="ti tabler-school"></i></div>
-      <span style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--bs-secondary-color);">Education</span>
+        </div><!-- /card-body -->
     </div>
-    <button class="btn btn-primary btn-sm waves-effect waves-light" onclick="OpenEducationForm('{{ obj.employee_unique_id }}', 0)">
-      <i class="ti tabler-plus me-1"></i>Add Education
-    </button>
-  </div>
-  <div class="card-body p-0">
-    <div id="div_EducationList"></div>
-  </div>
-</div>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    LoadEducationList('{{ obj.employee_unique_id }}');
-  });
+    <!-- ── Basic Info ── -->
 
-  function LoadEducationList(empUniqueId) {
-    $('#div_EducationList').load('/employee/' + empUniqueId + '/education/list/');
-  }
+    <div class="row">
+        <div class="col-md-6">
+            <!-- ── Education Card ── -->
+            <div class="card mt-4">
+                <div class="card-header border-bottom d-flex align-items-center justify-content-between py-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="sd-icon"><i class="ti tabler-school"></i></div>
+                        <span style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--bs-secondary-color);">Education</span>
+                    </div>
+                    <button class="btn btn-primary btn-sm waves-effect waves-light" onclick="OpenEducationForm('{{ obj.employee_unique_id }}', 0)">
+                        <i class="ti tabler-plus me-1"></i>Add Education
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div id="div_EducationList"></div>
+                </div>
+            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    LoadEducationList('{{ obj.employee_unique_id }}');
+                });
 
-  function OpenEducationForm(empUniqueId, pk) {
-    $('#div_BindPartialPages').load('/employee/' + empUniqueId + '/education/form/' + pk + '/',
-      function () { $('#Modal_BindPartialPages').modal('show'); }
-    );
-  }
+                function LoadEducationList(empUniqueId) {
+                    $('#div_EducationList').load('/employee/' + empUniqueId + '/education/list/');
+                }
 
-  function DeleteEducation(pk, empUniqueId) {
-    Swal.fire({
-      title: 'Delete Education?',
-      text: 'This education record will be permanently deleted.',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, delete it!',
-      cancelButtonText: 'Cancel',
-      confirmButtonColor: '#d33',
-    }).then(function (result) {
-      if (!result.isConfirmed) return;
-      $.post('{% url "education-delete" %}', {
-        pk: pk,
-        csrfmiddlewaretoken: '{{ csrf_token }}'
-      }, function (resp) {
-        if (resp.success) {
-          Swal.fire({icon: 'success', title: 'Deleted successfully', timer: 2000, showConfirmButton: false});
-          LoadEducationList(empUniqueId);
-        } else {
-          Swal.fire({icon: 'error', title: resp.error || 'Delete failed', timer: 3000, showConfirmButton: false});
-        }
-      });
-    });
-  }
-</script>
+                function OpenEducationForm(empUniqueId, pk) {
+                    $('#div_BindPartialPages').load('/employee/' + empUniqueId + '/education/form/' + pk + '/',
+                        function () {
+                            $('#Modal_BindPartialPages').modal('show');
+                        }
+                    );
+                }
 
-<!-- ── Experience Card ── -->
-<div class="card mt-4 d-none">
-  <div class="card-header border-bottom d-flex align-items-center justify-content-between py-3">
-    <div class="d-flex align-items-center gap-2">
-      <div class="sd-icon"><i class="ti tabler-briefcase"></i></div>
-      <span style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--bs-secondary-color);">Work Experience</span>
+                function DeleteEducation(pk, empUniqueId) {
+                    Swal.fire({
+                        title: 'Delete Education?',
+                        text: 'This education record will be permanently deleted.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, delete it!',
+                        cancelButtonText: 'Cancel',
+                        confirmButtonColor: '#d33',
+                    }).then(function (result) {
+                        if (!result.isConfirmed) return;
+                        $.post('{% url "education-delete" %}', {
+                            pk: pk,
+                            csrfmiddlewaretoken: '{{ csrf_token }}'
+                        }, function (resp) {
+                            if (resp.success) {
+                                Swal.fire({icon: 'success', title: 'Deleted successfully', timer: 2000, showConfirmButton: false});
+                                LoadEducationList(empUniqueId);
+                            } else {
+                                Swal.fire({icon: 'error', title: resp.error || 'Delete failed', timer: 3000, showConfirmButton: false});
+                            }
+                        });
+                    });
+                }
+            </script>
+        </div>
+        <!-- ── Education Card ── -->
+
+        <!-- ── Experience Card ── -->
+        <div class="col-md-6">
+            <div class="card mt-4">
+                <div class="card-header border-bottom d-flex align-items-center justify-content-between py-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="sd-icon"><i class="ti tabler-briefcase"></i></div>
+                        <span style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--bs-secondary-color);">Work Experience</span>
+                    </div>
+                    <button class="btn btn-primary btn-sm waves-effect waves-light" onclick="OpenExperienceForm('{{ obj.employee_unique_id }}', 0)">
+                        <i class="ti tabler-plus me-1"></i>Add Experience
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div id="div_ExperienceList"></div>
+                </div>
+            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    LoadExperienceList('{{ obj.employee_unique_id }}');
+                });
+
+                function LoadExperienceList(empUniqueId) {
+                    $('#div_ExperienceList').load('/employee/' + empUniqueId + '/experience/list/');
+                }
+
+                function OpenExperienceForm(empUniqueId, pk) {
+                    $('#div_BindPartialPages').load('/employee/' + empUniqueId + '/experience/form/' + pk + '/',
+                        function () {
+                            $('#Modal_BindPartialPages').modal('show');
+                        }
+                    );
+                }
+
+                function DeleteExperience(pk, empUniqueId) {
+                    Swal.fire({
+                        title: 'Delete Experience?',
+                        text: 'This experience record will be permanently deleted.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, delete it!',
+                        cancelButtonText: 'Cancel',
+                        confirmButtonColor: '#d33',
+                    }).then(function (result) {
+                        if (!result.isConfirmed) return;
+                        $.post('{% url "experience-delete" %}', {
+                            pk: pk,
+                            csrfmiddlewaretoken: '{{ csrf_token }}'
+                        }, function (resp) {
+                            if (resp.success) {
+                                Swal.fire({icon: 'success', title: 'Deleted successfully', timer: 2000, showConfirmButton: false});
+                                LoadExperienceList(empUniqueId);
+                            } else {
+                                Swal.fire({icon: 'error', title: resp.error || 'Delete failed', timer: 3000, showConfirmButton: false});
+                            }
+                        });
+                    });
+                }
+            </script>
+        </div>
+        <!-- ── Experience Card ── -->
     </div>
-    <button class="btn btn-primary btn-sm waves-effect waves-light" onclick="OpenExperienceForm('{{ obj.employee_unique_id }}', 0)">
-      <i class="ti tabler-plus me-1"></i>Add Experience
-    </button>
-  </div>
-  <div class="card-body p-0">
-    <div id="div_ExperienceList"></div>
-  </div>
-</div>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    LoadExperienceList('{{ obj.employee_unique_id }}');
-  });
 
-  function LoadExperienceList(empUniqueId) {
-    $('#div_ExperienceList').load('/employee/' + empUniqueId + '/experience/list/');
-  }
+    <!-- ── Job History Card ── -->
+    <div class="card mt-4">
+        <div class="card-header border-bottom d-flex align-items-center justify-content-between py-3">
+            <div class="d-flex align-items-center gap-2">
+                <div class="sd-icon"><i class="ti tabler-history"></i></div>
+                <span style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--bs-secondary-color);">Job History</span>
+            </div>
+            <button class="btn btn-primary btn-sm waves-effect waves-light"
+                    onclick="OpenJobHistoryForm('{{ obj.employee_unique_id }}', 0)">
+                <i class="ti tabler-plus me-1"></i>Add Job History
+            </button>
+        </div>
+        <div class="card-body p-0">
+            <div id="div_JobHistoryList"></div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            LoadJobHistoryList('{{ obj.employee_unique_id }}');
+        });
 
-  function OpenExperienceForm(empUniqueId, pk) {
-    $('#div_BindPartialPages').load('/employee/' + empUniqueId + '/experience/form/' + pk + '/',
-      function () { $('#Modal_BindPartialPages').modal('show'); }
-    );
-  }
-
-  function DeleteExperience(pk, empUniqueId) {
-    Swal.fire({
-      title: 'Delete Experience?',
-      text: 'This experience record will be permanently deleted.',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, delete it!',
-      cancelButtonText: 'Cancel',
-      confirmButtonColor: '#d33',
-    }).then(function (result) {
-      if (!result.isConfirmed) return;
-      $.post('{% url "experience-delete" %}', {
-        pk: pk,
-        csrfmiddlewaretoken: '{{ csrf_token }}'
-      }, function (resp) {
-        if (resp.success) {
-          Swal.fire({icon: 'success', title: 'Deleted successfully', timer: 2000, showConfirmButton: false});
-          LoadExperienceList(empUniqueId);
-        } else {
-          Swal.fire({icon: 'error', title: resp.error || 'Delete failed', timer: 3000, showConfirmButton: false});
+        function LoadJobHistoryList(empUniqueId) {
+            $('#div_JobHistoryList').load('/employee/' + empUniqueId + '/job-history/list/');
         }
-      });
-    });
-  }
-</script>
+
+        function OpenJobHistoryForm(empUniqueId, pk) {
+            $('#div_BindPartialPages').load('/employee/' + empUniqueId + '/job-history/form/' + pk + '/',
+                function () {
+                    $('#Modal_BindPartialPages').modal('show');
+                }
+            );
+        }
+
+        function DeleteJobHistory(pk, empUniqueId) {
+            Swal.fire({
+                title: 'Delete Job History?',
+                text: 'This job history record will be permanently deleted.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#d33',
+            }).then(function (result) {
+                if (!result.isConfirmed) return;
+                $.post('{% url "job-history-delete" %}', {
+                    pk: pk,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                }, function (resp) {
+                    if (resp.success) {
+                        Swal.fire({icon: 'success', title: 'Deleted successfully', timer: 2000, showConfirmButton: false});
+                        LoadJobHistoryList(empUniqueId);
+                    } else {
+                        Swal.fire({icon: 'error', title: resp.error || 'Delete failed', timer: 3000, showConfirmButton: false});
+                    }
+                });
+            });
+        }
+    </script>
+
+
+
+    <div class="row">
+        <div class="col-md-6">
+            <!-- ── Certification Card ── -->
+            <div class="card mt-4">
+                <div class="card-header border-bottom d-flex align-items-center justify-content-between py-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="sd-icon"><i class="ti tabler-certificate"></i></div>
+                        <span style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--bs-secondary-color);">Certifications</span>
+                    </div>
+                    <button class="btn btn-primary btn-sm waves-effect waves-light" onclick="OpenCertificationForm('{{ obj.employee_unique_id }}', 0)">
+                        <i class="ti tabler-plus me-1"></i>Add Certification
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div id="div_CertificationList"></div>
+                </div>
+            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    LoadCertificationList('{{ obj.employee_unique_id }}');
+                });
+
+                function LoadCertificationList(empUniqueId) {
+                    $('#div_CertificationList').load('/employee/' + empUniqueId + '/certification/list/');
+                }
+
+                function OpenCertificationForm(empUniqueId, pk) {
+                    $('#div_BindPartialPages').load('/employee/' + empUniqueId + '/certification/form/' + pk + '/',
+                        function () {
+                            $('#Modal_BindPartialPages').modal('show');
+                        }
+                    );
+                }
+
+                function DeleteCertification(pk, empUniqueId) {
+                    Swal.fire({
+                        title: 'Delete Certification?',
+                        text: 'This certification record will be permanently deleted.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, delete it!',
+                        cancelButtonText: 'Cancel',
+                        confirmButtonColor: '#d33',
+                    }).then(function (result) {
+                        if (!result.isConfirmed) return;
+                        $.post('{% url "certification-delete" %}', {
+                            pk: pk,
+                            csrfmiddlewaretoken: '{{ csrf_token }}'
+                        }, function (resp) {
+                            if (resp.success) {
+                                Swal.fire({icon: 'success', title: 'Deleted successfully', timer: 2000, showConfirmButton: false});
+                                LoadCertificationList(empUniqueId);
+                            } else {
+                                Swal.fire({icon: 'error', title: resp.error || 'Delete failed', timer: 3000, showConfirmButton: false});
+                            }
+                        });
+                    });
+                }
+            </script>
+        </div>
+        <!-- ── Certification Card ── -->
+
+        <!-- ── Language Card ── -->
+        <div class="col-md-6">
+            <div class="card mt-4">
+                <div class="card-header border-bottom d-flex align-items-center justify-content-between py-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="sd-icon"><i class="ti tabler-language"></i></div>
+                        <span style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--bs-secondary-color);">Languages</span>
+                    </div>
+                    <button class="btn btn-primary btn-sm waves-effect waves-light" onclick="OpenLanguageForm('{{ obj.employee_unique_id }}', 0)">
+                        <i class="ti tabler-plus me-1"></i>Add Language
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div id="div_LanguageList"></div>
+                </div>
+            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    LoadLanguageList('{{ obj.employee_unique_id }}');
+                });
+
+                function LoadLanguageList(empUniqueId) {
+                    $('#div_LanguageList').load('/employee/' + empUniqueId + '/language/list/');
+                }
+
+                function OpenLanguageForm(empUniqueId, pk) {
+                    $('#div_BindPartialPages').load('/employee/' + empUniqueId + '/language/form/' + pk + '/',
+                        function () {
+                            $('#Modal_BindPartialPages').modal('show');
+                        }
+                    );
+                }
+
+                function DeleteLanguage(pk, empUniqueId) {
+                    Swal.fire({
+                        title: 'Delete Language?',
+                        text: 'This language record will be permanently deleted.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, delete it!',
+                        cancelButtonText: 'Cancel',
+                        confirmButtonColor: '#d33',
+                    }).then(function (result) {
+                        if (!result.isConfirmed) return;
+                        $.post('{% url "language-delete" %}', {
+                            pk: pk,
+                            csrfmiddlewaretoken: '{{ csrf_token }}'
+                        }, function (resp) {
+                            if (resp.success) {
+                                Swal.fire({icon: 'success', title: 'Deleted successfully', timer: 2000, showConfirmButton: false});
+                                LoadLanguageList(empUniqueId);
+                            } else {
+                                Swal.fire({icon: 'error', title: resp.error || 'Delete failed', timer: 3000, showConfirmButton: false});
+                            }
+                        });
+                    });
+                }
+            </script>
+        </div>
+        <!-- ── Language Card ── -->
+    </div>
+
+
+
+    <div class="row">
+        <!-- ── Document Card ── -->
+        <div class="col-md-6">
+            <div class="card mt-4">
+                <div class="card-header border-bottom d-flex align-items-center justify-content-between py-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="sd-icon"><i class="ti tabler-file"></i></div>
+                        <div>
+                            <span style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--bs-secondary-color);">Documents</span>
+                            <div style="font-size:11px;color:var(--bs-secondary-color);font-weight:400;margin-top:1px;">
+                                Certificates, IDs, and official records
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-sm waves-effect waves-light"
+                            onclick="OpenDocumentForm('{{ obj.employee_unique_id }}', 0)">
+                        <i class="ti tabler-plus me-1"></i>Add Document
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div id="div_DocumentList"></div>
+                </div>
+            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    LoadDocumentList('{{ obj.employee_unique_id }}');
+                });
+
+                function LoadDocumentList(empUniqueId) {
+                    $('#div_DocumentList').load('/employee/' + empUniqueId + '/document/list/');
+                }
+
+                function OpenDocumentForm(empUniqueId, pk) {
+                    $('#div_BindPartialPages').load('/employee/' + empUniqueId + '/document/form/' + pk + '/',
+                        function () {
+                            $('#Modal_BindPartialPages').modal('show');
+                        }
+                    );
+                }
+
+                function DeleteDocument(pk, empUniqueId) {
+                    Swal.fire({
+                        title: 'Delete Document?',
+                        text: 'This document record will be permanently deleted.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, delete it!',
+                        cancelButtonText: 'Cancel',
+                        confirmButtonColor: '#d33',
+                    }).then(function (result) {
+                        if (!result.isConfirmed) return;
+                        $.post('{% url "document-delete" %}', {
+                            pk: pk,
+                            csrfmiddlewaretoken: '{{ csrf_token }}'
+                        }, function (resp) {
+                            if (resp.success) {
+                                Swal.fire({icon: 'success', title: 'Deleted successfully', timer: 2000, showConfirmButton: false});
+                                LoadDocumentList(empUniqueId);
+                            } else {
+                                Swal.fire({icon: 'error', title: resp.error || 'Delete failed', timer: 3000, showConfirmButton: false});
+                            }
+                        });
+                    });
+                }
+            </script>
+        </div>
+        <!-- ── Reporting Manager Card ── -->
+        <div class="col-md-6">
+            <div class="card mt-4">
+                <div class="card-header border-bottom d-flex align-items-center justify-content-between py-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="sd-icon"><i class="ti tabler-user-check"></i></div>
+                        <div>
+                            <span style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--bs-secondary-color);">Reporting Manager</span>
+                            <div style="font-size:11px;color:var(--bs-secondary-color);font-weight:400;margin-top:1px;">
+                                Current and previous reporting hierarchy
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-sm waves-effect waves-light"
+                            onclick="OpenReportingManagerForm('{{ obj.employee_unique_id }}', 0)">
+                        <i class="ti tabler-plus me-1"></i>Add Reporting Manager
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div id="div_ReportingManagerList"></div>
+                </div>
+            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    LoadReportingManagerList('{{ obj.employee_unique_id }}');
+                });
+
+                function LoadReportingManagerList(empUniqueId) {
+                    $('#div_ReportingManagerList').load('/employee/' + empUniqueId + '/reporting-manager/list/');
+                }
+
+                function OpenReportingManagerForm(empUniqueId, pk) {
+                    $('#div_BindPartialPages').load('/employee/' + empUniqueId + '/reporting-manager/form/' + pk + '/',
+                        function () {
+                            $('#Modal_BindPartialPages').modal('show');
+                        }
+                    );
+                }
+
+                function DeleteReportingManager(pk, empUniqueId) {
+                    Swal.fire({
+                        title: 'Delete Reporting Manager?',
+                        text: 'This reporting manager record will be permanently deleted.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, delete it!',
+                        cancelButtonText: 'Cancel',
+                        confirmButtonColor: '#d33',
+                    }).then(function (result) {
+                        if (!result.isConfirmed) return;
+                        $.post('{% url "reporting-manager-delete" %}', {
+                            pk: pk,
+                            csrfmiddlewaretoken: '{{ csrf_token }}'
+                        }, function (resp) {
+                            if (resp.success) {
+                                Swal.fire({icon: 'success', title: 'Deleted successfully', timer: 2000, showConfirmButton: false});
+                                LoadReportingManagerList(empUniqueId);
+                            } else {
+                                Swal.fire({icon: 'error', title: resp.error || 'Delete failed', timer: 3000, showConfirmButton: false});
+                            }
+                        });
+                    });
+                }
+            </script>
+        </div>
+    </div>
+
+    <!-- ── Family Detail Card ── -->
+    <div class="card mt-4">
+        <div class="card-header border-bottom d-flex align-items-center justify-content-between py-3">
+            <div class="d-flex align-items-center gap-2">
+                <div class="sd-icon"><i class="ti tabler-users"></i></div>
+                <span style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--bs-secondary-color);">Family Details</span>
+            </div>
+            <button class="btn btn-primary btn-sm waves-effect waves-light"
+                    onclick="OpenFamilyForm('{{ obj.employee_unique_id }}', 0)">
+                <i class="ti tabler-plus me-1"></i>Add Family Member
+            </button>
+        </div>
+        <div class="card-body p-0">
+            <div id="div_FamilyList"></div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            LoadFamilyList('{{ obj.employee_unique_id }}');
+        });
+
+        function LoadFamilyList(empUniqueId) {
+            $('#div_FamilyList').load('/employee/' + empUniqueId + '/family/list/');
+        }
+
+        function OpenFamilyForm(empUniqueId, pk) {
+            $('#div_BindPartialPages').load('/employee/' + empUniqueId + '/family/form/' + pk + '/',
+                function () {
+                    $('#Modal_BindPartialPages').modal('show');
+                }
+            );
+        }
+
+        function DeleteFamily(pk, empUniqueId) {
+            Swal.fire({
+                title: 'Delete Family Member?',
+                text: 'This family detail record will be permanently deleted.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#d33',
+            }).then(function (result) {
+                if (!result.isConfirmed) return;
+                $.post('{% url "family-delete" %}', {
+                    pk: pk,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                }, function (resp) {
+                    if (resp.success) {
+                        Swal.fire({icon: 'success', title: 'Deleted successfully', timer: 2000, showConfirmButton: false});
+                        LoadFamilyList(empUniqueId);
+                    } else {
+                        Swal.fire({icon: 'error', title: resp.error || 'Delete failed', timer: 3000, showConfirmButton: false});
+                    }
+                });
+            });
+        }
+    </script>
 
 {% endblock %}

@@ -1,0 +1,97 @@
+{% if family_details %}
+<div class="p-3">
+    <div class="row g-3">
+        {% for member in family_details %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="family-card">
+
+                <!-- Header: avatar + name + relationship -->
+                <div class="family-card-header">
+
+                    {% with rel=member.relationship|lower %}
+                    {% if rel == 'father' %}
+                        <div class="family-avatar bg-label-primary text-primary">
+                            <i class="ti tabler-user"></i>
+                        </div>
+                    {% elif rel == 'mother' %}
+                        <div class="family-avatar bg-label-danger text-danger">
+                            <i class="ti tabler-user"></i>
+                        </div>
+                    {% elif rel == 'spouse' %}
+                        <div class="family-avatar bg-label-success text-success">
+                            <i class="ti tabler-heart"></i>
+                        </div>
+                    {% elif rel == 'son' or rel == 'brother' %}
+                        <div class="family-avatar bg-label-info text-info">
+                            <i class="ti tabler-user"></i>
+                        </div>
+                    {% elif rel == 'daughter' or rel == 'sister' %}
+                        <div class="family-avatar bg-label-warning text-warning">
+                            <i class="ti tabler-user"></i>
+                        </div>
+                    {% else %}
+                        <div class="family-avatar bg-label-secondary text-secondary">
+                            <i class="ti tabler-user"></i>
+                        </div>
+                    {% endif %}
+                    {% endwith %}
+
+                    <div class="flex-fill" style="min-width:0;">
+                        <div class="fc-name text-truncate">{{ member.family_member_name }}</div>
+                        <div class="fc-relation">
+                            <i class="ti tabler-users me-1" style="font-size:11px;"></i>{{ member.relationship }}
+                        </div>
+                    </div>
+
+                    {% if member.is_emergency_contact %}
+                    <span class="family-emergency-badge badge bg-label-danger">
+                        <i class="ti tabler-urgent me-1"></i>Emergency
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- Body: field grid -->
+                <div class="family-card-body">
+                    <div class="fc-field">
+                        <span class="fc-field-label"><i class="ti tabler-calendar me-1"></i>Date of Birth</span>
+                        <span class="fc-field-value">{{ member.date_of_birth|default:"—" }}</span>
+                    </div>
+                    <div class="fc-field">
+                        <span class="fc-field-label"><i class="ti tabler-gender-bigender me-1"></i>Gender</span>
+                        <span class="fc-field-value">{{ member.gender.gender_name|default:"—" }}</span>
+                    </div>
+                    <div class="fc-field">
+                        <span class="fc-field-label"><i class="ti tabler-phone me-1"></i>Mobile</span>
+                        <span class="fc-field-value">{{ member.mobile_number|default:"—" }}</span>
+                    </div>
+                    <div class="fc-field">
+                        <span class="fc-field-label"><i class="ti tabler-briefcase me-1"></i>Occupation</span>
+                        <span class="fc-field-value text-truncate">{{ member.occupation|default:"—" }}</span>
+                    </div>
+                </div>
+
+                <!-- Footer: actions -->
+                <div class="family-card-footer">
+                    <a href="#" class="btn btn-sm btn-label-info waves-effect flex-fill"
+                       onclick="OpenFamilyForm('{{ obj.employee_unique_id }}', {{ member.employee_family_detail_id }}); return false;">
+                        <i class="ti tabler-edit me-1"></i>Edit
+                    </a>
+                    <button class="btn btn-sm btn-label-danger waves-effect px-3"
+                            onclick="DeleteFamily({{ member.employee_family_detail_id }}, '{{ obj.employee_unique_id }}')">
+                        <i class="ti tabler-trash me-1"></i>Delete
+                    </button>
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="empty-state-grid">
+    <i class="ti tabler-users-group"></i>
+    <p>No family members added yet.<br>
+       <span style="font-size:12px;">Click <strong>Add Family Member</strong> to add the first one.</span>
+    </p>
+</div>
+{% endif %}

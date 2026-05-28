@@ -1,0 +1,90 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">
+            <i class="ti tabler-history me-2"></i>
+            {% if job %}Edit Job History{% else %}Add Job History{% endif %}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+        <form id="frm_JobHistory" class="needs-validation row g-4" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="pk" value="{{ job.employee_job_history_id|default:'' }}">
+
+            <div class="col-md-6">
+                <label class="form-label">Post <span class="text-danger">*</span></label>
+                <input type="text" name="post" required class="form-control"
+                       value="{{ job.post|default:'' }}"
+                       placeholder="e.g. Senior Inspector">
+                <div class="invalid-feedback">Post is required.</div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Grade</label>
+                <input type="text" name="grade" class="form-control"
+                       value="{{ job.grade|default:'' }}"
+                       placeholder="e.g. Grade A">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Joining Date <span class="text-danger">*</span></label>
+                <input type="date" name="joining_date" required class="form-control"
+                       value="{{ job.joining_date|date:'Y-m-d'|default:'' }}">
+                <div class="invalid-feedback">Joining date is required.</div>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Probation End Date</label>
+                <input type="date" name="probation_end_date" class="form-control"
+                       value="{{ job.probation_end_date|date:'Y-m-d'|default:'' }}">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Confirmation Date</label>
+                <input type="date" name="confirmation_date" class="form-control"
+                       value="{{ job.confirmation_date|date:'Y-m-d'|default:'' }}">
+            </div>
+
+            <div class="col-12 d-flex justify-content-end gap-2 pt-2">
+                <button type="button" class="btn btn-primary waves-effect waves-light"
+                        onclick="SaveJobHistory('{{ obj.employee_unique_id }}')">
+                    <i class="ti tabler-device-floppy me-1"></i>
+                    {% if job %}Update{% else %}Save{% endif %}
+                </button>
+                <button type="button" class="btn btn-label-secondary waves-effect"
+                        data-bs-dismiss="modal">
+                    <i class="ti tabler-x me-1"></i>Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+function SaveJobHistory(empUniqueId) {
+    const form = document.getElementById('frm_JobHistory');
+    if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+        return;
+    }
+    const formData = new FormData(form);
+    $.ajax({
+        type: 'POST',
+        url: '/employee/' + empUniqueId + '/job-history/save/',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (resp) {
+            if (resp.success) {
+                $('#Modal_BindPartialPages').modal('hide');
+                Swal.fire({icon: 'success', title: 'Saved successfully', timer: 2000, showConfirmButton: false});
+                LoadJobHistoryList(empUniqueId);
+            } else {
+                Swal.fire({icon: 'error', title: resp.error || 'Save failed', timer: 3000, showConfirmButton: false});
+            }
+        },
+        error: function () {
+            Swal.fire({icon: 'info', title: 'Request failed. Please try again.', timer: 3000, showConfirmButton: false});
+        }
+    });
+}
+</script>

@@ -1,0 +1,63 @@
+{% if certifications %}
+<div class="ep-list-wrap">
+    {% now "Y-m-d" as today_str %}
+    {% for cert in certifications %}
+
+    <div class="ep-row {% if cert.expiry_date %}{% if cert.expiry_date|date:'Y-m-d' < today_str %}border-expired{% else %}border-valid{% endif %}{% else %}border-muted{% endif %}">
+
+        {% if cert.expiry_date and cert.expiry_date|date:"Y-m-d" < today_str %}
+            <div class="ep-icon bg-label-danger"><i class="ti tabler-certificate-off text-danger"></i></div>
+        {% else %}
+            <div class="ep-icon bg-label-success"><i class="ti tabler-certificate text-success"></i></div>
+        {% endif %}
+
+        <div class="flex-fill" style="min-width:0;">
+            <div class="ep-title">{{ cert.certification_name }}</div>
+            <div class="ep-sub"><i class="ti tabler-building me-1" style="font-size:11px;"></i>{{ cert.issuing_organization }}</div>
+            <div class="d-flex flex-wrap gap-2 align-items-center mt-2">
+                <span class="ep-chip">
+                    <i class="ti tabler-calendar-event text-primary"></i>Issue:&nbsp;{{ cert.issue_date|default:"—" }}
+                </span>
+                <span class="ep-chip">
+                    <i class="ti tabler-calendar-x text-warning"></i>Expiry:&nbsp;{{ cert.expiry_date|default:"No Expiry" }}
+                </span>
+                {% if cert.expiry_date %}
+                    {% if cert.expiry_date|date:"Y-m-d" < today_str %}
+                        <span class="badge bg-label-danger" style="font-size:10px;">Expired</span>
+                    {% else %}
+                        <span class="badge bg-label-success" style="font-size:10px;">Valid</span>
+                    {% endif %}
+                {% else %}
+                    <span class="badge bg-label-secondary" style="font-size:10px;">No Expiry</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="ep-actions">
+            {% if cert.certificate_file %}
+            <a href="{{ cert.certificate_file }}" target="_blank"
+               class="btn btn-sm btn-label-secondary waves-effect" title="View Certificate">
+                <i class="ti tabler-eye"></i>
+            </a>
+            {% endif %}
+            <a href="#" class="btn btn-sm btn-label-info waves-effect"
+               onclick="OpenCertificationForm('{{ obj.employee_unique_id }}', {{ cert.employee_certification_id }}); return false;">
+                <i class="ti tabler-edit"></i>
+            </a>
+            <button class="btn btn-sm btn-label-danger waves-effect"
+                    onclick="DeleteCertification({{ cert.employee_certification_id }}, '{{ obj.employee_unique_id }}')">
+                <i class="ti tabler-trash"></i>
+            </button>
+        </div>
+
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state-grid">
+    <i class="ti tabler-certificate-off"></i>
+    <p>No certification records added yet.<br>
+       <span style="font-size:12px;">Click <strong>Add Certification</strong> to add the first one.</span>
+    </p>
+</div>
+{% endif %}

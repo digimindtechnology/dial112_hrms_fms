@@ -16,6 +16,7 @@ from setup.models import (
     CostCenterStatus,
     CostCenterBulkUploadHistory,
     EmployeeType,
+    EmployeeCategory,
     EmployeeGroup,
     Designation,
     Grade,
@@ -44,6 +45,7 @@ def data_setup(request):
 
 SETUP_LOOKUPS = {
     'employee-type': {'model': EmployeeType, 'title': 'Employee Type', 'plural': 'Employee Types', 'icon': 'tabler-users-group'},
+    'employee-category': {'model': EmployeeCategory, 'title': 'Employee Category', 'plural': 'Employee Categories', 'icon': 'tabler-category'},
     'employee-group': {'model': EmployeeGroup, 'title': 'Employee Group', 'plural': 'Employee Groups', 'icon': 'tabler-users'},
     'designation': {'model': Designation, 'title': 'Designation', 'plural': 'Designations', 'icon': 'tabler-id-badge-2'},
     'grade': {'model': Grade, 'title': 'Grade', 'plural': 'Grades', 'icon': 'tabler-layers-subtract'},

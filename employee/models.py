@@ -2,7 +2,7 @@ import uuid
 from django.db import models
 from accounts.models import Profile
 from approvalrules.models import ApprovalType
-from setup.models import EmployeeType
+from setup.models import EmployeeType, EmployeeCategory
 from tenant.models import TenantProfile, Role
 from django.contrib.auth.models import User
 from masters.models import Gender, District, BaseModel
@@ -99,6 +99,7 @@ class EmployeeInfo(BaseModel):
     religion = models.CharField(max_length=100, blank=True)
     caste = models.ForeignKey(EmployeeCaste, related_name='caste_EmployeeInfo', null=True, blank=True, on_delete=models.CASCADE)
     empType = models.ForeignKey(EmployeeType, related_name='empType_EmployeeInfo', null=True, blank=True, on_delete=models.CASCADE)
+    empCategory = models.ForeignKey(EmployeeCategory, related_name='empCategory_EmployeeInfo', null=True, blank=True, on_delete=models.CASCADE)
     empStatus = models.ForeignKey(EmployeeStatus, related_name='empStatus_EmployeeInfo', default=1, on_delete=models.CASCADE)
 
     district = models.ForeignKey(District, related_name='district_EmployeeInfo', null=True, blank=True, on_delete=models.CASCADE)
@@ -128,6 +129,7 @@ class EmployeeInfo(BaseModel):
     pf_number = models.CharField(max_length=20, blank=True)
 
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name="user_EmployeeInfo")
+    empRole = models.ForeignKey(Role, default=20, on_delete=models.CASCADE, related_name="empRole_EmployeeInfo")  ##Employee Role ID=20
     userProfile = models.ForeignKey(Profile, blank=True, null=True, on_delete=models.CASCADE, related_name="userProfile_EmployeeInfo")
 
     tenantProfile = models.ForeignKey(TenantProfile, blank=True, null=True, related_name='tenantProfile_EmployeeInfo', on_delete=models.CASCADE, verbose_name="Tenant")

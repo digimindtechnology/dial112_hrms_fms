@@ -95,6 +95,14 @@ class EmployeeType(SetupLookupBase):
             models.UniqueConstraint(fields=['tenantProfile', 'name'], name='setup_employee_type_tenant_name_uniq')
         ]
 
+class EmployeeCategory(SetupLookupBase):
+    class Meta(SetupLookupBase.Meta):
+        verbose_name = 'Employee Category '
+        verbose_name_plural = 'Employee Category '
+        constraints = [
+            models.UniqueConstraint(fields=['tenantProfile', 'name'], name='setup_employee_category_tenant_name_uniq')
+        ]
+
 
 class EmployeeGroup(SetupLookupBase):
     class Meta(SetupLookupBase.Meta):

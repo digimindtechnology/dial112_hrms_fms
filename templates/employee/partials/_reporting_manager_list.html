@@ -1,0 +1,50 @@
+{% if managers %}
+<div class="ep-list-wrap">
+    {% for mgr in managers %}
+    {% with full_name=mgr.reporting_manager.get_full_name|default:mgr.reporting_manager.username %}
+
+    <div class="ep-row {% if mgr.is_current %}border-valid{% else %}border-muted{% endif %}">
+
+        <div class="mgr-avatar">{{ full_name|slice:":1"|upper }}</div>
+
+        <div class="flex-fill" style="min-width:0;">
+            <div class="ep-title">{{ full_name }}</div>
+            <div class="d-flex flex-wrap align-items-center gap-2 mt-1">
+                <span class="ep-chip">
+                    <i class="ti tabler-at" style="font-size:11px;"></i>{{ mgr.reporting_manager.username }}
+                </span>
+                {% if mgr.is_current %}
+                    <span class="badge bg-label-success" style="font-size:10px;">
+                        <i class="ti tabler-circle-check me-1"></i>Current Manager
+                    </span>
+                {% else %}
+                    <span class="badge bg-label-secondary" style="font-size:10px;">
+                        <i class="ti tabler-clock me-1"></i>Previous Manager
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="ep-actions">
+            <a href="#" class="btn btn-sm btn-label-info waves-effect"
+               onclick="OpenReportingManagerForm('{{ obj.employee_unique_id }}', {{ mgr.employee_reporting_manager_id }}); return false;">
+                <i class="ti tabler-edit"></i>
+            </a>
+            <button class="btn btn-sm btn-label-danger waves-effect"
+                    onclick="DeleteReportingManager({{ mgr.employee_reporting_manager_id }}, '{{ obj.employee_unique_id }}')">
+                <i class="ti tabler-trash"></i>
+            </button>
+        </div>
+
+    </div>
+    {% endwith %}
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state-grid">
+    <i class="ti tabler-user-off"></i>
+    <p>No reporting managers assigned yet.<br>
+       <span style="font-size:12px;">Click <strong>Add Reporting Manager</strong> to assign one.</span>
+    </p>
+</div>
+{% endif %}

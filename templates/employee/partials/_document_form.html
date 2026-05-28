@@ -1,0 +1,88 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">
+            <i class="ti tabler-file me-2"></i>
+            {% if doc %}Edit Document{% else %}Add Document{% endif %}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+        <form id="frm_Document" class="needs-validation row g-4" novalidate enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="pk" value="{{ doc.employee_document_id|default:'' }}">
+
+            <div class="col-12">
+                <label class="form-label">Document Name <span class="text-danger">*</span></label>
+                <input type="text" name="document_name" required class="form-control"
+                       value="{{ doc.document_name|default:'' }}"
+                       placeholder="e.g. Driving Licence, Birth Certificate">
+                <div class="invalid-feedback">Document name is required.</div>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Issue Date</label>
+                <input type="date" name="issue_date" class="form-control"
+                       value="{{ doc.issue_date|date:'Y-m-d'|default:'' }}">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Expiry Date</label>
+                <input type="date" name="expiry_date" class="form-control"
+                       value="{{ doc.expiry_date|date:'Y-m-d'|default:'' }}">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Document File</label>
+                <input type="file" name="file_doc" class="form-control"
+                       accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                {% if file_url %}
+                <div class="mt-1" style="font-size:12px;">
+                    <i class="ti tabler-paperclip me-1"></i>
+                    <a href="{{ file_url }}" target="_blank" class="text-primary">View existing</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="col-12 d-flex justify-content-end gap-2 pt-2">
+                <button type="button" class="btn btn-primary waves-effect waves-light"
+                        onclick="SaveDocument('{{ obj.employee_unique_id }}')">
+                    <i class="ti tabler-device-floppy me-1"></i>
+                    {% if doc %}Update{% else %}Save{% endif %}
+                </button>
+                <button type="button" class="btn btn-label-secondary waves-effect"
+                        data-bs-dismiss="modal">
+                    <i class="ti tabler-x me-1"></i>Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+function SaveDocument(empUniqueId) {
+    const form = document.getElementById('frm_Document');
+    if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+        return;
+    }
+    const formData = new FormData(form);
+    $.ajax({
+        type: 'POST',
+        url: '/employee/' + empUniqueId + '/document/save/',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (resp) {
+            if (resp.success) {
+                $('#Modal_BindPartialPages').modal('hide');
+                Swal.fire({icon: 'success', title: 'Saved successfully', timer: 2000, showConfirmButton: false});
+                LoadDocumentList(empUniqueId);
+            } else {
+                Swal.fire({icon: 'error', title: resp.error || 'Save failed', timer: 3000, showConfirmButton: false});
+            }
+        },
+        error: function () {
+            Swal.fire({icon: 'info', title: 'Request failed. Please try again.', timer: 3000, showConfirmButton: false});
+        }
+    });
+}
+</script>

@@ -1,55 +1,110 @@
-<div class="table-responsive">
-    <table class="table table-bordered mb-0">
-        <thead class="table-light">
-            <tr class="text-nowrap">
-                <th>#</th>
-                <th>Qualif</th>
-                <th>Institution</th>
-                <th>Board / University</th>
-                <th>Year</th>
-                <th>%</th>
-                <th>Cert</th>
-                <th style="width:80px;">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for edu in educations %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td class="fw-medium">{{ edu.qualification }}</td>
-                <td>{{ edu.institution_name }}</td>
-                <td>{{ edu.board_university }}</td>
-                <td>{{ edu.passing_year }}</td>
-                <td>{{ edu.percentage|default:"—" }}</td>
-                <td>
-                    {% if edu.certificate_file %}
-                        <a href="{{ edu.certificate_file }}" target="_blank" class="btn btn-icon btn-text-secondary btn-sm rounded-pill waves-effect" title="View certificate">
-                            <i class="ti tabler-paperclip ti-md"></i>
-                        </a>
-                    {% else %}
-                        <span class="text-muted">—</span>
-                    {% endif %}
-                </td>
-                <td class="text-nowrap">
-                    <a href="#" class="badge bg-label-info rounded"
-                       onclick="OpenEducationForm('{{ obj.employee_unique_id }}', {{ edu.employee_education_id }}); return false;"
-                       title="Edit">
-                        <i class="ti tabler-edit ti-md"></i>
+{% if educations %}
+<div class="edu-list-wrap">
+    {% for edu in educations %}
+    {% with q=edu.qualification|lower %}
+
+    <div class="edu-hcard">
+
+        <!-- Left panel: degree icon + year -->
+        <div class="edu-hcard-left">
+            {% if 'phd' in q or 'doctor' in q %}
+                <div class="edu-icon-circle bg-label-danger">
+                    <i class="ti tabler-school text-danger"></i>
+                </div>
+            {% elif 'master' in q or 'mba' in q or 'm.tech' in q or 'msc' in q or 'mca' in q %}
+                <div class="edu-icon-circle bg-label-success">
+                    <i class="ti tabler-award text-success"></i>
+                </div>
+            {% elif 'bachelor' in q or 'b.tech' in q or 'b.e' in q or 'bsc' in q or 'bca' in q or 'bcom' in q or 'bba' in q %}
+                <div class="edu-icon-circle bg-label-primary">
+                    <i class="ti tabler-certificate text-primary"></i>
+                </div>
+            {% elif 'diploma' in q %}
+                <div class="edu-icon-circle bg-label-warning">
+                    <i class="ti tabler-rosette text-warning"></i>
+                </div>
+            {% elif '12' in q or 'hsc' in q or 'inter' in q or 'higher' in q %}
+                <div class="edu-icon-circle bg-label-info">
+                    <i class="ti tabler-book text-info"></i>
+                </div>
+            {% else %}
+                <div class="edu-icon-circle bg-label-secondary">
+                    <i class="ti tabler-book-2 text-secondary"></i>
+                </div>
+            {% endif %}
+
+            {% if edu.passing_year %}
+            <span class="edu-year-tag">{{ edu.passing_year }}</span>
+            {% endif %}
+        </div>
+
+        <!-- Right panel: details -->
+        <div class="edu-hcard-right">
+
+            <div class="edu-hcard-top">
+                <div class="edu-qual">{{ edu.qualification }}</div>
+                {% if 'phd' in q or 'doctor' in q %}
+                    <span class="badge bg-label-danger" style="font-size:10px;">Doctorate</span>
+                {% elif 'master' in q or 'mba' in q or 'm.tech' in q or 'msc' in q or 'mca' in q %}
+                    <span class="badge bg-label-success" style="font-size:10px;">Post Graduate</span>
+                {% elif 'bachelor' in q or 'b.tech' in q or 'b.e' in q or 'bsc' in q or 'bca' in q or 'bcom' in q or 'bba' in q %}
+                    <span class="badge bg-label-primary" style="font-size:10px;">Graduate</span>
+                {% elif 'diploma' in q %}
+                    <span class="badge bg-label-warning" style="font-size:10px;">Diploma</span>
+                {% elif '12' in q or 'hsc' in q or 'inter' in q or 'higher' in q %}
+                    <span class="badge bg-label-info" style="font-size:10px;">Higher Secondary</span>
+                {% else %}
+                    <span class="badge bg-label-secondary" style="font-size:10px;">Secondary</span>
+                {% endif %}
+            </div>
+
+            <div class="edu-inst">
+                <i class="ti tabler-building-bank me-1 text-primary" style="font-size:12px;"></i>{{ edu.institution_name }}
+            </div>
+
+            {% if edu.board_university %}
+            <div class="edu-board">
+                <i class="ti tabler-sitemap me-1" style="font-size:11px;"></i>{{ edu.board_university }}
+            </div>
+            {% endif %}
+
+            <!-- Footer: percentage + cert + actions -->
+            <div class="edu-hcard-footer">
+                {% if edu.percentage %}
+                <span class="edu-pct-chip">
+                    <i class="ti tabler-percentage text-primary" style="font-size:13px;"></i>{{ edu.percentage }}%
+                </span>
+                {% endif %}
+
+                {% if edu.certificate_file %}
+                <a href="{{ edu.certificate_file }}" target="_blank"
+                   class="edu-pct-chip text-success" style="text-decoration:none;">
+                    <i class="ti tabler-file-download text-success" style="font-size:13px;"></i>Certificate
+                </a>
+                {% endif %}
+
+                <div class="edu-hcard-actions">
+                    <a href="#" class="btn btn-sm btn-label-info waves-effect"
+                       onclick="OpenEducationForm('{{ obj.employee_unique_id }}', {{ edu.employee_education_id }}); return false;">
+                        <i class="ti tabler-edit"></i>
                     </a>
-                    <button class="badge bg-label-danger rounded"onclick="DeleteEducation({{ edu.employee_education_id }}, '{{ obj.employee_unique_id }}')"
-                             title="Delete">
-                        <i class="ti tabler-trash ti-md"></i>
+                    <button class="btn btn-sm btn-label-danger waves-effect"
+                            onclick="DeleteEducation({{ edu.employee_education_id }}, '{{ obj.employee_unique_id }}')">
+                        <i class="ti tabler-trash"></i>
                     </button>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="8" class="text-center py-5 text-muted">
-                    <i class="ti tabler-school d-block mb-2" style="font-size:28px;"></i>
-                    No education records added yet.
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
 </div>
+{% else %}
+<div class="empty-state-grid">
+    <i class="ti tabler-school-off"></i>
+    <p>No education records added yet.<br>
+       <span style="font-size:12px;">Click <strong>Add Education</strong> to add the first record.</span>
+    </p>
+</div>
+{% endif %}

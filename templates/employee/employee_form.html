@@ -1,6 +1,6 @@
 {% extends "layout/layout_base.html" %}
 {% load static %}
-
+{% load ui_filter_tags %}
 {% block title %}{% if obj %}Edit Employee — {{ obj.full_name }}{% else %}Add New Employee{% endif %}{% endblock %}
 
 {% block page_css %}
@@ -130,9 +130,10 @@
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="ti tabler-phone"></i></span>
                                         <input class="form-control" required type="text" name="mobile" maxlength="20"
-                                               value="{{ fd.mobile|default:'' }}" placeholder="Mobile number">
+                                               id="inp_mobile" value="{{ fd.mobile|default:'' }}" placeholder="Mobile number">
                                     </div>
                                     <div class="invalid-feedback">Mobile is required.</div>
+                                    <div id="fb_mobile" class="mt-1" style="font-size:12px;"></div>
                                 </div>
 
                                 <div class="col-md-4">
@@ -140,8 +141,9 @@
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="ti tabler-mail"></i></span>
                                         <input class="form-control" type="email" name="email"
-                                               value="{{ fd.email|default:'' }}" placeholder="Email address">
+                                               id="inp_email" value="{{ fd.email|default:'' }}" placeholder="Email address">
                                     </div>
+                                    <div id="fb_email" class="mt-1" style="font-size:12px;"></div>
                                 </div>
 
                                 <div class="col-md-4">
@@ -284,6 +286,21 @@
                                 </div>
 
                                 <div class="col-md-4">
+                                    <label class="form-label">Employee Category <span class="required-star">*</span></label>
+                                    <select class="select2 form-select" name="emp_category_id" required>
+                                        <option value="">Select Category</option>
+                                        {% for ec in emp_categories %}
+                                            {% if empCatId|ToInt == ec.id %}
+                                                <option value="{{ ec.id }}" selected> {{ ec.name }}</option>
+                                            {% else %}
+                                                <option value="{{ ec.id }}"> {{ ec.name }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                    <div class="invalid-feedback">Employee Category is required.</div>
+                                </div>
+
+                                <div class="col-md-4">
                                     <label class="form-label">Employment Status</label>
                                     <select class="select2 form-select" name="employment_status">
                                         {% for val, label in employment_statuses %}
@@ -292,7 +309,7 @@
                                     </select>
                                 </div>
 
-                                <div class="col-md-12">
+                                <div class="col-md-8">
                                     <label class="form-label">Work Location</label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="ti tabler-building"></i></span>
@@ -316,8 +333,9 @@
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="ti tabler-fingerprint"></i></span>
                                         <input class="form-control" type="text" name="aadhaar_number" maxlength="12"
-                                               value="{{ fd.aadhaar_number|default:'' }}" placeholder="12-digit Aadhaar">
+                                               id="inp_aadhaar" value="{{ fd.aadhaar_number|default:'' }}" placeholder="12-digit Aadhaar">
                                     </div>
+                                    <div id="fb_aadhaar" class="mt-1" style="font-size:12px;"></div>
                                 </div>
 
                                 <div class="col-md-4">
@@ -325,9 +343,10 @@
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="ti tabler-credit-card"></i></span>
                                         <input class="form-control" type="text" name="pan_number" maxlength="10"
-                                               value="{{ fd.pan_number|default:'' }}" placeholder="e.g. ABCDE1234F"
+                                               id="inp_pan" value="{{ fd.pan_number|default:'' }}" placeholder="e.g. ABCDE1234F"
                                                style="text-transform:uppercase">
                                     </div>
+                                    <div id="fb_pan" class="mt-1" style="font-size:12px;"></div>
                                 </div>
 
                                 <div class="col-md-4">
@@ -335,8 +354,9 @@
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="ti tabler-world"></i></span>
                                         <input class="form-control" type="text" name="passport_number" maxlength="20"
-                                               value="{{ fd.passport_number|default:'' }}" placeholder="Passport number">
+                                               id="inp_passport" value="{{ fd.passport_number|default:'' }}" placeholder="Passport number">
                                     </div>
+                                    <div id="fb_passport" class="mt-1" style="font-size:12px;"></div>
                                 </div>
 
                             </div><!-- /row identity -->
@@ -494,7 +514,7 @@
                                             {% else %}
                                                 <div id="pic-placeholder"
                                                      class="rounded-circle d-flex align-items-center justify-content-center"
-                                                     style="width:84px;height:84px;background:var(--bs-primary-bg-subtle);">
+                                                     style="width:75px;height:75px;background:var(--bs-primary-bg-subtle);">
                                                     {% if obj %}
                                                         <span style="font-size:26px;font-weight:700;color:var(--bs-primary);line-height:1;">
                                                     {{ obj.first_name|first|upper }}{{ obj.last_name|first|upper }}
@@ -505,7 +525,7 @@
                                                 </div>
                                                 <img id="pic-preview" src="" alt="Photo"
                                                      class="rounded-circle border d-none"
-                                                     style="width:84px;height:84px;object-fit:cover;">
+                                                     style="width:75px;height:75px;object-fit:cover;">
                                             {% endif %}
                                             <label for="picture"
                                                    class="position-absolute bottom-0 end-0 bg-primary rounded-circle d-flex align-items-center justify-content-center"
@@ -576,6 +596,67 @@
 
             document.addEventListener('DOMContentLoaded', function () {
                 togglePf(document.getElementById('is_eligible_for_pf'));
+            });
+
+            /* ── Check Duplicate  ── */
+            var _dupFlags = {};
+            var _excludeId = '{{ obj.employee_id|default:"" }}';
+
+            function checkDuplicate(field, inputId, feedbackId) {
+                var value = $('#' + inputId).val().trim();
+                var $fb = $('#' + feedbackId);
+                _dupFlags[field] = false;
+                if (!value) {
+                    $fb.html('');
+                    return;
+                }
+
+                $.post('{% url "employee-check-duplicate" %}', {
+                    field: field,
+                    value: value,
+                    exclude_id: _excludeId,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                }, function (resp) {
+                    if (resp.exists) {
+                        _dupFlags[field] = true;
+                        $fb.html('<span class="text-danger"><i class="ti tabler-alert-circle me-1"></i>Already exists in: ' + resp.found_in.join(', ') + '</span>');
+                    } else {
+                        _dupFlags[field] = false;
+                        $fb.html('<span class="text-success"><i class="ti tabler-circle-check me-1"></i>Available</span>');
+                    }
+                });
+            }
+
+            $(document).ready(function () {
+                $('#inp_mobile').on('blur', function () {
+                    checkDuplicate('mobile', 'inp_mobile', 'fb_mobile');
+                });
+                $('#inp_email').on('blur', function () {
+                    checkDuplicate('email', 'inp_email', 'fb_email');
+                });
+                $('#inp_aadhaar').on('blur', function () {
+                    checkDuplicate('aadhaar_number', 'inp_aadhaar', 'fb_aadhaar');
+                });
+                $('#inp_pan').on('blur', function () {
+                    checkDuplicate('pan_number', 'inp_pan', 'fb_pan');
+                });
+                $('#inp_passport').on('blur', function () {
+                    checkDuplicate('passport_number', 'inp_passport', 'fb_passport');
+                });
+                $('#empForm').on('submit', function (e) {
+                    var hasDup = Object.values(_dupFlags).some(Boolean);
+                    if (hasDup) {
+                        e.preventDefault();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Duplicate Values Found',
+                            text: 'Please fix the highlighted fields before saving.',
+                            timer: 3500,
+                            showConfirmButton: false
+                        });
+                        return false;
+                    }
+                });
             });
         </script>
     {% endwith %}

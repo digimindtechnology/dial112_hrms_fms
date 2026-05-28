@@ -1,0 +1,94 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">
+            <i class="ti tabler-language me-2"></i>
+            {% if lang %}Edit Language{% else %}Add Language{% endif %}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+        <form id="frm_Language" class="needs-validation row g-4" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="pk" value="{{ lang.employee_language_id|default:'' }}">
+
+            <div class="col-12">
+                <label class="form-label">Language Name <span class="text-danger">*</span></label>
+                <input type="text" name="language_name" required class="form-control"
+                       value="{{ lang.language_name|default:'' }}"
+                       placeholder="e.g. Hindi, English, Marathi">
+                <div class="invalid-feedback">Language name is required.</div>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label d-block mb-2">Proficiency</label>
+                <div class="d-flex flex-wrap gap-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="can_read" id="chk_can_read"
+                               {% if lang.can_read %}checked{% endif %}>
+                        <label class="form-check-label" for="chk_can_read">Can Read</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="can_write" id="chk_can_write"
+                               {% if lang.can_write %}checked{% endif %}>
+                        <label class="form-check-label" for="chk_can_write">Can Write</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="can_speak" id="chk_can_speak"
+                               {% if lang.can_speak %}checked{% endif %}>
+                        <label class="form-check-label" for="chk_can_speak">Can Speak</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch"
+                           name="is_mother_tongue" id="chk_mother_tongue"
+                           {% if lang.is_mother_tongue %}checked{% endif %}>
+                    <label class="form-check-label" for="chk_mother_tongue">Mother Tongue</label>
+                </div>
+            </div>
+
+            <div class="col-12 d-flex justify-content-end gap-2 pt-2">
+                <button type="button" class="btn btn-primary waves-effect waves-light"
+                        onclick="SaveLanguage('{{ obj.employee_unique_id }}')">
+                    <i class="ti tabler-device-floppy me-1"></i>
+                    {% if lang %}Update{% else %}Save{% endif %}
+                </button>
+                <button type="button" class="btn btn-label-secondary waves-effect"
+                        data-bs-dismiss="modal">
+                    <i class="ti tabler-x me-1"></i>Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+function SaveLanguage(empUniqueId) {
+    const form = document.getElementById('frm_Language');
+    if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+        return;
+    }
+    const formData = new FormData(form);
+    $.ajax({
+        type: 'POST',
+        url: '/employee/' + empUniqueId + '/language/save/',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (resp) {
+            if (resp.success) {
+                $('#Modal_BindPartialPages').modal('hide');
+                Swal.fire({icon: 'success', title: 'Saved successfully', timer: 2000, showConfirmButton: false});
+                LoadLanguageList(empUniqueId);
+            } else {
+                Swal.fire({icon: 'error', title: resp.error || 'Save failed', timer: 3000, showConfirmButton: false});
+            }
+        },
+        error: function () {
+            Swal.fire({icon: 'info', title: 'Request failed. Please try again.', timer: 3000, showConfirmButton: false});
+        }
+    });
+}
+</script>

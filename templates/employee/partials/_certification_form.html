@@ -1,0 +1,97 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">
+            <i class="ti tabler-certificate me-2"></i>
+            {% if cert %}Edit Certification{% else %}Add Certification{% endif %}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+        <form id="frm_Certification" class="needs-validation row g-4" novalidate enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="pk" value="{{ cert.employee_certification_id|default:'' }}">
+
+            <div class="col-12">
+                <label class="form-label">Certification Name <span class="text-danger">*</span></label>
+                <input type="text" name="certification_name" required class="form-control"
+                       value="{{ cert.certification_name|default:'' }}"
+                       placeholder="e.g. AWS Certified Solutions Architect">
+                <div class="invalid-feedback">Certification name is required.</div>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label">Issuing Organization <span class="text-danger">*</span></label>
+                <input type="text" name="issuing_organization" required class="form-control"
+                       value="{{ cert.issuing_organization|default:'' }}"
+                       placeholder="e.g. Amazon Web Services">
+                <div class="invalid-feedback">Issuing organization is required.</div>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Issue Date <span class="text-danger">*</span></label>
+                <input type="date" name="issue_date" required class="form-control"
+                       value="{{ cert.issue_date|date:'Y-m-d'|default:'' }}">
+                <div class="invalid-feedback">Issue date is required.</div>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Expiry Date</label>
+                <input type="date" name="expiry_date" class="form-control"
+                       value="{{ cert.expiry_date|date:'Y-m-d'|default:'' }}">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Certificate File</label>
+                <input type="file" name="certificate_file" class="form-control"
+                       accept=".pdf,.jpg,.jpeg,.png">
+                {% if cert_url %}
+                <div class="mt-1" style="font-size:12px;">
+                    <i class="ti tabler-paperclip me-1"></i>
+                    <a href="{{ cert_url }}" target="_blank" class="text-primary">View existing</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="col-12 d-flex justify-content-end gap-2 pt-2">
+                <button type="button" class="btn btn-primary waves-effect waves-light"
+                        onclick="SaveCertification('{{ obj.employee_unique_id }}')">
+                    <i class="ti tabler-device-floppy me-1"></i>
+                    {% if cert %}Update{% else %}Save{% endif %}
+                </button>
+                <button type="button" class="btn btn-label-secondary waves-effect"
+                        data-bs-dismiss="modal">
+                    <i class="ti tabler-x me-1"></i>Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+function SaveCertification(empUniqueId) {
+    const form = document.getElementById('frm_Certification');
+    if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+        return;
+    }
+    const formData = new FormData(form);
+    $.ajax({
+        type: 'POST',
+        url: '/employee/' + empUniqueId + '/certification/save/',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (resp) {
+            if (resp.success) {
+                $('#Modal_BindPartialPages').modal('hide');
+                Swal.fire({icon: 'success', title: 'Saved successfully', timer: 2000, showConfirmButton: false});
+                LoadCertificationList(empUniqueId);
+            } else {
+                Swal.fire({icon: 'error', title: resp.error || 'Save failed', timer: 3000, showConfirmButton: false});
+            }
+        },
+        error: function () {
+            Swal.fire({icon: 'info', title: 'Request failed. Please try again.', timer: 3000, showConfirmButton: false});
+        }
+    });
+}
+</script>
