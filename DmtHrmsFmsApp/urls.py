@@ -24,6 +24,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('search/', include('search.urls')),
+    path('data-process/', include('dataprocess.urls')),
 
     path('attendance/', include('attendance.urls')),
     path('leave/', include('leave.urls')),

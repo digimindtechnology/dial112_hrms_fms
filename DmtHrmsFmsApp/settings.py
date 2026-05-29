@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'search',
 
     'approvalrules',
+    'dataprocess',
     'attendance',
     'leave',
     'employee',
