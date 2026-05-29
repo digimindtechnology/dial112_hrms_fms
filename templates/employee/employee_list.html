@@ -89,7 +89,7 @@
                             <i class="ti tabler-plus me-1"></i> Add Employee
                         </a>
                     {% else %}
-                         <a href="/employee/add/" class="btn btn-primary btn-sm">
+                        <a href="/employee/add/" class="btn btn-primary btn-sm">
                             <i class="ti tabler-plus me-1"></i> Add Employee
                         </a>
                     {% endif %}
@@ -110,9 +110,9 @@
                         <th>Code</th>
                         <th>Name</th>
                         <th>Mobile</th>
-                        <th>Designation</th>
                         <th>Employee Type</th>
-                        <th>Status</th>
+                        <th>Employment Status</th>
+                        <th> Status</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
@@ -128,11 +128,15 @@
                             </td>
                             <td class="fw-medium">{{ emp.full_name }}</td>
                             <td>{{ emp.mobile }}</td>
-                            <td>{{ emp.designation }}</td>
                             <td>{{ emp.empType.name|default:'-' }}</td>
                             <td>
                                 <span class="badge bg-label-{% if emp.employment_status == 'Active' %}success{% elif emp.employment_status == 'Inactive' %}warning{% else %}danger{% endif %}">
                                     {{ emp.employment_status }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-label- {{ emp.empStatus.employee_status_css }}">
+                                    {{ emp.empStatus.employee_status_name }}
                                 </span>
                             </td>
                             <td class="text-nowrap">

@@ -1,0 +1,664 @@
+{% extends "layout/layout_base.html" %}
+{% load static %}
+{% block title %}{{ obj.full_name }} — Profile{% endblock %}
+
+{% block page_css %}
+<style>
+:root {
+    --pv-primary: #696cff;
+    --pv-soft-bg: #f9fafb;
+    --pv-border-light: #edf2f7;
+    --pv-text-main: #1e293b;
+    --pv-text-muted: #64748b;
+}
+
+/* Layout & Card */
+.pv-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+.card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    overflow: hidden;
+}
+
+/* Banner & Avatar - Fixed alignment */
+.pv-banner {
+    height: 90px;
+     background: linear-gradient(135deg, var(--bs-primary) 0%, #9c8cfc 100%);
+    border-radius: 0;
+    position: relative;
+}
+.pv-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: white;
+    color: var(--pv-primary);
+    font-size: 36px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 4px solid white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    left: 32px;
+    overflow: hidden;
+    z-index: 2;
+}
+.pv-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Header Area - Reduced padding */
+.pv-header-card {
+    padding: 55px 32px 16px 32px;
+    background: white;
+}
+.pv-name {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--pv-text-main);
+    margin-bottom: 6px;
+}
+.pv-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    margin-top: 6px;
+}
+.pv-meta-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    background: #f8fafc;
+    padding: 4px 12px;
+    border-radius: 20px;
+    color: var(--pv-text-muted);
+}
+.pv-meta-chip i {
+    font-size: 14px;
+    color: var(--pv-primary);
+}
+.employment-badge {
+    padding: 6px 16px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+/* Quick Stats Grid - Compact */
+.pv-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    background: var(--pv-soft-bg);
+    border-top: 1px solid var(--pv-border-light);
+    border-bottom: 1px solid var(--pv-border-light);
+}
+.stat-item {
+    padding: 12px 10px;
+    text-align: center;
+    border-right: 1px solid var(--pv-border-light);
+}
+.stat-item:last-child {
+    border-right: none;
+}
+.stat-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--pv-text-muted);
+    margin-bottom: 4px;
+}
+.stat-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--pv-text-main);
+}
+
+/* Section Headers - Compact */
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    background: #ffffff;
+    border-bottom: 1px solid var(--pv-border-light);
+}
+.section-title-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.section-icon {
+    width: 30px;
+    height: 30px;
+    background: rgba(105, 108, 255, 0.1);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.section-icon i {
+    font-size: 16px;
+    color: var(--pv-primary);
+}
+.section-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--pv-text-main);
+}
+.item-count-badge {
+    background: #f1f5f9;
+    padding: 2px 10px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--pv-primary);
+}
+
+/* Info Grid - Compact */
+.info-grid-modern {
+    padding: 14px 24px 18px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px 24px;
+    background: white;
+}
+.field-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--pv-text-muted);
+    letter-spacing: 0.4px;
+    margin-bottom: 4px;
+}
+.field-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--pv-text-main);
+}
+
+/* List Items - Compact */
+.list-item-row {
+    display: flex;
+    gap: 16px;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--pv-border-light);
+    transition: background 0.12s;
+}
+.list-item-row:hover {
+    background: #fafbfc;
+}
+.item-badge-icon {
+    width: 42px;
+    height: 42px;
+    background: #f8fafc;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--pv-primary);
+    border: 1px solid #eef2ff;
+    flex-shrink: 0;
+}
+.item-content {
+    flex: 1;
+}
+.item-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--pv-text-main);
+    margin-bottom: 4px;
+}
+.item-subtitle {
+    font-size: 12px;
+    color: var(--pv-text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+.item-meta-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    margin-top: 4px;
+}
+.meta-tag {
+    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--pv-text-muted);
+}
+.right-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    min-width: 85px;
+    flex-shrink: 0;
+}
+
+/* Language Skills - Fixed Icons */
+.skill-bubbles {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+.skill-bubble {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: #f1f5f9;
+}
+.skill-bubble.active {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+.skill-bubble.inactive {
+    background: #f1f5f9;
+    color: #94a3b8;
+    opacity: 0.7;
+}
+
+/* Badge styles */
+.badge-sm {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .pv-header-card {
+        padding: 55px 16px 12px 16px;
+    }
+    .pv-avatar {
+        width: 80px;
+        height: 80px;
+        bottom: -40px;
+        left: 16px;
+        font-size: 28px;
+    }
+    .pv-banner {
+        height: 100px;
+    }
+    .pv-name {
+        font-size: 20px;
+    }
+    .section-header {
+        padding: 10px 16px;
+    }
+    .list-item-row {
+        padding: 12px 16px;
+        flex-direction: column;
+    }
+    .right-meta {
+        align-items: flex-start;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    .info-grid-modern {
+        padding: 12px 16px;
+        grid-template-columns: 1fr;
+    }
+    .stat-item {
+        border-right: none;
+        border-bottom: 1px solid var(--pv-border-light);
+        padding: 10px;
+    }
+    .pv-stats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Print */
+@media print {
+    .no-print, .layout-navbar, .layout-menu, .layout-footer, .btn, .breadcrumb {
+        display: none !important;
+    }
+    .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    .pv-banner {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% now "Y-m-d" as today_str %}
+<div class="pv-container">
+    <!-- Header actions (no-print) -->
+    <div class="d-flex justify-content-between align-items-center mb-3 no-print flex-wrap gap-2">
+        <div>
+            <h5 class="mb-0 fw-semibold">Employee Profile</h5>
+            <ol class="breadcrumb mb-0 mt-1" style="font-size:12px;">
+                <li class="breadcrumb-item"><a href="{% url 'employee-list' %}?empcat={{ obj.empCategory_id }}">Employees</a></li>
+                <li class="breadcrumb-item active">{{ obj.full_name }}</li>
+            </ol>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'employee-list' %}?empcat={{ obj.empCategory_id }}" class="btn btn-outline-secondary btn-sm"><i class="ti tabler-arrow-left me-1"></i>Back</a>
+            <a href="{% url 'employee-detail' obj.employee_unique_id %}" class="btn btn-outline-primary btn-sm"><i class="ti tabler-layout-dashboard me-1"></i>Detail</a>
+            <button class="btn btn-outline-info btn-sm" onclick="window.print()"><i class="ti tabler-printer me-1"></i>Print</button>
+        </div>
+    </div>
+
+    <!-- Main Profile Card -->
+    <div class="card mb-4">
+        <!-- Banner & Avatar -->
+        <div class="pv-banner"></div>
+        <div class="pv-avatar">
+            {% if picture_url %}
+                <img src="{{ picture_url }}" alt="{{ obj.full_name }}">
+            {% else %}
+                {{ obj.first_name|first|upper }}{{ obj.last_name|first|upper }}
+            {% endif %}
+        </div>
+
+        <!-- Profile Header -->
+        <div class="pv-header-card">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                <div>
+                    <div class="pv-name">{{ obj.full_name }}</div>
+                    <div class="pv-meta-row">
+                        {% if obj.designation %}<span class="pv-meta-chip"><i class="ti tabler-briefcase"></i>{{ obj.designation }}</span>{% endif %}
+                        {% if obj.department %}<span class="pv-meta-chip"><i class="ti tabler-layout-grid"></i>{{ obj.department }}</span>{% endif %}
+                        {% if obj.work_location %}<span class="pv-meta-chip"><i class="ti tabler-building"></i>{{ obj.work_location }}</span>{% endif %}
+                        {% if obj.mobile %}<span class="pv-meta-chip"><i class="ti tabler-phone"></i>{{ obj.mobile }}</span>{% endif %}
+                        {% if obj.email %}<span class="pv-meta-chip"><i class="ti tabler-mail"></i>{{ obj.email }}</span>{% endif %}
+                    </div>
+                </div>
+                <span class="badge bg-label-{% if obj.employment_status == 'Active' %}success{% elif obj.employment_status == 'Inactive' %}warning{% else %}danger{% endif %} employment-badge">
+                    <i class="ti tabler-circle-filled me-1" style="font-size:6px;"></i>{{ obj.employment_status }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="pv-stats-grid">
+            <div class="stat-item"><div class="stat-label">Emp Code</div><div class="stat-value">{{ obj.employee_code|default:"—" }}</div></div>
+            <div class="stat-item"><div class="stat-label">Joining Date</div><div class="stat-value">{{ obj.joining_date|default:"—" }}</div></div>
+            <div class="stat-item"><div class="stat-label">Emp Type</div><div class="stat-value">{{ obj.empType.name|default:"—" }}</div></div>
+            <div class="stat-item"><div class="stat-label">Category</div><div class="stat-value">{{ obj.empCategory.name|default:"—" }}</div></div>
+            <div class="stat-item"><div class="stat-label">Blood Group</div><div class="stat-value">{{ obj.blood_group|default:"—" }}</div></div>
+            <div class="stat-item"><div class="stat-label">Nationality</div><div class="stat-value">{{ obj.nationality|default:"—" }}</div></div>
+            <div class="stat-item"><div class="stat-label">Status</div><div class="stat-value">{% if obj.empStatus %}<span class="badge {{ obj.empStatus.employee_status_css|default:'bg-secondary' }}" style="font-size:10px;">{{ obj.empStatus.employee_status_name }}</span>{% else %}—{% endif %}</div></div>
+        </div>
+
+        <!-- Two Column Layout -->
+        <div class="row g-0">
+            <!-- Left Column -->
+            <div class="col-lg-6">
+                <!-- Personal Info -->
+                <div class="section-header"><div class="section-title-group"><div class="section-icon"><i class="ti tabler-user"></i></div><span class="section-title">Personal Information</span></div></div>
+                <div class="info-grid-modern">
+                    <div><div class="field-label">Date of Birth</div><div class="field-value">{{ obj.date_of_birth|default:"—" }}</div></div>
+                    <div><div class="field-label">Gender</div><div class="field-value">{{ obj.gender.gender_name|default:"—" }}</div></div>
+                    <div><div class="field-label">Marital Status</div><div class="field-value">{{ obj.marital_status|default:"—" }}</div></div>
+                    <div><div class="field-label">Caste</div><div class="field-value">{{ obj.caste.employee_caste_name|default:"—" }}</div></div>
+                    <div><div class="field-label">Religion</div><div class="field-value">{{ obj.religion|default:"—" }}</div></div>
+                    <div><div class="field-label">Father's Name</div><div class="field-value">{{ obj.father_name|default:"—" }}</div></div>
+                    <div><div class="field-label">Mother's Name</div><div class="field-value">{{ obj.mother_name|default:"—" }}</div></div>
+                </div>
+
+                <!-- Identity -->
+                <div class="section-header"><div class="section-title-group"><div class="section-icon"><i class="ti tabler-id"></i></div><span class="section-title">Identity Documents</span></div></div>
+                <div class="info-grid-modern">
+                    <div><div class="field-label">Aadhaar Number</div><div class="field-value">{{ obj.aadhaar_number|default:"—" }}</div></div>
+                    <div><div class="field-label">PAN Number</div><div class="field-value">{{ obj.pan_number|default:"—" }}</div></div>
+                    <div><div class="field-label">Passport Number</div><div class="field-value">{{ obj.passport_number|default:"—" }}</div></div>
+                </div>
+
+                <!-- Address -->
+                <div class="section-header"><div class="section-title-group"><div class="section-icon"><i class="ti tabler-map-pin"></i></div><span class="section-title">Address Details</span></div></div>
+                <div class="info-grid-modern">
+                    <div><div class="field-label">District</div><div class="field-value">{{ obj.district.district_name|default:"—" }}</div></div>
+                    <div><div class="field-label">City</div><div class="field-value">{{ obj.city|default:"—" }}</div></div>
+                    <div><div class="field-label">Postal Code</div><div class="field-value">{{ obj.postal_code|default:"—" }}</div></div>
+                    <div><div class="field-label">Current Address</div><div class="field-value">{{ obj.current_address|default:"—" }}</div></div>
+                    <div><div class="field-label">Permanent Address</div><div class="field-value">{{ obj.permanent_address|default:"—" }}</div></div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-lg-6 border-lg-start" style="border-left:1px solid var(--pv-border-light);">
+                <div class="section-header"><div class="section-title-group"><div class="section-icon"><i class="ti tabler-briefcase"></i></div><span class="section-title">Employment Details</span></div></div>
+                <div class="info-grid-modern">
+                    <div><div class="field-label">Employee Code</div><div class="field-value">{{ obj.employee_code|default:"—" }}</div></div>
+                    <div><div class="field-label">Joining Date</div><div class="field-value">{{ obj.joining_date|default:"—" }}</div></div>
+                    <div><div class="field-label">Designation</div><div class="field-value">{{ obj.designation|default:"—" }}</div></div>
+                    <div><div class="field-label">Department</div><div class="field-value">{{ obj.department|default:"—" }}</div></div>
+                    <div><div class="field-label">Employee Type</div><div class="field-value">{{ obj.empType.name|default:"—" }}</div></div>
+                    <div><div class="field-label">Category</div><div class="field-value">{{ obj.empCategory.name|default:"—" }}</div></div>
+                    <div><div class="field-label">Work Location</div><div class="field-value">{{ obj.work_location|default:"—" }}</div></div>
+                </div>
+
+                <div class="section-header"><div class="section-title-group"><div class="section-icon"><i class="ti tabler-building-bank"></i></div><span class="section-title">Bank Details</span></div></div>
+                <div class="info-grid-modern">
+                    <div><div class="field-label">Bank Name</div><div class="field-value">{{ obj.bank_name|default:"—" }}</div></div>
+                    <div><div class="field-label">IFSC Code</div><div class="field-value">{{ obj.ifsc_code|default:"—" }}</div></div>
+                    <div><div class="field-label">Account Number</div><div class="field-value">{{ obj.bank_account_number|default:"—" }}</div></div>
+                    <div><div class="field-label">Branch Address</div><div class="field-value">{{ obj.bank_address|default:"—" }}</div></div>
+                </div>
+
+                <div class="section-header"><div class="section-title-group"><div class="section-icon"><i class="ti tabler-shield-check"></i></div><span class="section-title">Compliance</span></div></div>
+                <div class="info-grid-modern">
+                    <div><div class="field-label">PF Eligible</div><div class="field-value">{% if obj.is_eligible_for_pf %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-secondary">No</span>{% endif %}</div></div>
+                    <div><div class="field-label">PF Number</div><div class="field-value">{{ obj.pf_number|default:"—" }}</div></div>
+                    <div><div class="field-label">Gratuity Eligible</div><div class="field-value">{% if obj.is_gratuity %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-secondary">No</span>{% endif %}</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Education -->
+        <div class="section-header"><div class="section-title-group"><div class="section-icon"><i class="ti tabler-school"></i></div><span class="section-title">Education</span></div><span class="item-count-badge">{{ educations|length }}</span></div>
+        {% if educations %}
+            {% for edu in educations %}
+            <div class="list-item-row">
+                <div class="item-badge-icon">{{ edu.passing_year|default:"ED"|stringformat:"s"|slice:"2:4" }}</div>
+                <div class="item-content">
+                    <div class="item-title">{{ edu.qualification }}</div>
+                    <div class="item-subtitle"><i class="ti tabler-building-bank"></i> {{ edu.institution_name }}</div>
+                    {% if edu.board_university %}<div class="item-subtitle">{{ edu.board_university }}</div>{% endif %}
+                </div>
+                <div class="right-meta">
+                    <span class="badge bg-primary" style="font-size:10px;">{{ edu.passing_year }}</span>
+                    {% if edu.percentage %}<span class="meta-tag"><i class="ti tabler-percentage"></i>{{ edu.percentage }}%</span>{% endif %}
+                    {% if edu.certificate_file %}<a href="{{ edu.certificate_file }}" target="_blank" class="small">View</a>{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="text-center py-3 text-muted small">No education records found</div>
+        {% endif %}
+
+        <!-- Work Experience -->
+        <div class="section-header"><div class="section-title-group"><div class="section-icon"><i class="ti tabler-briefcase"></i></div><span class="section-title">Work Experience</span></div><span class="item-count-badge">{{ experiences|length }}</span></div>
+        {% if experiences %}
+            {% for exp in experiences %}
+            <div class="list-item-row">
+                <div class="item-badge-icon">{{ exp.organization_name|slice:":1"|upper }}</div>
+                <div class="item-content">
+                    <div class="item-title">{{ exp.designation|default:exp.organization_name }}</div>
+                    <div class="item-subtitle">{{ exp.organization_name }}</div>
+                    <div class="item-meta-grid">
+                        <span class="meta-tag"><i class="ti tabler-calendar"></i> {{ exp.start_date }} — {{ exp.end_date|default:"Present" }}</span>
+                        {% if exp.department %}<span class="meta-tag"><i class="ti tabler-layout-grid"></i> {{ exp.department }}</span>{% endif %}
+                    </div>
+                    {% if exp.reason_for_leaving %}<div class="item-subtitle mt-1">{{ exp.reason_for_leaving }}</div>{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="text-center py-3 text-muted small">No experience records found</div>
+        {% endif %}
+
+        <!-- Job History -->
+        <div class="section-header"><div class="section-title-group"><div class="section-icon"><i class="ti tabler-history"></i></div><span class="section-title">Job History</span></div><span class="item-count-badge">{{ job_histories|length }}</span></div>
+        {% if job_histories %}
+            {% for job in job_histories %}
+            <div class="list-item-row">
+                <div class="item-badge-icon">{{ forloop.counter }}</div>
+                <div class="item-content">
+                    <div class="item-title">{{ job.post }} {% if job.grade %}<span class="badge bg-info ms-1" style="font-size:9px;">{{ job.grade }}</span>{% endif %}</div>
+                    <div class="item-meta-grid">
+                        <span class="meta-tag"><i class="ti tabler-calendar-plus"></i> Joining: {{ job.joining_date|default:"—" }}</span>
+                        <span class="meta-tag"><i class="ti tabler-calendar-time"></i> Probation: {{ job.probation_end_date|default:"—" }}</span>
+                        <span class="meta-tag"><i class="ti tabler-calendar-check"></i> Confirmation: {{ job.confirmation_date|default:"—" }}</span>
+                    </div>
+                </div>
+                {% if forloop.first %}<div class="right-meta"><span class="badge bg-success" style="font-size:9px;">Current</span></div>{% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="text-center py-3 text-muted small">No job history records found</div>
+        {% endif %}
+
+        <!-- Certifications & Languages Row -->
+        <div class="row g-0">
+            <div class="col-lg-6">
+                <div class="section-header"><div class="section-title-group"><div class="section-icon"><i class="ti tabler-certificate"></i></div><span class="section-title">Certifications</span></div><span class="item-count-badge">{{ certifications|length }}</span></div>
+                {% if certifications %}
+                    {% for cert in certifications %}
+                    <div class="list-item-row">
+                        <div class="item-badge-icon">{% if cert.expiry_date and cert.expiry_date|date:"Y-m-d" < today_str %}<i class="ti tabler-certificate-off" style="color:#dc3545;"></i>{% else %}<i class="ti tabler-certificate" style="color:#28a745;"></i>{% endif %}</div>
+                        <div class="item-content">
+                            <div class="item-title">{{ cert.certification_name }}</div>
+                            <div class="item-subtitle">{{ cert.issuing_organization }}</div>
+                            <div class="item-meta-grid">
+                                <span class="meta-tag">Issued: {{ cert.issue_date|default:"—" }}</span>
+                                <span class="meta-tag">Expiry: {{ cert.expiry_date|default:"No Expiry" }}</span>
+                            </div>
+                        </div>
+                        <div class="right-meta">
+                            {% if cert.expiry_date %}{% if cert.expiry_date|date:"Y-m-d" < today_str %}<span class="badge bg-danger" style="font-size:9px;">Expired</span>{% else %}<span class="badge bg-success" style="font-size:9px;">Valid</span>{% endif %}{% endif %}
+                            {% if cert.certificate_file %}<a href="{{ cert.certificate_file }}" target="_blank" class="small">View</a>{% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="text-center py-3 text-muted small">No certifications found</div>
+                {% endif %}
+            </div>
+            <div class="col-lg-6 border-lg-start" style="border-left:1px solid var(--pv-border-light);">
+                <div class="section-header"><div class="section-title-group"><div class="section-icon"><i class="ti tabler-language"></i></div><span class="section-title">Languages</span></div><span class="item-count-badge">{{ languages|length }}</span></div>
+                {% if languages %}
+                    {% for lang in languages %}
+                    <div class="list-item-row">
+                        <div class="item-badge-icon">{{ lang.language_name|slice:":2"|upper }}</div>
+                        <div class="item-content">
+                            <div class="item-title">{{ lang.language_name }} {% if lang.is_mother_tongue %}<span class="badge bg-secondary ms-1" style="font-size:9px;">Mother Tongue</span>{% endif %}</div>
+                            <div class="skill-bubbles">
+                                <span class="skill-bubble {% if lang.can_read %}active{% else %}inactive{% endif %}">
+                                    <i class="ti {% if lang.can_read %}tabler-check{% else %}tabler-x{% endif %}"></i> Read
+                                </span>
+                                <span class="skill-bubble {% if lang.can_write %}active{% else %}inactive{% endif %}">
+                                    <i class="ti {% if lang.can_write %}tabler-pencil{% else %}tabler-x{% endif %}"></i> Write
+                                </span>
+                                <span class="skill-bubble {% if lang.can_speak %}active{% else %}inactive{% endif %}">
+                                    <i class="ti {% if lang.can_speak %}tabler-microphone{% else %}tabler-x{% endif %}"></i> Speak
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="text-center py-3 text-muted small">No language records found</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Documents & Reporting Manager -->
+        <div class="row g-0">
+            <div class="col-lg-6">
+                <div class="section-header"><div class="section-title-group"><div class="section-icon"><i class="ti tabler-file"></i></div><span class="section-title">Documents</span></div><span class="item-count-badge">{{ documents|length }}</span></div>
+                {% if documents %}
+                    {% for doc in documents %}
+                    <div class="list-item-row">
+                        <div class="item-badge-icon"><i class="ti tabler-file-text"></i></div>
+                        <div class="item-content">
+                            <div class="item-title">{{ doc.document_name }}</div>
+                            <div class="item-meta-grid">
+                                <span class="meta-tag">Issued: {{ doc.issue_date|default:"—" }}</span>
+                                <span class="meta-tag">Expiry: {{ doc.expiry_date|default:"No Expiry" }}</span>
+                            </div>
+                        </div>
+                        <div class="right-meta">
+                            {% if doc.expiry_date %}{% if doc.expiry_date|date:"Y-m-d" < today_str %}<span class="badge bg-danger" style="font-size:9px;">Expired</span>{% else %}<span class="badge bg-success" style="font-size:9px;">Valid</span>{% endif %}{% endif %}
+                            {% if doc.file_doc %}<a href="{{ request.filePath }}{{ doc.file_doc }}" target="_blank" class="small">View</a>{% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="text-center py-3 text-muted small">No documents found</div>
+                {% endif %}
+            </div>
+            <div class="col-lg-6 border-lg-start" style="border-left:1px solid var(--pv-border-light);">
+                <div class="section-header"><div class="section-title-group"><div class="section-icon"><i class="ti tabler-user-check"></i></div><span class="section-title">Reporting Manager</span></div><span class="item-count-badge">{{ managers|length }}</span></div>
+                {% if managers %}
+                    {% for mgr in managers %}
+                    <div class="list-item-row">
+                        <div class="item-badge-icon"><i class="ti tabler-user-circle"></i></div>
+                        <div class="item-content">
+                            <div class="item-title">{{ mgr.reporting_manager.get_full_name|default:mgr.reporting_manager.username }}</div>
+                            <div class="item-subtitle"><i class="ti tabler-at"></i> {{ mgr.reporting_manager.username }}</div>
+                        </div>
+                        <div class="right-meta">{% if mgr.is_current %}<span class="badge bg-success" style="font-size:9px;">Current</span>{% else %}<span class="badge bg-secondary" style="font-size:9px;">Previous</span>{% endif %}</div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="text-center py-3 text-muted small">No reporting managers assigned</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Family Details -->
+        <div class="section-header"><div class="section-title-group"><div class="section-icon"><i class="ti tabler-users"></i></div><span class="section-title">Family Details</span></div><span class="item-count-badge">{{ family_details|length }}</span></div>
+        {% if family_details %}
+            {% for member in family_details %}
+            <div class="list-item-row">
+                <div class="item-badge-icon"><i class="ti tabler-user-heart"></i></div>
+                <div class="item-content">
+                    <div class="item-title">{{ member.family_member_name }} <span class="badge bg-secondary ms-1" style="font-size:9px;">{{ member.relationship }}</span> {% if member.is_emergency_contact %}<span class="badge bg-danger ms-1" style="font-size:9px;">Emergency</span>{% endif %}</div>
+                    <div class="item-meta-grid">
+                        {% if member.date_of_birth %}<span class="meta-tag"><i class="ti tabler-calendar"></i> {{ member.date_of_birth }}</span>{% endif %}
+                        {% if member.gender %}<span class="meta-tag">{{ member.gender.gender_name }}</span>{% endif %}
+                        {% if member.mobile_number %}<span class="meta-tag"><i class="ti tabler-phone"></i> {{ member.mobile_number }}</span>{% endif %}
+                        {% if member.occupation %}<span class="meta-tag">{{ member.occupation }}</span>{% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="text-center py-3 text-muted small">No family details found</div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Print footer -->
+<div class="pv-print-footer text-center mt-2 small text-muted" style="display:none;">
+    Printed on {% now "d M Y" %} — {{ obj.full_name }} ({{ obj.employee_code|default:"" }})
+</div>
+{% endblock %}
