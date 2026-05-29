@@ -38,6 +38,18 @@ class ApprovalRule(BaseModel):
     def __str__(self):
         return f"{self.approval_type.name} - {self.sequence}"
 
+class ApproverStatus(models.Model):
+    approver_status_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+    css = models.CharField(max_length=100,null=True,blank=True)
+    sequence = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ("sequence",)
+
+    def __str__(self):
+        return self.name
 
 class Approver(BaseModel):
     STATUS_CHOICES = (("pending", "Pending"), ("approved", "Approved"), ("rejected", "Rejected"),)

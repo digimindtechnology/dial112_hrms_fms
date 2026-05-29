@@ -4,106 +4,86 @@
 {% block title %}Employees{% endblock %}
 
 {% block content %}
-
-    <!-- Stat cards -->
-    <div class="row g-6 mb-6">
-        <div class="col-sm-6 col-xl-4">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex align-items-start justify-content-between">
-                        <div class="content-left">
-                            <span class="text-heading">Total Employees</span>
-                            <div class="d-flex align-items-center my-1">
-                                <h4 class="mb-0 me-2">{{ total_employees }}</h4>
+    <div class="row g-4 mb-4">
+        {% for es in empstatus_counts %}
+            <div class="col-sm-6 col-xl-3">
+                <div class="card h-100" style="border-left:4px solid var(--bs-primary)">
+                    <div class="card-body py-3">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--bs-primary);">{{ es.employee_status_name }}</div>
+                                <h4 class="mb-0 mt-1 text-success">{{ es.count }}</h4>
                             </div>
-                        </div>
-                        <div class="avatar">
-                            <span class="avatar-initial rounded bg-label-primary">
-                                <i class="ti tabler-users"></i>
-                            </span>
+                            <i class="ti tabler-circle-check text-danger" style="font-size:30px;opacity:.5;"></i>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-sm-6 col-xl-4">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex align-items-start justify-content-between">
-                        <div class="content-left">
-                            <span class="text-heading">Active Employees</span>
-                            <div class="d-flex align-items-center my-1">
-                                <h4 class="mb-0 me-2 text-success">{{ active_employees }}</h4>
-                            </div>
-                        </div>
-                        <div class="avatar">
-                            <span class="avatar-initial rounded bg-label-success">
-                                <i class="ti tabler-user-check"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-4">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex align-items-start justify-content-between">
-                        <div class="content-left">
-                            <span class="text-heading">Inactive Employees</span>
-                            <div class="d-flex align-items-center my-1">
-                                <h4 class="mb-0 me-2 text-danger">{{ inactive_employees }}</h4>
-                            </div>
-                        </div>
-                        <div class="avatar">
-                            <span class="avatar-initial rounded bg-label-danger">
-                                <i class="ti tabler-user-off"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 
     <div class="card">
         <div class="table-responsive">
+
+            <!-- Header -->
             <div class="card-header border-bottom d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 py-3">
-                <h5 class="card-title mb-0">Employees List</h5>
+                <h5 class="card-title mb-0"> {{ empCatName }} Employee List</h5>
                 <div class="d-flex align-items-center gap-3">
+                    <!-- Search Form -->
                     <form method="GET" class="d-flex align-items-center gap-2">
-                        <input type="text" class="form-control form-control-sm" name="search"
-                               placeholder="Search employees..." value="{{ search_query }}"
+                        <!-- Preserve empcat -->
+                        {% if empCatId %}<input type="hidden" name="empcat" value="{{ empCatId }}"> {% endif %}
+
+                        <input type="text"
+                               class="form-control form-control-sm"
+                               name="search"
+                               placeholder="Search employees..."
+                               value="{{ search_query }}"
                                style="min-width: 220px;">
+
                         <button type="submit" class="btn btn-primary btn-sm">
                             <i class="ti tabler-search"></i>
                         </button>
+
                         {% if search_query %}
-                            <a href="{% url 'employee-list' %}" class="btn btn-label-secondary btn-sm">
+                            <a href="{% url 'employee-list' %}{% if empCatId %}?empcat={{ empCatId }}{% endif %}"
+                               class="btn btn-label-secondary btn-sm">
                                 <i class="ti tabler-x"></i>
                             </a>
                         {% endif %}
+
                     </form>
+
+                    <!-- Add Employee Button -->
                     {% if empCatId %}
-                        <a href="/employee/add/?empcat={{ empCatId }}" class="btn btn-primary btn-sm">
+                        <a href="/employee/add/?empcat={{ empCatId }}"
+                           class="btn btn-primary btn-sm">
                             <i class="ti tabler-plus me-1"></i> Add Employee
                         </a>
                     {% else %}
-                        <a href="/employee/add/" class="btn btn-primary btn-sm">
+                        <a href="/employee/add/"
+                           class="btn btn-primary btn-sm">
                             <i class="ti tabler-plus me-1"></i> Add Employee
                         </a>
                     {% endif %}
+
                 </div>
             </div>
 
+            <!-- Body -->
             <div class="card-body">
+
+                <!-- Top Info -->
                 <div class="d-flex justify-content-between align-items-center px-2 py-2">
                     <small class="text-muted">
-                        Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ paginator.count }} entries
+                        Showing {{ page_obj.start_index }} to {{ page_obj.end_index }}
+                        of {{ paginator.count }} entries
                     </small>
                 </div>
 
+                <!-- Table -->
                 <table class="table table-bordered">
+
                     <thead class="border-top">
                     <tr class="text-nowrap">
                         <th>S.No</th>
@@ -111,99 +91,166 @@
                         <th>Name</th>
                         <th>Mobile</th>
                         <th>Employee Type</th>
-                        <th>Employment Status</th>
-                        <th> Status</th>
+                        <th>Employ Status</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
+
                     <tbody>
+
                     {% for emp in page_obj %}
                         <tr>
                             <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
                             <td>
-                                <a href="{% url 'employee-detail' emp.employee_unique_id %}"
-                                   class="badge bg-label-primary waves-effect" title="View detail">
-                                    {{ emp.employee_code|default:'-' }}
-                                </a>
+                                {% if  emp.empStatus_id != 3 %}
+                                    <a href="{% url 'employee-detail' emp.employee_unique_id %}"
+                                       class="badge bg-label-primary waves-effect rounded-pill" title="View detail">
+                                        {{ emp.employee_code|default:'-' }}
+                                    </a>
+
+                                {% else %}
+
+                                    <a href="{% url 'employee-view' emp.employee_unique_id %}"
+                                       class="badge bg-label-primary waves-effect rounded-pill" title="View">
+                                        {{ emp.employee_code|default:'-' }}
+                                    </a>
+                                {% endif %}
                             </td>
+
                             <td class="fw-medium">{{ emp.full_name }}</td>
-                            <td>{{ emp.mobile }}</td>
-                            <td>{{ emp.empType.name|default:'-' }}</td>
+                            <td> {{ emp.mobile }}</td>
+                            <td> {{ emp.empType.name|default:'-' }}</td>
                             <td>
-                                <span class="badge bg-label-{% if emp.employment_status == 'Active' %}success{% elif emp.employment_status == 'Inactive' %}warning{% else %}danger{% endif %}">
-                                    {{ emp.employment_status }}
-                                </span>
+                            <span class="badge bg-label-{% if emp.employment_status == 'Active' %}success{% elif emp.employment_status == 'Inactive' %}warning{% else %}danger{% endif %}">
+                                {{ emp.employment_status }}
+                            </span>
                             </td>
+
                             <td>
-                                <span class="badge bg-label- {{ emp.empStatus.employee_status_css }}">
-                                    {{ emp.empStatus.employee_status_name }}
-                                </span>
+                            <span class="badge bg-{{ emp.empStatus.employee_status_css }} bg-glow">
+                                {{ emp.empStatus.employee_status_name }}
+                            </span>
                             </td>
+
                             <td class="text-nowrap">
-                                <a href="{% url 'employee-edit' emp.employee_unique_id %}"
-                                   class="badge bg-label-info rounded" title="Edit">
-                                    <i class="ti tabler-edit ti-md"></i>
-                                </a>
-                                <button class="badge bg-label-danger rounded"
-                                        title="Delete" onclick="deleteEmployee({{ emp.employee_id }})">
-                                    <i class="ti tabler-trash ti-md"></i>
-                                </button>
+                                {% if  emp.empStatus_id != 3 %}
+                                    <a href="{% url 'employee-edit' emp.employee_unique_id %}"
+                                       class="badge bg-label-info rounded"
+                                       title="Edit">
+                                        <i class="ti tabler-edit ti-md"></i>
+                                    </a>
+
+                                    <button class="badge bg-label-danger rounded"
+                                            title="Delete"
+                                            onclick="deleteEmployee({{ emp.employee_id }})">
+                                        <i class="ti tabler-trash ti-md"></i>
+                                    </button>
+                                {% else %}
+
+                                    <a href="{% url 'employee-view' emp.employee_unique_id %}"
+                                       class="badge bg-label-info rounded"
+                                       title="View">
+                                        <i class="ti tabler-eye me-1"></i>View
+                                    </a>
+                                {% endif %}
                             </td>
+
                         </tr>
+
                     {% empty %}
                         <tr>
-                            <td colspan="8" class="text-center py-4 text-muted">No employees found.</td>
+                            <td colspan="8"
+                                class="text-center py-4 text-muted">
+                                No employees found.
+                            </td>
                         </tr>
                     {% endfor %}
+
                     </tbody>
+
                 </table>
 
                 <!-- Pagination -->
                 <div class="d-flex justify-content-between align-items-center px-2 py-3 border-top">
+
                     <small class="text-muted">
-                        Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ paginator.count }} entries
+                        Showing {{ page_obj.start_index }} to {{ page_obj.end_index }}
+                        of {{ paginator.count }} entries
                     </small>
+
                     <nav>
                         <ul class="pagination pagination-sm mb-0">
+
+                            <!-- First + Previous -->
                             {% if page_obj.has_previous %}
+
                                 <li class="page-item">
-                                    <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">
+                                    <a class="page-link"
+                                       href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if empCatId %}&empcat={{ empCatId }}{% endif %}">
                                         <i class="ti tabler-chevrons-left"></i>
                                     </a>
                                 </li>
+
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                    <a class="page-link"
+                                       href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if empCatId %}&empcat={{ empCatId }}{% endif %}">
                                         <i class="ti tabler-chevron-left"></i>
                                     </a>
                                 </li>
+
                             {% endif %}
+
+                            <!-- Page Numbers -->
                             {% for num in paginator.page_range %}
+
                                 {% if num == page_obj.number %}
-                                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
                                     </li>
+
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                           href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if empCatId %}&empcat={{ empCatId }}{% endif %}">
+                                            {{ num }}
+                                        </a>
+                                    </li>
+
                                 {% endif %}
+
                             {% endfor %}
+
+                            <!-- Next + Last -->
                             {% if page_obj.has_next %}
+
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                    <a class="page-link"
+                                       href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if empCatId %}&empcat={{ empCatId }}{% endif %}">
                                         <i class="ti tabler-chevron-right"></i>
                                     </a>
                                 </li>
+
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                    <a class="page-link"
+                                       href="?page={{ paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if empCatId %}&empcat={{ empCatId }}{% endif %}">
                                         <i class="ti tabler-chevrons-right"></i>
                                     </a>
                                 </li>
+
                             {% endif %}
+
                         </ul>
                     </nav>
+
                 </div>
+
             </div>
         </div>
     </div>
+
 
     <script>
         function deleteEmployee(pk) {

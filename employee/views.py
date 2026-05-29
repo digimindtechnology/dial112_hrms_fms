@@ -1,5 +1,6 @@
 from django.core.paginator import Paginator
-from django.db.models import Q, Model
+from django.db import transaction
+from django.db.models import Q, Model, Max, Min, Count
 from django.http import JsonResponse
 from django.urls import reverse
 
@@ -7,14 +8,14 @@ from accounts.base import Base
 from accounts.helpers.basicUtility import UploadFileData, GetFileUrl
 from accounts.helpers.message_helper import send_sweetalert
 from approvalrules.models import ApprovalRule
-from employee.models import (EmployeeInfo, EmployeeCaste, EmployeeEducation, EmployeeExperience,
+from employee.models import (EmployeeInfo, EmployeeStatus, EmployeeCaste, EmployeeEducation, EmployeeExperience,
                              EmployeeCertification, EmployeeLanguage, EmployeeFamilyDetail,
                              EmployeeJobHistory, EmployeeDocument, EmployeeReportingManager, EmployeeDataApprover)
 from masters.models import Gender, District
 from setup.models import EmployeeType, EmployeeCategory
 from accounts.models import Profile
-from django.contrib.auth.models import User as AuthUser
-from datetime import datetime
+from django.contrib.auth.models import User as AuthUser, User
+from datetime import datetime, date
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 
@@ -135,38 +136,57 @@ def _post_to_fields(p):
 
 @login_required
 def employee_list(request):
+    empCatName = ''
+    empCatId = request.GET.get('empcat')
     search_query = request.GET.get('search', '').strip()
-    empCatId = request.GET.get('empcat', None)
-    qs = EmployeeInfo.objects.filter(tenantProfile_id=request.tenantID).select_related('gender', 'empType', 'empStatus')
-    if empCatId:
-        qs = qs.filter(empCategory_id=int(empCatId))
 
+    base_qs = EmployeeInfo.objects.filter(tenantProfile_id=request.tenantID)
+    if empCatId:
+        base_qs = base_qs.filter(empCategory_id=int(empCatId))
+        empCatName = EmployeeCategory.objects.filter(id=empCatId).values_list('name', flat=True).first()
+
+    total_employees = base_qs.count()
+    _es_count_map = dict(base_qs.values_list('empStatus_id').annotate(count=Count('employee_id')).values_list('empStatus_id', 'count'))
+    empstatus_counts = [
+        {
+            'employee_status_id': s.employee_status_id,
+            'employee_status_name': s.employee_status_name,
+            'employee_status_css': s.employee_status_css or 'bg-label-secondary',
+            'count': _es_count_map.get(s.employee_status_id, 0),
+        }
+        for s in EmployeeStatus.objects.filter(is_active=True).order_by('employee_status_id')
+    ]
+
+    _emp_count_map = {item['employment_status']: item['count'] for item in base_qs.values('employment_status').annotate(count=Count('employee_id'))}
+    employment_status_counts = {choice: _emp_count_map.get(choice, 0) for choice in ['Active', 'Inactive', 'Resigned', 'Terminated']}
+    qs = base_qs.select_related('gender', 'empType', 'empStatus', 'empCategory', )
+
+    # Search Filter
     if search_query:
-        qs = qs.filter(
-            Q(first_name__icontains=search_query) |
-            Q(last_name__icontains=search_query) |
-            Q(employee_code__icontains=search_query) |
-            Q(mobile__icontains=search_query) |
-            Q(designation__icontains=search_query)
-        )
+        qs = qs.filter(Q(first_name__icontains=search_query) |
+                       Q(last_name__icontains=search_query) |
+                       Q(employee_code__icontains=search_query) |
+                       Q(mobile__icontains=search_query) |
+                       Q(designation__icontains=search_query) |
+                       Q(employment_status__icontains=search_query) |
+                       Q(empStatus__employee_status_name__icontains=search_query))
 
     qs = qs.order_by('first_name', 'last_name')
-    total_employees = qs.count()
-    active_employees = qs.filter(employment_status='Active').count()
-    inactive_employees = total_employees - active_employees
-
     paginator = Paginator(qs, 25)
-    page_obj = paginator.get_page(request.GET.get('page'))
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
-    return render(request, 'employee/employee_list.html', {
+    context = {
         'empCatId': empCatId,
+        'empCatName': empCatName,
+        'search_query': search_query,
         'page_obj': page_obj,
         'paginator': paginator,
-        'search_query': search_query,
         'total_employees': total_employees,
-        'active_employees': active_employees,
-        'inactive_employees': inactive_employees,
-    })
+        'empstatus_counts': empstatus_counts,
+        'employment_status_counts': employment_status_counts,
+    }
+    return render(request, 'employee/employee_list.html', context)
 
 
 @login_required
@@ -177,7 +197,7 @@ def employee_add(request):
         p = request.POST
         fd = p
         try:
-            obj = EmployeeInfo.objects.create(**_post_to_fields(p), empStatus_id=1, tenantProfile_id=request.tenantID, created_by=request.user, )
+            obj = EmployeeInfo.objects.create(**_post_to_fields(p), empStatus_id=1, tenantProfile_id=request.tenantID, created_by=request.user, profile_completion_percentage=30)
             picture = request.FILES.get('picture')
             if picture:
                 path = UploadFileData(request.tenantID, f'employees/{obj.employee_id}', picture)
@@ -240,15 +260,21 @@ def employee_update(request, emp_unique_id=''):
 
 @login_required
 def employee_detail(request, emp_unique_id):
-    obj = get_object_or_404(EmployeeInfo.objects.select_related('gender', 'empType', 'empCategory', 'empStatus', 'caste', 'district', 'tenantProfile'), employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID, )
-    empApprovalRuleList = EmployeeDataApprover.objects.filter(employee_id=obj.employee_id).order_by('sequence')
-    # if request.method == 'POST':
-    #     p = request.POST
-    #     obj.save(empStatus_id=2)
+    next_approver = None
+    can_show_btn = False
+    obj = get_object_or_404(EmployeeInfo.objects.select_related('gender', 'empType', 'empCategory', 'empStatus', 'caste', 'district', 'tenantProfile'), employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
+
+    empApprovalRuleList = EmployeeDataApprover.objects.filter(employee_id=obj.employee_id, approverType__name=Base.ApprovalRules.EmployeeApproval.value).order_by('sequence')
+    min_pending_seq = empApprovalRuleList.filter(approverStatus_id=Base.ApproverStatus.Pending.value).aggregate(min_seq=Min('sequence'))['min_seq']
+    if min_pending_seq is not None:
+        next_approver = empApprovalRuleList.filter(approverStatus_id=Base.ApproverStatus.Pending.value, sequence=min_pending_seq, approver_id=request.user.id).first()
+        can_show_btn = next_approver is not None
 
     return render(request, 'employee/employee_detail.html', {'obj': obj,
                                                              'picture_url': GetFileUrl(obj.picture),
-                                                             'empApprovalRuleList': empApprovalRuleList})
+                                                             'showApproveRejectBtn': can_show_btn,
+                                                             'empApprovalRuleList': empApprovalRuleList,
+                                                             })
 
 
 @login_required
@@ -773,10 +799,7 @@ def reporting_manager_save(request, emp_unique_id):
     p = request.POST
     pk = p.get('pk', '').strip()
     try:
-        fields = dict(
-            reporting_manager_id=p.get('reporting_manager_id', '').strip() or None,
-            is_current=p.get('is_current') == 'on',
-        )
+        fields = dict(reporting_manager_id=p.get('reporting_manager_id', '').strip() or None, is_current=p.get('is_current') == 'on', )
         if pk:
             mgr = get_object_or_404(EmployeeReportingManager, employee_reporting_manager_id=pk, employee=obj)
             for attr, val in fields.items():
@@ -785,6 +808,11 @@ def reporting_manager_save(request, emp_unique_id):
             mgr.save()
         else:
             EmployeeReportingManager.objects.create(**fields, employee=obj, created_by=request.user)
+            if obj.empStatus_id == 1:  ##Draft =1
+                obj.empStatus_id = 2
+                obj.profile_completion_percentage = 35
+                obj.svae()
+
         return JsonResponse({'success': True})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
@@ -797,3 +825,92 @@ def reporting_manager_delete(request):
     pk = request.POST.get('pk')
     EmployeeReportingManager.objects.filter(employee_reporting_manager_id=pk, employee__tenantProfile_id=request.tenantID).delete()
     return JsonResponse({'success': True})
+
+
+# ── Approval Action ────────────────────────────────────────
+
+@login_required
+def employee_approval_action(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'})
+    approver_record_id = request.POST.get('approver_record_id', '').strip()
+    status_id = request.POST.get('status_id', '').strip()
+    remark = request.POST.get('remark', '').strip()
+
+    if not approver_record_id or not status_id:
+        return JsonResponse({'success': False, 'error': 'Missing required fields'})
+    try:
+        status_id = int(status_id)
+        if status_id not in [Base.ApproverStatus.Approved.value, Base.ApproverStatus.Rejected.value]:
+            return JsonResponse({'success': False, 'error': 'Invalid status'})
+
+        record = get_object_or_404(EmployeeDataApprover, employee_data_approver_id=approver_record_id, employee__tenantProfile_id=request.tenantID, )
+        if record.approver_id != request.user.id:
+            return JsonResponse({'success': False, 'error': 'You are not authorized to perform this action'})
+
+        min_pending_seq = EmployeeDataApprover.objects.filter(employee_id=record.employee_id, approverType=record.approverType, approverStatus_id=Base.ApproverStatus.Pending.value, ).aggregate(min_seq=Min('sequence'))['min_seq']
+        if min_pending_seq is None or record.sequence != min_pending_seq:
+            return JsonResponse({'success': False, 'error': 'You can only act on the current pending step'})
+
+        with transaction.atomic():
+            if status_id == Base.ApproverStatus.Approved.value:
+                record.approverStatus_id = Base.ApproverStatus.Approved.value
+                record.approved_date = date.today()
+                record.approved_remark = remark or None
+                record.updated_by = request.user
+                record.save()
+
+                any_pending = EmployeeDataApprover.objects.filter(employee_id=record.employee_id, approverType=record.approverType, approverStatus_id=Base.ApproverStatus.Pending.value).exists()
+                if not any_pending:
+                    emp = EmployeeInfo.objects.select_related('tenantProfile', 'tenantProfile__currency', 'tenantProfile__time_zone', 'tenantProfile__date_formate_view', 'tenantProfile__time_formate_view', 'district', 'gender', ).get(employee_id=record.employee_id)
+                    if emp.user_id:
+                        return JsonResponse({'success': True, 'message': 'Employee profile approved successfully.'})
+
+                    username = emp.mobile
+                    if AuthUser.objects.filter(username=username).exists():
+                        return JsonResponse({'success': False, 'error': f'Username "{username}" (mobile) is already taken. Update the employee mobile first.'})
+                    if emp.email and AuthUser.objects.filter(email=emp.email).exists():
+                        return JsonResponse({'success': False, 'error': f'Email "{emp.email}" is already registered.'})
+
+                    user = AuthUser.objects.create_user(username=username, email=emp.email or '', password=username, first_name=emp.first_name, last_name=emp.last_name, is_active=True, )
+
+                    profile = Profile.objects.get(user=user)
+                    tenant = emp.tenantProfile
+                    profile.tenantProfile_id = emp.tenantProfile_id
+                    profile.created_by = request.user
+                    profile.mobile = emp.mobile
+                    profile.address = emp.current_address
+                    profile.city = emp.city
+                    profile.postal_code = emp.postal_code
+                    profile.gender_id = emp.gender_id
+                    profile.role_id = emp.empRole_id
+                    profile.is_login_with_otp = False
+                    profile.is_system_assigned_password = True  # user must change on first login
+                    profile.district_id = emp.district_id
+                    profile.state_id = emp.district.state_id if emp.district else None
+                    profile.country_id = tenant.country_id if tenant else None
+                    profile.currency_id = tenant.currency_id if tenant else None
+                    profile.time_zone_id = tenant.time_zone_id if tenant else None
+                    profile.date_formate_view_id = tenant.date_formate_view_id if tenant else None
+                    profile.time_formate_view_id = tenant.time_formate_view_id if tenant else None
+                    profile.save()
+
+                    emp.user = user
+                    emp.empStatus_id = 3  ##Approved
+                    emp.userProfile = profile
+                    emp.updated_by = request.user
+                    emp.save()
+
+            else:  # Rejected
+                if not remark:
+                    return JsonResponse({'success': False, 'error': 'Remark is required for rejection'})
+                record.approverStatus_id = Base.ApproverStatus.Rejected.value
+                record.rejected_date = date.today()
+                record.rejected_remark = remark
+                record.updated_by = request.user
+                record.save()
+
+        action = 'approved' if status_id == Base.ApproverStatus.Approved.value else 'rejected'
+        return JsonResponse({'success': True, 'message': f'Employee profile {action} successfully.'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})

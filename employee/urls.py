@@ -59,4 +59,7 @@ urlpatterns = [
     path('<str:emp_unique_id>/reporting-manager/form/<int:pk>/', views.reporting_manager_form, name='reporting-manager-form'),
     path('<str:emp_unique_id>/reporting-manager/save/', views.reporting_manager_save, name='reporting-manager-save'),
     path('reporting-manager/delete/', views.reporting_manager_delete, name='reporting-manager-delete'),
+
+    # Approval Action
+    path('approval-action/', views.employee_approval_action, name='employee-approval-action'),
 ]

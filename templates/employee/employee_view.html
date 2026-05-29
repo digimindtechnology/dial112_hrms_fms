@@ -19,21 +19,21 @@
 }
 .card {
     border: none;
-    border-radius: 20px;
+    border-radius: 8px 8px 0 0;
     box-shadow: 0 4px 20px rgba(0,0,0,0.04);
     overflow: hidden;
 }
 
 /* Banner & Avatar - Fixed alignment */
 .pv-banner {
-    height: 90px;
+    height: 100px;
      background: linear-gradient(135deg, var(--bs-primary) 0%, #9c8cfc 100%);
     border-radius: 0;
     position: relative;
 }
 .pv-avatar {
-    width: 100px;
-    height: 100px;
+      width: 84px;
+    height: 84px;
     border-radius: 50%;
     background: white;
     color: var(--pv-primary);
@@ -43,10 +43,12 @@
     align-items: center;
     justify-content: center;
     border: 4px solid white;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
     left: 32px;
     overflow: hidden;
     z-index: 2;
+    position: absolute;
+    top: 60px;
 }
 .pv-avatar img {
     width: 100%;

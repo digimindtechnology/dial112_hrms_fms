@@ -1,7 +1,7 @@
 import uuid
 from django.db import models
 from accounts.models import Profile
-from approvalrules.models import ApprovalType
+from approvalrules.models import ApprovalType, ApproverStatus
 from setup.models import EmployeeType, EmployeeCategory
 from tenant.models import TenantProfile, Role
 from django.contrib.auth.models import User
@@ -311,8 +311,7 @@ class EmployeeDataApprover(BaseModel):
     approver = models.ForeignKey(User, related_name="user_EmployeeDataApprover", on_delete=models.CASCADE, help_text="user-approver by")
     approver_role = models.ForeignKey(Role, related_name="role_EmployeeDataApprover", null=True, blank=True, on_delete=models.CASCADE, help_text="role of approver by")
 
-    STATUS_CHOICES = (("pending", "Pending"), ("approved", "Approved"), ("rejected", "Rejected"),)
-    approverStatus = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending")
+    approverStatus =  models.ForeignKey(ApproverStatus, default=1, related_name="approverStatus_EmployeeDataApprover", on_delete=models.CASCADE, help_text="approver status")
 
     tenantProfile = models.ForeignKey(TenantProfile, related_name="tenantProfile_EmployeeDataApprover", on_delete=models.CASCADE, verbose_name="Tenant")
     created_by = models.ForeignKey(User, related_name="created_EmployeeDataApprover", on_delete=models.CASCADE)

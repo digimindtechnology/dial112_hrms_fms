@@ -704,7 +704,7 @@
                 <i class="ti tabler-edit me-1"></i>Edit
             </a>
             <a href="{% url 'employee-view' obj.employee_unique_id %}" class="btn btn-sm btn-label-info waves-effect">
-                <i class="ti tabler-eye me-1"></i>View Print
+                <i class="ti tabler-eye me-1"></i>View
             </a>
         </div>
     </div>
@@ -1515,5 +1515,148 @@
             });
         }
     </script>
+
+
+    {% if empApprovalRuleList %}
+        <div class="card mt-4">
+            <div class="card-header border-bottom d-flex align-items-center justify-content-between py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="sd-icon"><i class="ti tabler-checklist"></i></div>
+                    <div>
+                        <span style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--bs-secondary-color);">Approval Workflow</span>
+                        <div style="font-size:11px;color:var(--bs-secondary-color);font-weight:400;margin-top:1px;">Sequential multi-step approval chain</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead class="table-light">
+                        <tr style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">
+                            <th>Step</th>
+                            <th>Approver</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Remark</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for entry in empApprovalRuleList %}
+                            <tr style="vertical-align:middle;">
+                                <td class="ps-3">
+                                    <span class="badge bg-label-secondary rounded-pill">{{ entry.sequence }}</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div style="width:34px;height:34px;border-radius:50%;background:var(--bs-primary-bg-subtle);color:var(--bs-primary);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;">
+                                            {{ entry.approver.first_name|first|upper }}{{ entry.approver.last_name|first|upper }}
+                                        </div>
+                                        <div>
+                                            <div style="font-size:13px;font-weight:600;color:var(--bs-heading-color);">{{ entry.approver.get_full_name }}</div>
+                                            <div style="font-size:11px;color:var(--bs-secondary-color);">{{ entry.approver_role.role_name|default:"" }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if entry.approverStatus_id == 1 %}
+                                        <span class="badge bg-label-warning"><i class="ti tabler-clock me-1" style="font-size:11px;"></i>{{ entry.approverStatus }}</span>
+                                    {% elif entry.approverStatus_id == 2 %}
+                                        <span class="badge bg-label-success"><i class="ti tabler-circle-check me-1" style="font-size:11px;"></i>{{ entry.approverStatus }}</span>
+                                    {% else %}
+                                        <span class="badge bg-label-danger"><i class="ti tabler-circle-x me-1" style="font-size:11px;"></i>{{ entry.approverStatus }}</span>
+                                    {% endif %}
+                                </td>
+                                <td style="font-size:12px;color:var(--bs-secondary-color);">
+                                    {% if entry.approverStatus_id == 2 %}
+                                        {{ entry.approved_date|default:"—" }}
+                                    {% elif entry.approverStatus_id == 3 %}
+                                        {{ entry.rejected_date|default:"—" }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td style="font-size:12px;color:var(--bs-secondary-color);max-width:200px;word-break:break-word;">
+                                    {% if entry.approverStatus_id == 2 %}
+                                        {{ entry.approved_remark|default:"—" }}
+                                    {% elif entry.approverStatus_id == 3 %}
+                                        {{ entry.rejected_remark|default:"—" }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td class="pe-3">
+                                    {% if entry.approverStatus_id == 1 and showApproveRejectBtn and entry.approver_id == request.user.id %}
+                                        <button type="button" class="btn btn-sm btn-success waves-effect me-1"
+                                                onclick="EmpApprovalStatus({{ entry.employee_data_approver_id }}, 2)">
+                                            <i class="ti tabler-check me-1"></i>Approve
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger waves-effect"
+                                                onclick="EmpApprovalStatus({{ entry.employee_data_approver_id }}, 3)">
+                                            <i class="ti tabler-x me-1"></i>Reject
+                                        </button>
+                                    {% else %}
+                                        <span class="text-muted" style="font-size:12px;">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function EmpApprovalStatus(approverRecordId, statusId) {
+                const isApprove = statusId === 2;
+                Swal.fire({
+                    title: isApprove ? 'Approve Employee Profile?' : 'Reject Employee Profile?',
+                    icon: isApprove ? 'question' : 'warning',
+                    html: `<div class="text-start">
+                        <label class="form-label fw-semibold mb-1">
+                            Remark ${isApprove ? '<small class="text-muted">(optional)</small>' : '<span class="text-danger">*</span>'}
+                        </label>
+                        <textarea id="swal_remark" class="form-control" rows="3"
+                            placeholder="${isApprove ? 'Enter approval remark...' : 'Enter rejection reason (required)...'}"></textarea>
+                    </div>`,
+                    showCancelButton: true,
+                    confirmButtonText: isApprove ? '<i class="ti tabler-check me-1"></i>Yes, Approve' : '<i class="ti tabler-x me-1"></i>Yes, Reject',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: isApprove ? '#28a745' : '#d33',
+                    reverseButtons: true,
+                    preConfirm: () => {
+                        const remark = document.getElementById('swal_remark').value.trim();
+                        if (!isApprove && !remark) {
+                            Swal.showValidationMessage('Rejection remark is required');
+                            return false;
+                        }
+                        return remark;
+                    }
+                }).then(function (result) {
+                    if (!result.isConfirmed) return;
+                    $.post('{% url "employee-approval-action" %}', {
+                        approver_record_id: approverRecordId,
+                        status_id: statusId,
+                        remark: result.value || '',
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    }, function (resp) {
+                        if (resp.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: resp.message,
+                                timer: 2500,
+                                showConfirmButton: false
+                            }).then(() => location.reload());
+                        } else {
+                            Swal.fire({icon: 'error', title: 'Error', text: resp.error || 'Action failed'});
+                        }
+                    }).fail(function () {
+                        Swal.fire({icon: 'error', title: 'Network error', text: 'Please try again.'});
+                    });
+                });
+            }
+        </script>
+    {% endif %}
 
 {% endblock %}

@@ -73,6 +73,12 @@ class Base(models.Model):
         LogoutGroup = "Logout"
 
     @django_enum
+    class ApproverStatus(Enum):
+        Pending = 1
+        Approved=2
+        Rejected=3
+
+    @django_enum
     class ApprovalRules(Enum):
         EmployeeApproval = "Employee Approval Rule"
 

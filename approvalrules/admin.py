@@ -1,3 +1,6 @@
 from django.contrib import admin
+from approvalrules.models import ApprovalType, ApproverStatus
 
-# Register your models here.
+admin.site.register(ApprovalType)
+admin.site.register(ApproverStatus)
+
