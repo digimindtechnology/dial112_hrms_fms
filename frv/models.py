@@ -112,6 +112,7 @@ class VehicleStatus(models.Model):
 class FRVServiceCenter(BaseModel):
     """List of Authorized Service Centers"""
     frv_service_center_id = models.AutoField(primary_key=True)
+    frv_service_center_unique_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     server_center_name = models.CharField(max_length=200)
     
     address = models.TextField(null=True, blank=True)
@@ -158,6 +159,7 @@ class FRVInspectionCheckList(BaseModel):
 class FRVGuideline(BaseModel):
     """FRV Operating Guidelines & Manuals"""
     frv_guideline_id = models.AutoField(primary_key=True)
+    frv_guideline_unique_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=200)
     category = models.ForeignKey(GuidelineCategory, on_delete=models.SET_NULL, null=True,related_name='category_FRVGuideline')
     
@@ -238,6 +240,7 @@ class FRV(BaseModel):
 class FRVTakeoverhandover(models.Model):
     """FRV Handover/Takeover Logs with Odometer Readings & 4-Side Images"""
     frv_handover_takeover_id = models.AutoField(primary_key=True)
+    frv_handover_takeover_unique_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     frv = models.ForeignKey(FRV, on_delete=models.CASCADE, related_name='frv_FRVTakeoverhandover')
 
     # ========== Takeover Details ==========
@@ -343,6 +346,7 @@ class FRVTakeoverhandover(models.Model):
 class FRVMaintenance(BaseModel):
     """Vehicle Maintenance Records (Service Book)"""
     frv_maintenance_id = models.AutoField(primary_key=True)
+    frv_maintenance_unique_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     frv = models.ForeignKey(FRV, on_delete=models.CASCADE, related_name='frv_FRVMaintenance')
     
     maintenanceType = models.ForeignKey(MaintenanceType, on_delete=models.SET_NULL, null=True, related_name='maintenanceType_FRVMaintenance')
@@ -385,6 +389,7 @@ class FRVMaintenance(BaseModel):
 class FRVInspection(BaseModel):
     """Periodic Vehicle Inspection Reports (Weekly minimum)"""
     frv_inspection_id = models.AutoField(primary_key=True)
+    frv_inspection_unique_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     frv = models.ForeignKey(FRV, on_delete=models.CASCADE, related_name='frv_FRVInspection')
     
     inspection_date = models.DateField(auto_now_add=True)
@@ -430,6 +435,7 @@ class FRVInspectionCheckListValue(BaseModel):
 class FRVFuel(BaseModel):
     """Fuel Records Management"""
     frv_fuel_id = models.AutoField(primary_key=True)
+    frv_fuel_unique_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     frv = models.ForeignKey(FRV, on_delete=models.CASCADE, related_name='frv_FRVFuel')
 
     fuel_date = models.DateTimeField()
@@ -470,6 +476,7 @@ class FRVFuel(BaseModel):
 class FRVAccident(BaseModel):
     """Accident/Incident Reports"""
     frv_accident_id = models.AutoField(primary_key=True)
+    frv_accident_unique_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     frv = models.ForeignKey(FRV, on_delete=models.CASCADE, related_name='frv_FRVAccident')
    
     accident_date = models.DateTimeField(null=True, blank=True)
@@ -499,6 +506,7 @@ class FRVAccident(BaseModel):
 class FRVConsumable(BaseModel):
     """Consumables Inventory Tracking"""
     frv_consumable_id = models.AutoField(primary_key=True)
+    frv_consumable_unique_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     frv = models.ForeignKey(FRV, on_delete=models.CASCADE, related_name='frv_FRVConsumable')
     consumable_type = models.CharField(max_length=255, null=True, blank=True)
     quantity = models.DecimalField(max_digits=8, decimal_places=2)
@@ -512,6 +520,7 @@ class FRVConsumableTransaction(BaseModel):
     """Consumable Usage / Inventory Tracking"""
 
     frv_consumable_transaction_id = models.AutoField(primary_key=True)
+    frv_consumable_transaction_unique_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     frv = models.ForeignKey(FRV,on_delete=models.CASCADE,related_name='frv_FRVConsumableTransaction')
 
     consumable = models.ForeignKey(FRVConsumable,on_delete=models.CASCADE,related_name='consumable_FRVConsumableTransaction')
@@ -543,6 +552,7 @@ class FRVConsumableTransaction(BaseModel):
 class FRVCodeViolation(BaseModel):
     """Code Violations related to FRV"""
     frv_code_violation_id = models.AutoField(primary_key=True)
+    frv_code_violation_unique_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     frv = models.ForeignKey(FRV, on_delete=models.CASCADE, related_name='frv_FRVCodeViolation')
     
     violation_date = models.DateTimeField(null=True, blank=True)
@@ -569,6 +579,7 @@ class FRVCodeViolation(BaseModel):
 class FRVClaim(BaseModel):
     """Claims related to FRV Operations"""
     frv_claim_id = models.AutoField(primary_key=True)
+    frv_claim_unique_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     frv = models.ForeignKey(FRV, on_delete=models.CASCADE, related_name='frv_FRVClaim')
     
     claim_type = models.TextField(max_length=255,null=True, blank=True)
