@@ -235,10 +235,10 @@
                             <div class="row g-4 mb-2">
 
                                 <div class="col-md-4">
-                                    <label class="form-label">Employee Code</label>
+                                    <label class="form-label">Employee Code <span class="required-star">*</span></label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="ti tabler-hash"></i></span>
-                                        <input class="form-control" type="text" name="employee_code" maxlength="20"
+                                        <input class="form-control" type="text" name="employee_code" maxlength="20" required
                                                value="{{ fd.employee_code|default:'' }}" placeholder="e.g. EMP001">
                                     </div>
                                 </div>
