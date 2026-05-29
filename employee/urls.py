@@ -3,6 +3,7 @@ from employee import views
 
 urlpatterns = [
     path('', views.employee_list, name='employee-list'),
+    path('list/partial/', views.employee_list_partial, name='employee-list-partial'),
     path('add/', views.employee_add, name='employee-add'),
     path('<str:emp_unique_id>/detail/', views.employee_detail, name='employee-detail'),
     path('<str:emp_unique_id>/view/', views.employee_view_profile, name='employee-view'),
