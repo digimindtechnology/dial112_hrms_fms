@@ -1,0 +1,140 @@
+{% load ui_filter_tags %}
+
+<!-- Info bar -->
+<div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom flex-wrap gap-2">
+    <small class="text-muted">
+        Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ paginator.count }} entries
+    </small>
+{#    <div class="d-flex gap-2 d-none">#}
+{#        {% if emp_status_filter %}#}
+{#            <span class="badge bg-label-primary d-inline-flex align-items-center gap-1">#}
+{#                <i class="ti tabler-filter" style="font-size:11px;"></i>{{ emp_status_filter }}#}
+{#                <a href="#" onclick="clearEmpFilter('emp_status'); return false;" class="text-primary ms-1" style="line-height:1;"><i class="ti tabler-x" style="font-size:10px;"></i></a>#}
+{#            </span>#}
+{#        {% endif %}#}
+{#        {% if search_query %}#}
+{#            <span class="badge bg-label-secondary d-inline-flex align-items-center gap-1">#}
+{#                <i class="ti tabler-search" style="font-size:11px;"></i>"{{ search_query }}"#}
+{#                <a href="#" onclick="clearEmpFilter('search'); return false;" class="text-secondary ms-1" style="line-height:1;"><i class="ti tabler-x" style="font-size:10px;"></i></a>#}
+{#            </span>#}
+{#        {% endif %}#}
+{#    </div>#}
+</div>
+
+<!-- Table -->
+<table class="table table-bordered">
+    <thead class="border-top">
+    <tr class="text-nowrap">
+        <th style="width: 10px">S.No</th>
+        <th>Code</th>
+        <th>Name</th>
+        <th>Mobile</th>
+        <th>Emp Type</th>
+        <th>Emp Status</th>
+        <th>Status</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for emp in page_obj %}
+        <tr>
+            <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
+            <td>
+                {% if emp.empStatus_id != 3 %}
+                    <a href="{% url 'employee-detail' emp.employee_unique_id %}"
+                       class="badge bg-label-primary waves-effect rounded-pill" title="View detail">
+                        {{ emp.employee_code|default:'-' }}
+                    </a>
+                {% else %}
+                    <a href="{% url 'employee-view' emp.employee_unique_id %}"
+                       class="badge bg-label-primary waves-effect rounded-pill" title="View">
+                        {{ emp.employee_code|default:'-' }}
+                    </a>
+                {% endif %}
+            </td>
+            <td class="fw-medium">{{ emp.full_name }}</td>
+            <td>{{ emp.mobile }}</td>
+            <td>{{ emp.empType.name|default:'-' }}</td>
+            <td>
+                <span class="badge bg-label-{% if emp.employment_status == 'Active' %}success{% elif emp.employment_status == 'Inactive' %}warning{% else %}danger{% endif %}">
+                    {{ emp.employment_status }}
+                </span>
+            </td>
+            <td>
+                <span class="badge {{ emp.empStatus.employee_status_css|default:'bg-label-secondary' }}">
+                    {{ emp.empStatus.employee_status_name }}
+                </span>
+            </td>
+            <td class="text-nowrap">
+                {% if emp.empStatus_id != 3 %}
+                    <a href="{% url 'employee-detail' emp.employee_unique_id %}"
+                       class="badge bg-label-secondary rounded" title="Detail">
+                        <i class="ti tabler-eye ti-md"></i>
+                    </a>
+                    <a href="{% url 'employee-edit' emp.employee_unique_id %}"
+                       class="badge bg-label-info rounded" title="Edit">
+                        <i class="ti tabler-edit ti-md"></i>
+                    </a>
+                    <button class="badge bg-label-danger rounded border-0" title="Delete"
+                            onclick="deleteEmployee({{ emp.employee_id }})">
+                        <i class="ti tabler-trash ti-md"></i>
+                    </button>
+                {% else %}
+                    <a href="{% url 'employee-view' emp.employee_unique_id %}"
+                       class="badge bg-label-info rounded" title="View">
+                        <i class="ti tabler-eye me-1"></i>View
+                    </a>
+                {% endif %}
+            </td>
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan="8" class="text-center py-4 text-muted">No employees found.</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<!-- Pagination -->
+<div class="d-flex justify-content-between align-items-center px-3 py-3 border-top">
+    <small class="text-muted">
+        Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ paginator.count }} entries
+    </small>
+    <nav>
+        <ul class="pagination pagination-sm mb-0">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="loadEmployeeTable(1); return false;">
+                        <i class="ti tabler-chevrons-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="loadEmployeeTable({{ page_obj.previous_page_number }}); return false;">
+                        <i class="ti tabler-chevron-left"></i>
+                    </a>
+                </li>
+            {% endif %}
+            {% for num in paginator.page_range %}
+                {% if num == page_obj.number %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="loadEmployeeTable({{ num }}); return false;">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="loadEmployeeTable({{ page_obj.next_page_number }}); return false;">
+                        <i class="ti tabler-chevron-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="loadEmployeeTable({{ paginator.num_pages }}); return false;">
+                        <i class="ti tabler-chevrons-right"></i>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
