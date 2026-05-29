@@ -1,13 +1,15 @@
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Model
 from django.http import JsonResponse
 from django.urls import reverse
 
+from accounts.base import Base
 from accounts.helpers.basicUtility import UploadFileData, GetFileUrl
 from accounts.helpers.message_helper import send_sweetalert
+from approvalrules.models import ApprovalRule
 from employee.models import (EmployeeInfo, EmployeeCaste, EmployeeEducation, EmployeeExperience,
                              EmployeeCertification, EmployeeLanguage, EmployeeFamilyDetail,
-                             EmployeeJobHistory, EmployeeDocument, EmployeeReportingManager)
+                             EmployeeJobHistory, EmployeeDocument, EmployeeReportingManager, EmployeeDataApprover)
 from masters.models import Gender, District
 from setup.models import EmployeeType, EmployeeCategory
 from accounts.models import Profile
@@ -157,7 +159,7 @@ def employee_list(request):
     page_obj = paginator.get_page(request.GET.get('page'))
 
     return render(request, 'employee/employee_list.html', {
-        'empCatId':empCatId,
+        'empCatId': empCatId,
         'page_obj': page_obj,
         'paginator': paginator,
         'search_query': search_query,
@@ -182,6 +184,14 @@ def employee_add(request):
                 if path:
                     obj.picture = path
                     obj.save(update_fields=['picture'])
+
+                ## Add Employee Approval Rule
+                empApprovalRule = ApprovalRule.objects.filter(approval_type__name=Base.ApprovalRules.EmployeeApproval).order_by('sequence')
+                for ar in empApprovalRule:
+                    EmployeeDataApprover.objects.create(approverType_id=ar.approval_type_id, employee_id=obj.employee_id, sequence=ar.sequence, approver_id=ar.approver_id,
+                                                        approver_role_id=ar.role_id, tenantProfile_id=obj.tenantProfile_id, created_by_id=obj.created_by_id)
+                ## Add Employee Approval Rule
+
             send_sweetalert(request, 'success', f'Employee {obj.full_name} created successfully.')
             return redirect(f"{reverse('employee-list')}?empcat={obj.empCategory_id}")
         except Exception as e:
@@ -230,9 +240,33 @@ def employee_update(request, emp_unique_id=''):
 
 @login_required
 def employee_detail(request, emp_unique_id):
+    obj = get_object_or_404(EmployeeInfo.objects.select_related('gender', 'empType', 'empCategory', 'empStatus', 'caste', 'district', 'tenantProfile'), employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID, )
+    empApprovalRuleList = EmployeeDataApprover.objects.filter(employee_id=obj.employee_id).order_by('sequence')
+    # if request.method == 'POST':
+    #     p = request.POST
+    #     obj.save(empStatus_id=2)
+
+    return render(request, 'employee/employee_detail.html', {'obj': obj,
+                                                             'picture_url': GetFileUrl(obj.picture),
+                                                             'empApprovalRuleList': empApprovalRuleList})
+
+
+@login_required
+def employee_view_profile(request, emp_unique_id):
     obj = get_object_or_404(EmployeeInfo.objects.select_related('gender', 'empType', 'empCategory', 'empStatus', 'caste', 'district', 'tenantProfile'),
                             employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID, )
-    return render(request, 'employee/employee_detail.html', {'obj': obj, 'picture_url': GetFileUrl(obj.picture)})
+    return render(request, 'employee/employee_view.html', {
+        'obj': obj,
+        'picture_url': GetFileUrl(obj.picture),
+        'educations': obj.educations.order_by('-passing_year'),
+        'experiences': obj.experiences.order_by('-start_date'),
+        'certifications': obj.certifications.order_by('-issue_date'),
+        'languages': obj.languages.order_by('-is_mother_tongue', 'language_name'),
+        'family_details': obj.family_details.select_related('gender').order_by('family_member_name'),
+        'job_histories': obj.job_history.order_by('-joining_date'),
+        'documents': obj.employee_documents.order_by('-issue_date'),
+        'managers': obj.employee_reporting_managers.select_related('reporting_manager').order_by('-is_current'),
+    })
 
 
 @login_required

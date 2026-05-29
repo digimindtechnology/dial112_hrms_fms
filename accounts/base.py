@@ -72,6 +72,10 @@ class Base(models.Model):
         ReportGroup = "Report"
         LogoutGroup = "Logout"
 
+    @django_enum
+    class ApprovalRules(Enum):
+        EmployeeApproval = "Employee Approval Rule"
+
 
 def GenerateOTP():
     return random.randint(1000, 9999)

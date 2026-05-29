@@ -5,6 +5,7 @@ urlpatterns = [
     path('list/', views.employee_list, name='employee-list'),
     path('add/', views.employee_add, name='employee-add'),
     path('<str:emp_unique_id>/detail/', views.employee_detail, name='employee-detail'),
+    path('<str:emp_unique_id>/view/', views.employee_view_profile, name='employee-view'),
     path('<str:emp_unique_id>/edit/', views.employee_update, name='employee-edit'),
     path('delete/', views.employee_delete, name='employee-delete'),
 
