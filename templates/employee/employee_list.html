@@ -26,46 +26,45 @@
         <div class="table-responsive">
 
             <!-- Header -->
-            <div class="card-header border-bottom d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 py-3">
-                <h5 class="card-title mb-0"> <b class="text-primary">{{ empCatName }}</b> Employee List</h5>
-                <div class="d-flex align-items-center gap-3">
-                    <!-- Search Form -->
-                    <form method="GET" class="d-flex align-items-center gap-2">
-                        <!-- Preserve empcat -->
-                        {% if empCatId %}<input type="hidden" name="empcat" value="{{ empCatId }}"> {% endif %}
+            <div class="card-header border-bottom py-3">
+                <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
 
-                        <input type="text"
-                               class="form-control form-control-sm"
-                               name="search"
-                               placeholder="Search employees..."
-                               value="{{ search_query }}"
-                               style="min-width: 220px;">
+                    <h5 class="card-title mb-0 text-nowrap">
+                        {% if empCatName %}<b class="text-primary">{{ empCatName }}</b> {% endif %}Employee List
+                    </h5>
 
-                        <button type="submit" class="btn btn-primary btn-sm">
-                            <i class="ti tabler-search"></i>
-                        </button>
+                    <form method="GET" class="d-flex align-items-center gap-2 flex-nowrap">
+                        {% if empCatId %}<input type="hidden" name="empcat" value="{{ empCatId }}">{% endif %}
 
-                        {% if search_query %}
+                        <select name="emp_status" class="form-select form-select-sm"
+                                style="width:140px;" onchange="this.form.submit()">
+                            <option value="">All Status</option>
+                            {% for choice in employment_status_choices %}
+                                <option value="{{ choice }}" {% if emp_status_filter == choice %}selected{% endif %}>{{ choice }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <div class="input-group input-group-sm" style="width:240px;">
+                            <input type="text" class="form-control" name="search"
+                                   placeholder="Search name, code, mobile..."
+                                   value="{{ search_query }}">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="ti tabler-search"></i>
+                            </button>
+                        </div>
+
+                        {% if search_query or emp_status_filter %}
                             <a href="{% url 'employee-list' %}{% if empCatId %}?empcat={{ empCatId }}{% endif %}"
-                               class="btn btn-label-secondary btn-sm">
-                                <i class="ti tabler-x"></i>
+                               class="btn btn-sm btn-label-secondary text-nowrap" title="Clear all filters">
+                                <i class="ti tabler-x me-1"></i>Clear
                             </a>
                         {% endif %}
 
+                        <a href="{% if empCatId %}/employee/add/?empcat={{ empCatId }}{% else %}/employee/add/{% endif %}"
+                           class="btn btn-sm btn-primary text-nowrap">
+                            <i class="ti tabler-plus me-1"></i>Add Employee
+                        </a>
                     </form>
-
-                    <!-- Add Employee Button -->
-                    {% if empCatId %}
-                        <a href="/employee/add/?empcat={{ empCatId }}"
-                           class="btn btn-primary btn-sm">
-                            <i class="ti tabler-plus me-1"></i> Add Employee
-                        </a>
-                    {% else %}
-                        <a href="/employee/add/"
-                           class="btn btn-primary btn-sm">
-                            <i class="ti tabler-plus me-1"></i> Add Employee
-                        </a>
-                    {% endif %}
 
                 </div>
             </div>
@@ -73,12 +72,37 @@
             <!-- Body -->
             <div class="card-body">
 
-                <!-- Top Info -->
-                <div class="d-flex justify-content-between align-items-center px-2 py-2">
+                <!-- Top Info + Active Filters -->
+                <div class="d-flex justify-content-between align-items-center px-2 py-2 flex-wrap gap-2">
                     <small class="text-muted">
                         Showing {{ page_obj.start_index }} to {{ page_obj.end_index }}
                         of {{ paginator.count }} entries
+                        {% if emp_status_filter or search_query %}
+                            <span class="text-secondary">(filtered)</span>
+                        {% endif %}
                     </small>
+                    <div class="d-flex gap-2 flex-wrap">
+                        {% if emp_status_filter %}
+                            <span class="badge bg-label-primary d-flex align-items-center gap-1">
+                                <i class="ti tabler-filter" style="font-size:11px;"></i>
+                                {{ emp_status_filter }}
+                                <a href="?{% if empCatId %}empcat={{ empCatId }}&{% endif %}{% if search_query %}search={{ search_query }}{% endif %}"
+                                   class="text-primary ms-1" style="line-height:1;" title="Remove filter">
+                                    <i class="ti tabler-x" style="font-size:10px;"></i>
+                                </a>
+                            </span>
+                        {% endif %}
+                        {% if search_query %}
+                            <span class="badge bg-label-secondary d-flex align-items-center gap-1">
+                                <i class="ti tabler-search" style="font-size:11px;"></i>
+                                "{{ search_query }}"
+                                <a href="?{% if empCatId %}empcat={{ empCatId }}&{% endif %}{% if emp_status_filter %}emp_status={{ emp_status_filter }}{% endif %}"
+                                   class="text-secondary ms-1" style="line-height:1;" title="Remove search">
+                                    <i class="ti tabler-x" style="font-size:10px;"></i>
+                                </a>
+                            </span>
+                        {% endif %}
+                    </div>
                 </div>
 
                 <!-- Table -->
@@ -187,14 +211,14 @@
 
                                 <li class="page-item">
                                     <a class="page-link"
-                                       href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if empCatId %}&empcat={{ empCatId }}{% endif %}">
+                                       href="?page=1{% if empCatId %}&empcat={{ empCatId }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if emp_status_filter %}&emp_status={{ emp_status_filter }}{% endif %}">
                                         <i class="ti tabler-chevrons-left"></i>
                                     </a>
                                 </li>
 
                                 <li class="page-item">
                                     <a class="page-link"
-                                       href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if empCatId %}&empcat={{ empCatId }}{% endif %}">
+                                       href="?page={{ page_obj.previous_page_number }}{% if empCatId %}&empcat={{ empCatId }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if emp_status_filter %}&emp_status={{ emp_status_filter }}{% endif %}">
                                         <i class="ti tabler-chevron-left"></i>
                                     </a>
                                 </li>
@@ -214,7 +238,7 @@
 
                                     <li class="page-item">
                                         <a class="page-link"
-                                           href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if empCatId %}&empcat={{ empCatId }}{% endif %}">
+                                           href="?page={{ num }}{% if empCatId %}&empcat={{ empCatId }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if emp_status_filter %}&emp_status={{ emp_status_filter }}{% endif %}">
                                             {{ num }}
                                         </a>
                                     </li>
@@ -228,14 +252,14 @@
 
                                 <li class="page-item">
                                     <a class="page-link"
-                                       href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if empCatId %}&empcat={{ empCatId }}{% endif %}">
+                                       href="?page={{ page_obj.next_page_number }}{% if empCatId %}&empcat={{ empCatId }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if emp_status_filter %}&emp_status={{ emp_status_filter }}{% endif %}">
                                         <i class="ti tabler-chevron-right"></i>
                                     </a>
                                 </li>
 
                                 <li class="page-item">
                                     <a class="page-link"
-                                       href="?page={{ paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if empCatId %}&empcat={{ empCatId }}{% endif %}">
+                                       href="?page={{ paginator.num_pages }}{% if empCatId %}&empcat={{ empCatId }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if emp_status_filter %}&emp_status={{ emp_status_filter }}{% endif %}">
                                         <i class="ti tabler-chevrons-right"></i>
                                     </a>
                                 </li>

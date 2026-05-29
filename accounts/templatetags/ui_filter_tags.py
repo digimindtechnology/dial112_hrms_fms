@@ -63,6 +63,13 @@ def FormatTimeHHMM(value): return f"{value.hour:02}:{value.minute:02} hrs" if va
 @register.filter
 def ToInt(value): return int(value or 0)
 
+@register.filter
+def startswith(value, arg):
+    """Path-prefix menu match. Strips ?query from both sides before comparing."""
+    if not arg or arg == '#':
+        return False
+    return str(value).split('?')[0].startswith(str(arg).split('?')[0])
+
 @register.filter(name='multipleVal')
 def multipleVal(val, val1):
     return val * val1

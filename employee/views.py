@@ -134,19 +134,25 @@ def _post_to_fields(p):
 
 ## _emp_context
 
+EMPLOYMENT_STATUS_CHOICES = ['Active', 'Inactive', 'Resigned', 'Terminated']
+
 @login_required
 def employee_list(request):
     empCatName = ''
     empCatId = request.GET.get('empcat')
     search_query = request.GET.get('search', '').strip()
+    emp_status_filter = request.GET.get('emp_status', '').strip()
 
     base_qs = EmployeeInfo.objects.filter(tenantProfile_id=request.tenantID)
     if empCatId:
         base_qs = base_qs.filter(empCategory_id=int(empCatId))
         empCatName = EmployeeCategory.objects.filter(id=empCatId).values_list('name', flat=True).first()
 
+    # Stat counts always from base_qs (unaffected by search/status filter)
     total_employees = base_qs.count()
-    _es_count_map = dict(base_qs.values_list('empStatus_id').annotate(count=Count('employee_id')).values_list('empStatus_id', 'count'))
+    _es_count_map = dict(
+        base_qs.values_list('empStatus_id').annotate(count=Count('employee_id')).values_list('empStatus_id', 'count')
+    )
     empstatus_counts = [
         {
             'employee_status_id': s.employee_status_id,
@@ -156,37 +162,42 @@ def employee_list(request):
         }
         for s in EmployeeStatus.objects.filter(is_active=True).order_by('employee_status_id')
     ]
+    _emp_count_map = {
+        item['employment_status']: item['count']
+        for item in base_qs.values('employment_status').annotate(count=Count('employee_id'))
+    }
+    employment_status_counts = {c: _emp_count_map.get(c, 0) for c in EMPLOYMENT_STATUS_CHOICES}
 
-    _emp_count_map = {item['employment_status']: item['count'] for item in base_qs.values('employment_status').annotate(count=Count('employee_id'))}
-    employment_status_counts = {choice: _emp_count_map.get(choice, 0) for choice in ['Active', 'Inactive', 'Resigned', 'Terminated']}
-    qs = base_qs.select_related('gender', 'empType', 'empStatus', 'empCategory', )
-
-    # Search Filter
+    # Table queryset — apply search + status filter
+    qs = base_qs.select_related('gender', 'empType', 'empStatus', 'empCategory')
+    if emp_status_filter and emp_status_filter in EMPLOYMENT_STATUS_CHOICES:
+        qs = qs.filter(employment_status=emp_status_filter)
     if search_query:
-        qs = qs.filter(Q(first_name__icontains=search_query) |
-                       Q(last_name__icontains=search_query) |
-                       Q(employee_code__icontains=search_query) |
-                       Q(mobile__icontains=search_query) |
-                       Q(designation__icontains=search_query) |
-                       Q(employment_status__icontains=search_query) |
-                       Q(empStatus__employee_status_name__icontains=search_query))
+        qs = qs.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(employee_code__icontains=search_query) |
+            Q(mobile__icontains=search_query) |
+            Q(designation__icontains=search_query) |
+            Q(empStatus__employee_status_name__icontains=search_query)
+        )
 
     qs = qs.order_by('first_name', 'last_name')
     paginator = Paginator(qs, 25)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    page_obj = paginator.get_page(request.GET.get('page'))
 
-    context = {
+    return render(request, 'employee/employee_list.html', {
         'empCatId': empCatId,
         'empCatName': empCatName,
         'search_query': search_query,
+        'emp_status_filter': emp_status_filter,
+        'employment_status_choices': EMPLOYMENT_STATUS_CHOICES,
         'page_obj': page_obj,
         'paginator': paginator,
         'total_employees': total_employees,
         'empstatus_counts': empstatus_counts,
         'employment_status_counts': employment_status_counts,
-    }
-    return render(request, 'employee/employee_list.html', context)
+    })
 
 
 @login_required
