@@ -1,0 +1,248 @@
+{% extends "layout/layout_base.html" %}
+{% load static %}
+
+{% block title %}FRV{% endblock %}
+
+{% block content %}
+
+    <!-- Stat cards -->
+    <div class="row g-6 mb-6">
+        <div class="col-sm-6 col-xl-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div class="content-left">
+                            <span class="text-heading">Total FRV</span>
+                            <div class="d-flex align-items-center my-1">
+                                <h4 class="mb-0 me-2">{{ total_frv }}</h4>
+                            </div>
+                        </div>
+                        <div class="avatar">
+                            <span class="avatar-initial rounded bg-label-primary">
+                                <i class="ti tabler-truck"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div class="content-left">
+                            <span class="text-heading">Active FRV</span>
+                            <div class="d-flex align-items-center my-1">
+                                <h4 class="mb-0 me-2 text-success">{{ active_frv }}</h4>
+                            </div>
+                        </div>
+                        <div class="avatar">
+                            <span class="avatar-initial rounded bg-label-success">
+                                <i class="ti tabler-user-check"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div class="content-left">
+                            <span class="text-heading">Inactive FRV</span>
+                            <div class="d-flex align-items-center my-1">
+                                <h4 class="mb-0 me-2 text-danger">{{ inactive_frv }}</h4>
+                            </div>
+                        </div>
+                        <div class="avatar">
+                            <span class="avatar-initial rounded bg-label-danger">
+                                <i class="ti tabler-user-off"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="table-responsive">
+            <div class="card-header border-bottom d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 py-3">
+                <h5 class="card-title mb-0">FRV List</h5>
+                <div class="d-flex align-items-center gap-3">
+                    <form method="GET" class="d-flex align-items-center gap-2">
+                        <input type="text" class="form-control form-control-sm" name="search"
+                               placeholder="Search by Vehicle ID or Registration..." value="{{ search_query }}"
+                               style="min-width: 220px;">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="ti tabler-search"></i>
+                        </button>
+                        {% if search_query %}
+                            <a href="{% url 'frv-list' %}" class="btn btn-label-secondary btn-sm">
+                                <i class="ti tabler-x"></i>
+                            </a>
+                        {% endif %}
+                    </form>
+                    <a href="{% url 'frv-create' %}" class="btn btn-primary btn-sm">
+                        <i class="ti tabler-plus me-1"></i> Add FRV
+                    </a>
+                </div>
+            </div>
+
+            <div class="card-body">
+                {% if messages %}
+                    {% for msg in messages %}
+                        <div class="alert alert-{% if msg.tags == 'error' %}danger{% else %}{{ msg.tags }}{% endif %} alert-dismissible mb-3">
+                            {{ msg }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div class="d-flex justify-content-between align-items-center px-2 py-2">
+                    <small class="text-muted">
+                        Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ paginator.count }} entries
+                    </small>
+                </div>
+
+                <table class="table table-bordered">
+                    <thead class="border-top">
+                    <tr class="text-nowrap">
+                        <th>Vehicle ID</th>
+                        <th>Registration Number</th>
+                        <th>FRV Type</th>
+                        <th>Make/Model</th>
+                        <th>Status</th>
+                        <th>Active</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for frv in page_obj %}
+                    <tr>
+                        <td>
+                            <strong>{{ frv.vehicle_id|default:'-' }}</strong>
+                        </td>
+                        <td>{{ frv.registration_number|default:'-' }}</td>
+                        <td>{{ frv.frvType.name|default:'-' }}</td>
+                        <td>{{ frv.make|default:'-' }} {{ frv.model|default:'' }}</td>
+                        <td>
+                            <span class="badge bg-label-{% if frv.status.status_name == 'On Road' %}success{% elif frv.status.status_name == 'Off Road' %}warning{% else %}danger{% endif %}">
+                                {{ frv.status.status_name|default:'Unknown' }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if frv.is_active %}
+                                <span class="badge bg-label-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-label-danger">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-nowrap">
+                            <a href="{% url 'frv-detail' frv.frv_unique_id %}"
+                            class="btn btn-icon btn-text-info rounded-pill waves-effect" title="View Details">
+                                <i class="ti tabler-eye ti-md"></i>
+                            </a>
+                            <a href="{% url 'frv-edit' frv.frv_unique_id %}"
+                            class="btn btn-icon btn-text-secondary rounded-pill waves-effect" title="Edit">
+                                <i class="ti tabler-edit ti-md"></i>
+                            </a>
+                            <button class="btn btn-icon btn-text-danger rounded-pill waves-effect"
+                                    title="Delete" onclick="deleteFRV('{{ frv.frv_unique_id }}')">
+                                <i class="ti tabler-trash ti-md"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">No FRV records found.</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Pagination -->
+                <div class="d-flex justify-content-between align-items-center px-2 py-3 border-top">
+                    <small class="text-muted">
+                        Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ paginator.count }} entries
+                    </small>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">
+                                        <i class="ti tabler-chevrons-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                        <i class="ti tabler-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for num in paginator.page_range %}
+                                {% if num == page_obj.number %}
+                                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                        <i class="ti tabler-chevron-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                        <i class="ti tabler-chevrons-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function deleteFRV(frv_unique_id) {
+        if (!confirm('Are you sure you want to delete this FRV?')) return;
+        
+        $.ajax({
+            url: `/f-r-v/delete/${frv_unique_id}/`,  // Direct URL path
+            type: 'POST',
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    Swal.fire({
+                        icon: 'error', 
+                        title: response.error || 'Delete failed', 
+                        timer: 3000, 
+                        showConfirmButton: false
+                    });
+                }
+            },
+            error: function() {
+                Swal.fire({
+                    icon: 'error', 
+                    title: 'An error occurred', 
+                    timer: 3000, 
+                    showConfirmButton: false
+                });
+            }
+        });
+    }
+</script>
+
+{% endblock %}
