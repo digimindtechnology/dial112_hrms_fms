@@ -15,7 +15,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'"href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&amp;display=swap">
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&amp;display=swap">
     <noscript>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap">
     </noscript>
@@ -24,8 +24,8 @@
     <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/static/assets/vendor/libs/node-waves/node-waves.css">
     <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/static/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css">
     <link rel="stylesheet" href="/static/assets/vendor/fonts/iconify-icons.css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="/static/assets/vendor/libs/sweetalert2/sweetalert2.css" media="print"  onload="this.media='all'">
-    <link rel="stylesheet" href="/static/assets/vendor/libs/pickr/pickr-themes.css" media="print"  onload="this.media='all'">
+    <link rel="stylesheet" href="/static/assets/vendor/libs/sweetalert2/sweetalert2.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="/static/assets/vendor/libs/pickr/pickr-themes.css" media="print" onload="this.media='all'">
     <style>
         .nav-pills {
         {#background: var(--bs-body-bg);#} background: white;
@@ -88,7 +88,11 @@
             padding: 20px;
         }
 
-        #content-block { position: relative; min-height: 260px; }
+        #content-block {
+            position: relative;
+            min-height: 260px;
+        }
+
         #content-loader {
             position: absolute;
             inset: 0;
@@ -103,7 +107,14 @@
             min-height: 260px;
             transition: opacity 0.2s ease;
         }
-        [data-bs-theme="dark"] #content-loader { background: rgba(43, 44, 64, 0.92); }
+
+        [data-bs-theme="dark"] #content-loader {
+            background: rgba(43, 44, 64, 0.92);
+        }
+
+        {#.table > thead {#}
+        {#    background: gainsboro !important;#}
+        {#}#}
     </style>
 
     {% block vendor_css %}{% endblock %}
@@ -175,7 +186,7 @@
         <!-- / Menu -->
         <!-- Layout container -->
         <div class="layout-page">
-            <nav class="layout-navbar container-xxl navbar-detached navbar navbar-expand-xl align-items-center bg-navbar-theme"
+            <nav class="layout-navbar container-fluid navbar-detached navbar navbar-expand-xl align-items-center bg-navbar-theme"
                  id="layout-navbar">
                 <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0   d-xl-none ">
                     <a class="nav-item nav-link px-0 me-xl-6" href="javascript:void(0)">
@@ -448,7 +459,7 @@
 
             <!-- Content wrapper  Body-->
             <div class="content-wrapper">
-                <div class="container-xxl container-p-y">
+                <div class="container-fluid container-p-y">
                     {% if AUTO_LOGOUT %}
                         <div style="display:none" id="alert-auto-logout"
                              class="alert alert-warning alert-icon-start alert-dismissible fade show">
@@ -460,12 +471,12 @@
                     {% endif %}
                     <script defer src="/static/assets/vendor/libs/jquery/jquery.js"></script>
                     <div id="content-block">
-{#                        <div id="content-loader">#}
-{#                            <div class="spinner-border text-primary" style="width:2.5rem;height:2.5rem;" role="status">#}
-{#                                <span class="visually-hidden">Loading...</span>#}
-{#                            </div>#}
-{#                            <span class="text-muted" style="font-size:13px;font-weight:500;">Loading...</span>#}
-{#                        </div>#}
+                        {#                        <div id="content-loader">#}
+                        {#                            <div class="spinner-border text-primary" style="width:2.5rem;height:2.5rem;" role="status">#}
+                        {#                                <span class="visually-hidden">Loading...</span>#}
+                        {#                            </div>#}
+                        {#                            <span class="text-muted" style="font-size:13px;font-weight:500;">Loading...</span>#}
+                        {#                        </div>#}
                         {% block content %}
                         {% endblock %}
                     </div>
@@ -499,52 +510,52 @@
     <input type="hidden" id="hdn_IS_RunServer" value="{{ IS_RunServer }}">
     <input type="hidden" id="hdn_AUTO_LOGOUT" value="{{ AUTO_LOGOUT }}">
 
-<div class="modal fade" id="Modal_BindPartialPages" tabindex="-1" aria-modal="true" role="dialog">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div id="div_BindPartialPages"></div>
-  </div>
-</div>
+    <div class="modal fade" id="Modal_BindPartialPages" tabindex="-1" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div id="div_BindPartialPages"></div>
+        </div>
+    </div>
 
-<!-- / Layout wrapper -->
+    <!-- / Layout wrapper -->
 
-<script defer src="/static/assets/vendor/js/helpers.js"></script>
-<script defer src="/static/assets/js/config.js"></script>
-<script defer src="/static/assets/vendor/js/menu.js"></script>
-<script defer src="/static/assets/vendor/libs/popper/popper.js"></script>
-<script defer src="/static/assets/vendor/js/bootstrap.js"></script>
-<script defer src="/static/assets/vendor/libs/node-waves/node-waves.js"></script>
-<script defer src="/static/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-<script defer src="/static/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
-<script defer src="/static/assets/vendor/libs/pickr/pickr.js"></script>
-<script defer src="/static/assets/js/main.js"></script>
-<script src="/static/assets/js/custom_ss.js"></script>
+    <script defer src="/static/assets/vendor/js/helpers.js"></script>
+    <script defer src="/static/assets/js/config.js"></script>
+    <script defer src="/static/assets/vendor/js/menu.js"></script>
+    <script defer src="/static/assets/vendor/libs/popper/popper.js"></script>
+    <script defer src="/static/assets/vendor/js/bootstrap.js"></script>
+    <script defer src="/static/assets/vendor/libs/node-waves/node-waves.js"></script>
+    <script defer src="/static/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+    <script defer src="/static/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+    <script defer src="/static/assets/vendor/libs/pickr/pickr.js"></script>
+    <script defer src="/static/assets/js/main.js"></script>
+    <script src="/static/assets/js/custom_ss.js"></script>
 
-{% block vendor_js %}{% endblock %}
-{% block page_js %}{% endblock %}
+    {% block vendor_js %}{% endblock %}
+    {% block page_js %}{% endblock %}
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        {% if messages %}
-            {% for message in messages %}
-                (() => {
-                    const tags = '{{ message.tags|escapejs }}';
-                    const msg = '{{ message|escapejs }}';
-                    let type = 'info';
-                    if (tags.includes('error') || tags.includes('danger')) type = 'error';
-                    else if (tags.includes('warning')) type = 'warning';
-                    else if (tags.includes('success')) type = 'success';
-                    Swal.fire({
-                        icon: type,
-                        title: msg.toUpperCase(),
-                        timer: 3000,
-                        showConfirmButton: false,
-                        timerProgressBar: true,
-                        customClass: {popup: 'swal2-center-popup'}
-                    });
-                })();
-            {% endfor %}
-        {% endif %}
-    });
-</script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            {% if messages %}
+                {% for message in messages %}
+                    (() => {
+                        const tags = '{{ message.tags|escapejs }}';
+                        const msg = '{{ message|escapejs }}';
+                        let type = 'info';
+                        if (tags.includes('error') || tags.includes('danger')) type = 'error';
+                        else if (tags.includes('warning')) type = 'warning';
+                        else if (tags.includes('success')) type = 'success';
+                        Swal.fire({
+                            icon: type,
+                            title: msg.toUpperCase(),
+                            timer: 3000,
+                            showConfirmButton: false,
+                            timerProgressBar: true,
+                            customClass: {popup: 'swal2-center-popup'}
+                        });
+                    })();
+                {% endfor %}
+            {% endif %}
+        });
+    </script>
 </body>
 </html>
