@@ -8,6 +8,7 @@
         {% csrf_token %}
         <div class="modal-body">
             <div class="row g-3">
+
                 <!-- Holiday Name & Date -->
                 <div class="col-md-8">
                     <label class="form-label">Holiday Name <span class="text-danger">*</span></label>
@@ -21,7 +22,7 @@
                 </div>
 
                 <!-- Description -->
-                <div class="col-md-12">
+                <div class="col-12">
                     <label class="form-label">Description</label>
                     <textarea name="description" class="form-control" rows="2"
                               placeholder="Optional description">{{ obj.description|default:'' }}</textarea>
@@ -30,27 +31,26 @@
                 <!-- Checkboxes -->
                 <div class="col-md-6">
                     <div class="form-check">
-                        <input type="checkbox" name="is_national_holiday" class="form-check-input" id="is_national_holiday"
-                               {% if obj.is_national_holiday %}checked{% endif %}>
-                        <label class="form-check-label" for="is_national_holiday">National Holiday</label>
+                        <input type="checkbox" name="is_national_holiday" class="form-check-input"
+                               id="chk_national" {% if obj.is_national_holiday %}checked{% endif %}>
+                        <label class="form-check-label" for="chk_national">National Holiday</label>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-check">
-                        <input type="checkbox" name="is_active" class="form-check-input" id="holiday_active"
-                               {% if obj.is_active or not obj %}checked{% endif %}>
-                        <label class="form-check-label" for="holiday_active">Active</label>
+                        <input type="checkbox" name="is_active" class="form-check-input"
+                               id="chk_active" {% if obj.is_active or not obj %}checked{% endif %}>
+                        <label class="form-check-label" for="chk_active">Active</label>
                     </div>
                 </div>
 
                 <!-- District Selection -->
-                <div class="col-md-12">
+                <div class="col-12">
                     <label class="form-label fw-semibold">
                         Districts
                         <span class="text-muted fw-normal small">(leave all unchecked = applies to all districts)</span>
                     </label>
 
-                    <!-- Search + Select All -->
                     <div class="d-flex gap-2 align-items-center mb-1">
                         <input type="text" id="inp_HFDistrictSearch" class="form-control form-control-sm"
                                placeholder="Search district..." oninput="hfFilterDistricts()">
@@ -61,14 +61,14 @@
                         </div>
                     </div>
 
-                    <!-- Scrollable checkbox table -->
-                    <div style="max-height:200px; overflow-y:auto; border:1px solid #dee2e6; border-radius:6px;">
+                    <div style="max-height:200px;overflow-y:auto;border:1px solid #dee2e6;border-radius:6px;">
                         <table class="table table-sm table-hover mb-0" id="tbl_HFDistricts">
                             <tbody>
                             {% for d in all_districts %}
                             <tr class="hf-district-row">
                                 <td style="width:36px;">
-                                    <input type="checkbox" name="district_ids" class="form-check-input hf-chk-district"
+                                    <input type="checkbox" name="district_ids"
+                                           class="form-check-input hf-chk-district"
                                            value="{{ d.district_id }}"
                                            {% if d.district_id in assigned_ids %}checked{% endif %}
                                            onchange="hfSyncMaster()">
@@ -86,6 +86,7 @@
                         <span id="hf_lbl_DistrictCount">{{ assigned_ids|length }}</span> selected
                     </div>
                 </div>
+
             </div>
         </div>
 
@@ -101,51 +102,62 @@
 
 <script>
 (function () {
-    hfSyncMaster();
+    /* ── define all functions first, then call ── */
 
-    window.hfSyncMaster = function () {
+    function hfSyncMaster() {
         var total   = $('.hf-chk-district:visible').length;
         var checked = $('.hf-chk-district:visible:checked').length;
         $('#hf_chk_SelectAll').prop('indeterminate', checked > 0 && checked < total);
         $('#hf_chk_SelectAll').prop('checked', total > 0 && checked === total);
         $('#hf_lbl_DistrictCount').text($('.hf-chk-district:checked').length);
-    };
+    }
 
-    window.hfToggleAll = function (master) {
+    function hfToggleAll(master) {
         $('.hf-chk-district:visible').prop('checked', master.checked);
         hfSyncMaster();
-    };
+    }
 
-    window.hfFilterDistricts = function () {
+    function hfFilterDistricts() {
         var q = $('#inp_HFDistrictSearch').val().toLowerCase();
         $('.hf-district-row').each(function () {
             $(this).toggle($(this).find('.hf-district-name').text().toLowerCase().indexOf(q) !== -1);
         });
         hfSyncMaster();
-    };
+    }
 
-    $('#frm_Holiday').on('submit', function (e) {
+    /* expose for inline onclick="" handlers */
+    window.hfSyncMaster     = hfSyncMaster;
+    window.hfToggleAll      = hfToggleAll;
+    window.hfFilterDistricts = hfFilterDistricts;
+
+    /* initialise after functions are defined */
+    hfSyncMaster();
+
+    /* ── form submit ── */
+    $('#frm_Holiday').off('submit').on('submit', function (e) {
         e.preventDefault();
-        var btn = $(this).find('.loading_spinner');
-        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Processing..');
+        var $form = $(this);
+        var $btn  = $form.find('[type=submit]');
+        var originalText = $btn.data('original-text') || $btn.text();
+        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Processing..');
 
         $.ajax({
-            url: $(this).attr('action'),
+            url:  $form.attr('action'),
             type: 'POST',
-            data: $(this).serialize(),
-            success: function (response) {
-                if (response.success) {
-                    $('#Modal_Holiday').modal('hide');
-                    Swal.fire({icon: 'success', title: 'Saved successfully', timer: 3000, showConfirmButton: false});
-                    location.reload();
+            data: $form.serialize(),
+            success: function (resp) {
+                if (resp.success) {
+                    bootstrap.Modal.getOrCreateInstance(document.getElementById('Modal_Holiday')).hide();
+                    Swal.fire({ icon: 'success', title: 'Saved successfully', timer: 2000, showConfirmButton: false });
+                    setTimeout(function () { location.reload(); }, 2000);
                 } else {
-                    Swal.fire({icon: 'error', title: response.error || 'Something went wrong', timer: 3000, showConfirmButton: false});
-                    btn.prop('disabled', false).text(btn.data('original-text') || 'Save');
+                    Swal.fire({ icon: 'error', title: resp.error || 'Something went wrong', timer: 3000, showConfirmButton: false });
+                    $btn.prop('disabled', false).text(originalText);
                 }
             },
             error: function (xhr) {
-                Swal.fire({icon: 'error', title: 'Server error: ' + (xhr.responseText || 'Unknown'), timer: 3000, showConfirmButton: false});
-                btn.prop('disabled', false).text(btn.data('original-text') || 'Save');
+                Swal.fire({ icon: 'error', title: 'Server error: ' + (xhr.status || ''), timer: 3000, showConfirmButton: false });
+                $btn.prop('disabled', false).text(originalText);
             }
         });
     });

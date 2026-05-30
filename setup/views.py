@@ -584,10 +584,8 @@ def holiday_form(request, pk=0):
         except ValueError:
             return JsonResponse({'success': False, 'error': 'Invalid date format'})
 
-        profile = Profile.objects.filter(user=request.user).select_related('tenantProfile').first()
-        tenant = profile.tenantProfile if profile else None
-        if not tenant:
-            return JsonResponse({'success': False, 'error': 'No tenant profile found for your account'})
+        if not request.tenantID:
+            return JsonResponse({'success': False, 'error': 'No tenant profile found.'})
 
         try:
             if obj:
@@ -606,7 +604,7 @@ def holiday_form(request, pk=0):
                     description=description or None,
                     is_national_holiday=is_national_holiday,
                     is_active=is_active,
-                    tenantProfile=tenant,
+                    tenantProfile_id=request.tenantID,
                     created_by=request.user,
                 )
 
@@ -622,7 +620,9 @@ def holiday_form(request, pk=0):
             )
             HolidayDistrictWise.objects.filter(holiday=holiday, district_id__in=existing_ids - selected_ids).delete()
             for district in District.objects.filter(district_id__in=selected_ids - existing_ids):
-                HolidayDistrictWise.objects.create(holiday=holiday, district=district, tenantProfile=tenant)
+                HolidayDistrictWise.objects.create(
+                    holiday=holiday, district=district, tenantProfile_id=request.tenantID
+                )
 
             return JsonResponse({'success': True})
         except Exception as e:
