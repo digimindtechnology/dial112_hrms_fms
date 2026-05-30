@@ -70,6 +70,25 @@ class UserLoginTrace(models.Model):
             models.Index(fields=['user', '-created_date']),
         ]
 
+class UserDistrictMapping(models.Model):
+    user_district_mapping_id = models.AutoField(primary_key=True)
+    district = models.ForeignKey(District, related_name='district_UserDistrictMapping', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='user_UserDistrictMapping', on_delete=models.CASCADE)
+    tenantProfile = models.ForeignKey(TenantProfile, blank=True, null=True, related_name='tenantProfile_UserDistrictMapping', on_delete=models.CASCADE, verbose_name="Company")
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False, related_name="created_by_UserDistrictMapping")
+    created_date = models.DateTimeField(auto_now_add=True)
+    updated_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name="updated_by_UserDistrictMapping")
+    updated_date = models.DateTimeField(auto_now=True, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ('district',)
+        constraints = [
+            models.UniqueConstraint(fields=['district', 'user', 'tenantProfile'], name='district_user_tenantProfile_UserDistrictMapping')
+        ]
+
+    def __str__(self):
+        return self.district.district_name
 
 @receiver(post_save, sender=User)
 def user_is_created(sender, instance, created, **kwargs):

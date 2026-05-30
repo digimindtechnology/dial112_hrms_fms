@@ -37,6 +37,19 @@ class EmployeeRequestType(models.Model):
         return self.employee_request_type_name
 
 
+class EmployeeRequestStatus(models.Model):
+    employee_request_status_id = models.AutoField(primary_key=True)
+    employee_request_status_name = models.CharField(max_length=200)
+    employee_request_status_css = models.CharField(max_length=200, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ('employee_request_status_id',)
+
+    def __str__(self):
+        return self.employee_request_status_name
+
+
 class EmployeeCaste(models.Model):
     employee_caste_id = models.AutoField(primary_key=True)
     employee_caste_name = models.CharField(max_length=200)
@@ -311,7 +324,7 @@ class EmployeeDataApprover(BaseModel):
     approver = models.ForeignKey(User, related_name="user_EmployeeDataApprover", on_delete=models.CASCADE, help_text="user-approver by")
     approver_role = models.ForeignKey(Role, related_name="role_EmployeeDataApprover", null=True, blank=True, on_delete=models.CASCADE, help_text="role of approver by")
 
-    approverStatus =  models.ForeignKey(ApproverStatus, default=1, related_name="approverStatus_EmployeeDataApprover", on_delete=models.CASCADE, help_text="approver status")
+    approverStatus = models.ForeignKey(ApproverStatus, default=1, related_name="approverStatus_EmployeeDataApprover", on_delete=models.CASCADE, help_text="approver status")
 
     tenantProfile = models.ForeignKey(TenantProfile, related_name="tenantProfile_EmployeeDataApprover", on_delete=models.CASCADE, verbose_name="Tenant")
     created_by = models.ForeignKey(User, related_name="created_EmployeeDataApprover", on_delete=models.CASCADE)
@@ -322,6 +335,28 @@ class EmployeeDataApprover(BaseModel):
 
     def __str__(self):
         return self.approver.get_full_name() or self.approver.username
+
+
+class EmployeeProfileUpdateRequest(BaseModel):
+    employee_profile_update_id = models.AutoField(primary_key=True)
+    employee_profile_update_unique_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=500)
+    change_request_description = models.TextField()
+    employee = models.ForeignKey(EmployeeInfo, on_delete=models.CASCADE, related_name='employee_EmployeeProfileUpdateRequest', help_text="employee")
+    empRequestStatus = models.ForeignKey(EmployeeRequestStatus, default=1, related_name="empRequestStatus_EmployeeProfileUpdateRequest", on_delete=models.CASCADE)
+    approved_rejected_date = models.DateField(null=True, blank=True)
+    approved_rejected_remark = models.TextField(null=True, blank=True)
+    approved_rejected_created_by = models.ForeignKey(User,null=True, blank=True, related_name="approved_rejected_created_by_EmployeeProfileUpdateRequest", on_delete=models.CASCADE)
+    is_send_to_approval = models.BooleanField(default=False)
+
+    tenantProfile = models.ForeignKey(TenantProfile, related_name="tenantProfile_EmployeeProfileUpdateRequest", on_delete=models.CASCADE, verbose_name="Tenant")
+    created_by = models.ForeignKey(User, related_name="created_EmployeeProfileUpdateRequest", on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ('title',)
+
+    def __str__(self):
+        return self.title
 
 
 class EmployeeActivityLog(BaseModel):

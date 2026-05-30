@@ -135,14 +135,34 @@
                                     </div>
 
                                     <div class="mb-4 col-md-4">
-                                        <label for="city" class="form-label">City</label>
-                                        <input class="form-control" type="text" id="city" name="city"
+                                        <label for="city" class="form-label">City <span class="text-danger">*</span></label>
+                                        <input class="form-control" type="text" id="city" name="city" required
                                                value="{{ profile.city|default:'' }}" placeholder=""/>
                                     </div>
+
+
                                     <div class="mb-4 col-md-8">
                                         <label class="form-label">Address</label>
                                         <input type="text" class="form-control" id="userAddress" name="userAddress"
                                                value="{{ profile.address|default:'' }}" placeholder="High Street"/>
+                                    </div>
+
+                                   <!-- District Mapping (multi-select) -->
+                                    <div class="mb-4 col-md-12">
+                                        <label class="form-label">
+                                            Assigned Districts <span class="text-danger">*</span>
+                                            <span class="text-muted text-danger" style="font-size:12px;font-weight:400;">
+                                                (select one or more)
+                                            </span>
+                                        </label>
+                                        <select name="district_ids" id="district_ids" required
+                                                class="form-select select2" multiple>
+                                            {% for d in districtList %}
+                                                <option value="{{ d.district_id }}" {% if d.district_id in user_district_ids %}selected{% endif %}>
+                                                    {{ d.district_name }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
                                     </div>
 
                                     <div class="mb-4 col-md-4">
@@ -420,6 +440,18 @@
                 GetStateList();
             });
 
+            // 3. District multi-select — dedicated Select2 init with allowClear
+            if ($.fn.select2) {
+                var $districtSel = $('#district_ids');
+                $districtSel.wrap('<div class="position-relative"></div>');
+                $districtSel.select2({
+                    placeholder: 'Select districts…',
+                    allowClear: true,
+                    closeOnSelect: false,
+                    dropdownParent: $districtSel.parent()
+                });
+            }
+
             // 3. User Details Form Validation (Fix for Empty Dropdowns)
             $('#formUserDetails').on('submit', function (event) {
                 if (!this.checkValidity()) {
@@ -454,11 +486,10 @@
         function GetStateList() {
             var defaultCountry = '{{ profile.country_id|default:"" }}';
             var countryID = $("#country_id").val() !== "" ? $("#country_id").val() : defaultCountry;
-
+            var targetStateId = '{{ profile.state_id|default:"" }}';
             if (countryID && countryID !== '0') {
                 var options = '<option value="">Please Select State</option>';
                 $.getJSON('/masters/GetStateListJson/?countryID=' + countryID, function (data) {
-                    var targetStateId = '{{ profile.state_id|default:"" }}';
                     $.each(data, function (i, d) {
                         var selected = '';
                         if (d.pk.toString() === targetStateId) {
@@ -466,7 +497,7 @@
                         }
                         options += "<option " + selected + " value='" + d.pk + "'>" + d.fields['state_name'] + "</option>";
                     });
-                    $('#state_id').html(options);
+                    $('#state_id').html(options).trigger('change');
                 });
             } else {
                 var options = '<option value="">Please Select State</option>';

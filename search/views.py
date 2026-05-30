@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db.models import Q
 from accounts.models import Profile
+from employee.models import EmployeeInfo
 
 SEARCH_REGISTRY = []
 
@@ -12,10 +13,10 @@ def register(label, icon, model, fields, url, limit=5, tenant_filter=False, disp
                             'display_fn': display_fn, 'url_fn': url_fn, })
 
 
-register('Users', 'tabler-user', Profile, ['user__first_name', 'user__last_name', 'user__email'],
-         '/user/list/', tenant_filter=True, limit=5,
-         display_fn=lambda o: f"{o.user.first_name} {o.user.last_name}".strip() + f" ({o.user.email})",
-         url_fn=lambda o: f"/user/{o.user.id}/update/")
+register('Employees', 'tabler-user-minus', EmployeeInfo, ['employee_unique_id', 'first_name', 'last_name', 'email'],
+         '', tenant_filter=True, limit=2,
+         display_fn=lambda o: f"{o.first_name} {o.last_name}".strip() + f" ({o.email})",
+         url_fn=lambda o: f"/employee/{o.employee_unique_id}/detail/")
 
 
 @login_required

@@ -1,8 +1,9 @@
 from django.utils.deprecation import MiddlewareMixin
 from rest_framework.authtoken.models import Token
 from accounts.helpers.basicUtility import GetFileUrl
-from DmtHrmsFmsApp.settings import COPY_RIGHT_INFORMATION, S3_URL,MEDIA_URL,IS_FILE_UPLOAD_S3
+from DmtHrmsFmsApp.settings import COPY_RIGHT_INFORMATION, S3_URL, MEDIA_URL, IS_FILE_UPLOAD_S3
 from accounts.models import Profile
+from user.models import UserDistrictMapping
 
 
 class RoleMiddleware(MiddlewareMixin):
@@ -41,6 +42,7 @@ class RoleMiddleware(MiddlewareMixin):
         request.breadcrumb = ''
         request.title = ''
         request.pagetitle = ''
+        request.userDistrictMappingIds = ''
 
         # -------------------------------------------------
         # Breadcrumb Logic
@@ -59,20 +61,8 @@ class RoleMiddleware(MiddlewareMixin):
         # -------------------------------------------------
         # Profile Query (Single Query)
         # -------------------------------------------------
-        profile = (
-            Profile.objects
-            .select_related(
-                'role',
-                'currency',
-                'time_zone',
-                'date_formate_view',
-                'time_formate_view',
-                'tenantProfile',
-                'tenantProfile__currency',
-                'tenantProfile__time_zone',
-                'tenantProfile__date_formate_view',
-                'tenantProfile__time_formate_view',
-            ).prefetch_related('role__group').filter(user_id=user.id).first())
+        profile = (Profile.objects.select_related('role', 'currency', 'time_zone', 'date_formate_view', 'time_formate_view', 'tenantProfile', 'tenantProfile__currency',
+                                                  'tenantProfile__time_zone', 'tenantProfile__date_formate_view', 'tenantProfile__time_formate_view', ).prefetch_related('role__group').filter(user_id=user.id).first())
 
         if not profile:
             return None
@@ -81,22 +71,18 @@ class RoleMiddleware(MiddlewareMixin):
         # Profile Data
         # -------------------------------------------------
         request.is_company_setup = (profile.is_company_setup)
-
         request.is_system_assigned_password = (profile.is_system_assigned_password)
-
         if profile.profile_picture_s3_url:
             request.image = GetFileUrl(profile.profile_picture_s3_url)
 
-        # -------------------------------------------------
-        # Role Data
-        # -------------------------------------------------
+        request.userDistrictMappingIds = list(UserDistrictMapping.objects.filter(user=user, tenantProfile=profile.tenantProfile, is_active=True).values_list('district_id', flat=True).distinct())
+
         role = profile.role
         if role:
             request.roleID = role.role_id
             request.role = role.role_name
             role_groups = role.group.all()
             role_group_ids = {group.id for group in role_groups}
-
             user_group_ids = set(user.groups.values_list('id', flat=True))
 
             # Sync only if changed

@@ -10,21 +10,28 @@ from accounts.helpers.import_export_utils import export_csv, export_xlsx, parse_
 from accounts.base import Base
 from accounts.helpers.decorators import CheckRole
 from accounts.models import Profile, UserLoginTrace
-from masters.models import Country, Gender, State, Currency
+from masters.models import Country, Gender, State, Currency, District
 from tenant.models import Role, TimeZone, DateFormat, TimeFormat
+from user.models import UserDistrictMapping
+
+
+def _int(val):
+    try:
+        return int(val) if val else None
+    except (ValueError, TypeError):
+        return None
 
 
 @login_required
 @CheckRole(Base.Group.UserGroup.value)
 def users_view(request):
     tenant_id = request.tenantID
-    stats = Profile.objects.filter(tenantProfile_id=tenant_id).aggregate(alluser=Count('id'),
-                                                                         activeuser=Count('id',
-                                                                                          filter=Q(is_active=True)),
-                                                                         inactiveUser=Count('id',
-                                                                                            filter=Q(is_active=False)),
-                                                                         neverlogin=Count('id', filter=Q(is_active=True,
-                                                                                                         user__last_login__isnull=True)), )
+    base_qs = Profile.objects.filter(tenantProfile_id=tenant_id).select_related('user', 'role', 'gender')
+    if request.role != 'Administrator':
+        base_qs = base_qs.exclude(role__role_name='Administrator').select_related('user', 'role', 'gender')
+    stats = base_qs.aggregate(alluser=Count('id'), activeuser=Count('id', filter=Q(is_active=True)),
+                              inactiveUser=Count('id', filter=Q(is_active=False)),
+                              neverlogin=Count('id', filter=Q(is_active=True, user__last_login__isnull=True)), )
     context = {
         "alluser": stats["alluser"],
         "activeuser": stats["activeuser"],
@@ -44,6 +51,8 @@ def UserListJson(request):
     search_value = request.GET.get('search[value]', '')
 
     base_qs = Profile.objects.filter(tenantProfile_id=tenant_id).select_related('user', 'role', 'gender')
+    if request.role != 'Administrator':
+        base_qs = base_qs.exclude(role__role_name='Administrator').select_related('user', 'role', 'gender')
     order_column_index = int(request.GET.get('order[0][column]', 1))
     order_dir = request.GET.get('order[0][dir]', 'asc')
 
@@ -68,6 +77,18 @@ def UserListJson(request):
     records_filtered = base_qs.count()
     profiles = base_qs.order_by(*order_fields)[start:start + length]
 
+    # Batch-fetch district mappings for all users on this page
+    user_ids = [p.user_id for p in profiles]
+    district_map = {}
+    try:
+        for m in (UserDistrictMapping.objects
+                .filter(user_id__in=user_ids, tenantProfile_id=tenant_id, is_active=True)
+                .select_related('district')
+                .order_by('district__district_name')):
+            district_map.setdefault(m.user_id, []).append(m.district.district_name)
+    except Exception:
+        pass  # table may not exist if migration hasn't been run yet
+
     data = []
     for i, profile in enumerate(profiles):
         data.append({
@@ -80,7 +101,8 @@ def UserListJson(request):
             'role': profile.role.role_name if profile.role else '',
             'gender': profile.gender.gender_name if profile.gender else '',
             'gender_id': profile.gender_id,
-            'is_active': profile.is_active,
+            'is_active': profile.user.is_active,
+            'districts': ', '.join(district_map.get(profile.user_id, [])),
         })
 
     return JsonResponse({
@@ -104,6 +126,17 @@ def user_create(request, user_id=None):
         profile = Profile.objects.filter(user=user_instance).select_related('role', 'tenantProfile').first()
         loginhistory = UserLoginTrace.objects.filter(is_active=True, user=user_instance).order_by('-created_date')[:100]
 
+    # Existing district mappings for this user
+    user_district_ids = []
+    if user_id:
+        try:
+            user_district_ids = list(
+                UserDistrictMapping.objects.filter(user_id=user_id, tenantProfile_id=tenant_id, is_active=True)
+                .values_list('district_id', flat=True)
+            )
+        except Exception:
+            pass  # table may not exist until migration is applied
+
     # Base Context
     context = {
         "profile": profile,
@@ -116,97 +149,100 @@ def user_create(request, user_id=None):
         "timeZoneList": TimeZone.objects.filter(is_active=True),
         "dateFormatList": DateFormat.objects.filter(is_active=True),
         "timeFormatList": TimeFormat.objects.filter(is_active=True),
+        "districtList": District.objects.filter(is_active=True).select_related('state').order_by('district_name'),
+        "user_district_ids": user_district_ids,
     }
 
     if request.method == "POST":
         # TAB 1: User Details
         if 'btn_createUserDetails' in request.POST:
+            p = request.POST
+
+            first_name = p.get('userFirstName', '').strip()
+            last_name = p.get('userLastName', '').strip()
+            email = p.get('userEmail', '').strip()
+            phone = p.get('userPhone', '').strip()
+            city = p.get('city', '').strip()
+            address = p.get('userAddress', '').strip()
+            is_active = p.get('edituserstatus') == 'on'
+            is_login_with_otp = p.get('is_login_with_otp') == 'on'
+            profile_photo = request.FILES.get('uploadprofilephoto')
+
+            gender_id = _int(p.get('gender'))
+            role_id = _int(p.get('role'))
+            country_id = _int(p.get('country_id'))
+            state_id = _int(p.get('state_id'))
+
+            currency_id = _int(p.get('currency_id'))
+            time_zone_id = _int(p.get('time_zone'))
+            date_format_id = _int(p.get('date_formate_view'))
+            time_format_id = _int(p.get('time_formate_view'))
+
             try:
-                with transaction.atomic():
-                    # Capture Data
-                    first_name = request.POST.get('userFirstName', '').strip()
-                    last_name = request.POST.get('userLastName', '').strip()
-                    email = request.POST.get('userEmail', '').strip()
-                    phone = request.POST.get('userPhone', '').strip()
-                    gender_id = request.POST.get('gender')
-                    role_id = request.POST.get('role')
-                    country_id = request.POST.get('country_id')
-                    state_id = request.POST.get('state_id')
-                    city = request.POST.get('city', '').strip()
-                    address = request.POST.get('userAddress', '').strip()
-                    is_active = request.POST.get('edituserstatus') == 'on'
-                    is_login_with_otp = request.POST.get('is_login_with_otp') == 'on'
-                    profile_photo = request.FILES.get('uploadprofilephoto')
-                    currency_id = request.POST.get("currency_id")
-                    time_zone_id = request.POST.get("time_zone")
-                    date_formate_view_id = request.POST.get("date_formate_view")
-                    time_formate_view_id = request.POST.get("time_formate_view")
+                if not profile:
+                    if User.objects.filter(email=email).exists():
+                        messages.error(request, "A user with this email already exists.")
+                        return redirect('user-create-form')
 
-                    # 1. Create or Update User Object
-                    if not profile:
-                        if User.objects.filter(email=email).exists():
-                            messages.error(request, "User already exists with this email.")
-                            return redirect('user-create-form')
+                    base_un = email.split('@')[0]
+                    un, n = base_un, 1
+                    while User.objects.filter(username=un).exists():
+                        un = f"{base_un}{n}";
+                        n += 1
 
-                        user = User.objects.create(email=email,
-                                                   first_name=first_name,last_name=last_name,
-                                                   is_active=is_active
-                                                   )
+                    user = User.objects.create_user(username=un, email=email, first_name=first_name, last_name=last_name, is_active=is_active, )
+                    profile = Profile.objects.get(user=user)
+                    profile.tenantProfile_id = tenant_id
+                    profile.created_by = request.user
+                else:
+                    user = profile.user
+                    if User.objects.filter(email=email).exclude(id=user.id).exists():
+                        messages.error(request, "This email is already registered to another user.")
+                        return redirect('user-update-form', user_id=user.id)
 
-                        profile, created = Profile.objects.get_or_create(user=user)
-                        profile.tenantProfile_id = tenant_id
-                        profile.created_by = request.user
-                    else:
-                        user = profile.user
-                        # Check for duplicate email excluding current user
-                        if User.objects.filter(email=email).exclude(id=user.id).exists():
-                            messages.error(request, "Email already exists.")
-                            return redirect('user-update-form', user_id=user.id)
+                user.first_name = first_name
+                user.last_name = last_name
+                user.email = email
+                user.is_active = is_active
+                user.save()
 
-                    # Save standard User fields
-                    user.first_name = first_name
-                    user.last_name = last_name
-                    user.email = email
-                    user.is_active = is_active
-                    user.save()
+                profile.mobile = phone
+                profile.address = address
+                profile.city = city
+                profile.is_login_with_otp = is_login_with_otp
+                profile.is_active = is_active
+                profile.gender_id = gender_id
+                profile.role_id = role_id
+                profile.country_id = country_id
+                profile.state_id = state_id
+                profile.currency_id = currency_id
+                profile.time_zone_id = time_zone_id
+                profile.date_formate_view_id = date_format_id
+                profile.time_formate_view_id = time_format_id
+                profile.updated_by = request.user
+                profile.save()
+                if profile_photo:
+                    path = UploadFileData(tenant_id, 'profile', profile_photo, '')
+                    if path:
+                        profile.profile_picture_s3_url = path
+                        profile.save()
 
-                    # 2. Save Profile fields
-                    profile.mobile = phone
-                    profile.address = address
-                    profile.city = city
-                    profile.is_login_with_otp = is_login_with_otp
-                    profile.currency_id = currency_id
-                    profile.time_zone_id = time_zone_id
-                    profile.date_formate_view_id = date_formate_view_id
-                    profile.time_formate_view_id = time_formate_view_id
+                try:
+                    with transaction.atomic():
+                        selected = [int(d) for d in p.getlist('district_ids') if d]
+                        UserDistrictMapping.objects.filter(user=user, tenantProfile_id=tenant_id).delete()
+                        for did in selected:
+                            UserDistrictMapping.objects.create(user=user,district_id=did, tenantProfile_id=tenant_id, created_by=request.user, )
+                except Exception:
+                    pass  # table not yet created — run: python manage.py migrate user
 
-                    if gender_id:
-                        profile.gender_id = int(gender_id)
-                    if role_id:
-                        profile.role_id = int(role_id)
-                    if country_id:
-                        profile.country_id = int(country_id)
-                    if state_id:
-                        profile.state_id = int(state_id)
-
-                    profile.updated_by = request.user
-
-                    # 3. Process Profile Picture
-                    if profile_photo:
-                        # Make sure UploadFileS3Server is imported and working
-                        profile_url = UploadFileData(tenant_id, 'profile', profile_photo, '')
-                        if profile_url:
-                            profile.profile_picture_s3_url = profile_url
-
-                    profile.save()
-                    messages.success(request, "User details saved successfully.")
-
-                    # Redirect to update form using the user's ID
-                    return redirect('user-update-form', user_id=user.id)
+                messages.success(request, "User details saved successfully.")
+                return redirect('user-update-form', user_id=user.id)
 
             except Exception as error:
-                print('ERROR =>', error)
-                messages.error(request, f"Error saving details: {str(error)}")
+                import traceback;
+                traceback.print_exc()
+                messages.error(request, f"Error saving user: {error}")
                 context['active_tab'] = 'details'
 
         # TAB 2: User Security (Password)

@@ -113,13 +113,13 @@
                     <th>User</th>
                     <th>Email</th>
                     <th>Role</th>
+                    <th>Districts</th>
                     <th>Gender</th>
                     <th>Status</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody></tbody>
-
             </table>
                 </div>
         </div>
@@ -150,34 +150,40 @@
                         data: null,
                         render: function (data) {
                             var name = (data.first_name + ' ' + data.last_name).trim();
-                            var img = data.img_url || '';
-                            var html = '<div class="d-flex justify-content-start align-items-center user-name">' +
-                                '<div class="d-flex flex-column">' +
-                                '<a href="/user/' + data.user_pk + '/detail/" class="text-heading text-truncate">' +
-                                '<span class="fw-medium">' + name + '</span></a>' +
-                                '</div></div>';
-                            return html;
+                            return '<div class="d-flex flex-column">' +
+                                '<a href="/user/' + data.user_pk + '/detail/" class="text-heading text-truncate fw-medium">' +
+                                name + '</a></div>';
                         }
                     },
-
                     {data: 'email'},
                     {data: 'role'},
+                    {
+                        data: 'districts',
+                        orderable: false,
+                        render: function (data) {
+                            if (!data) return '<span class="text-muted" style="font-size:12px;">—</span>';
+                            var names = data.split(', ');
+                            var badges = names.map(function (n) {
+                                return '<span class="badge bg-label-primary me-1 mb-1" style="font-size:11px;">' + n + '</span>';
+                            }).join('');
+                            return '<div style="max-width:260px;white-space:normal;">' + badges + '</div>';
+                        }
+                    },
                     {
                         data: null,
                         orderable: false,
                         render: function (data) {
                             var badge = data.gender_id === 2 ? 'warning' : 'secondary';
-                            return '<div class="badge bg-label-' + badge + '">' + (data.gender || '') + '</div>';
+                            return '<span class="badge bg-label-' + badge + '">' + (data.gender || '') + '</span>';
                         }
                     },
                     {
                         data: null,
                         orderable: false,
                         render: function (data) {
-                            if (data.is_active) {
-                                return '<div class="badge bg-label-success">Active</div>';
-                            }
-                            return '<div class="badge bg-label-danger">Inactive</div>';
+                            return data.is_active
+                                ? '<span class="badge bg-label-success">Active</span>'
+                                : '<span class="badge bg-label-danger">Inactive</span>';
                         }
                     },
                     {
