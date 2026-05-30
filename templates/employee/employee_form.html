@@ -557,7 +557,7 @@
                                     <span class="btnText">{% if obj %}Update Employee{% else %}Save Employee{% endif %}</span>
                                     <span class="btnLoader spinner-border spinner-border-sm visually-hidden ms-1" role="status"></span>
                                 </button>
-                                <a href="{% url 'employee-list' %}" class="btn btn-label-secondary waves-effect">
+                                <a href="{% url 'employee-list' %}?empcat={{ empCatId }}" class="btn btn-label-secondary waves-effect">
                                     <i class="ti tabler-x me-1"></i>Cancel
                                 </a>
                             </div>

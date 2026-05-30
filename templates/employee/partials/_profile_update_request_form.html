@@ -1,0 +1,136 @@
+<style>
+    .ql-toolbar.ql-snow {
+        border-radius: 4px 4px 0 0;
+        border-color: #d9dee3;
+    }
+
+    .ql-container.ql-snow {
+        border-radius: 0 0 4px 4px;
+        border-color: #d9dee3;
+        min-height: 220px;
+        font-size: 14px;
+    }
+
+    .ql-editor {
+        min-height: 200px;
+    }
+</style>
+
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">
+            <i class="ti tabler-file-pencil me-2"></i>
+            {% if req %}Edit Profile Update Request{% else %}Add Profile Update Request{% endif %}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <form id="frm_ProfileUpdateRequest" class="needs-validation row g-4" novalidate>
+        {% csrf_token %}
+        <div class="modal-body">
+            <input type="hidden" name="pk" value="{{ req.employee_profile_update_id|default:'' }}">
+            <div class="col-md-12 mb-2">
+                <label class="form-label">Employee <span class="text-danger">*</span></label>
+                <select name="employee_id" required class="form-select">
+                    <option value="">-- Select Employee --</option>
+                    {% for emp in employees %}
+                        <option value="{{ emp.employee_id }}"
+                                {% if req and req.employee_id == emp.employee_id %}selected{% endif %}>
+                            {{ emp.full_name }}{% if emp.employee_code %} ({{ emp.employee_code }}){% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+                <div class="invalid-feedback">Please select an employee.</div>
+            </div>
+
+
+              <div class="col-md-12 mb-2">
+                <label class="form-label">Title <span class="text-danger">*</span></label>
+                <input type="text" name="title" required class="form-control"
+                       value="{{ req.title|default:'' }}"
+                       placeholder="Brief title for the update request">
+                <div class="invalid-feedback">Title is required.</div>
+            </div>
+
+             <div class="col-md-12 mb-2">
+                <label class="form-label">Change Request Description <span class="text-danger">*</span></label>
+                <input type="hidden" id="id_change_request_description" name="change_request_description">
+                <div id="quill_pur_editor"></div>
+                <div id="quill_pur_error" class="text-danger mt-1 d-none" style="font-size:12px;">
+                    Description is required.
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary">Save changes</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+    </form>
+</div>
+
+
+<script>
+    (function () {
+        var quill = new Quill('#quill_pur_editor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{header: [1, 2, 3, false]}],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{list: 'ordered'}, {list: 'bullet'}],
+                    [{indent: '-1'}, {indent: '+1'}],
+                    ['blockquote', 'link'],
+                    [{color: []}, {background: []}],
+                    ['clean']
+                ]
+            },
+            placeholder: 'Describe the changes being requested...'
+        });
+
+        {% if req.change_request_description %}
+            quill.root.innerHTML = "{{ req.change_request_description|escapejs }}";
+        {% endif %}
+
+        window.SaveProfileUpdateRequest = function () {
+            var description = quill.root.innerHTML;
+            var plainText = quill.getText().trim();
+
+            if (!plainText) {
+                document.getElementById('quill_pur_error').classList.remove('d-none');
+                return;
+            }
+            document.getElementById('quill_pur_error').classList.add('d-none');
+            document.getElementById('id_change_request_description').value = description;
+
+            var form = document.getElementById('frm_ProfileUpdateRequest');
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+
+            var formData = new FormData(form);
+            $.ajax({
+                type: 'POST',
+                url: '/employee/profile-update-request/save/',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (resp) {
+                    if (resp.success) {
+                        $('#Modal_BindPartialPages').modal('hide');
+                        Swal.fire({icon: 'success', title: 'Saved successfully', timer: 2000, showConfirmButton: false});
+                        if (typeof LoadProfileUpdateRequestList === 'function') {
+                            LoadProfileUpdateRequestList();
+                        } else {
+                            location.reload();
+                        }
+                    } else {
+                        Swal.fire({icon: 'error', title: resp.error || 'Save failed', timer: 3000, showConfirmButton: false});
+                    }
+                },
+                error: function () {
+                    Swal.fire({icon: 'info', title: 'Request failed. Please try again.', timer: 3000, showConfirmButton: false});
+                }
+            });
+        };
+    })();
+</script>

@@ -1,0 +1,114 @@
+<!-- Info bar -->
+<div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom flex-wrap gap-2">
+    <small class="text-muted">
+        Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ paginator.count }} entries
+    </small>
+</div>
+
+<!-- Table -->
+<table class="table table-bordered align-middle mb-0">
+    <thead class="border-top">
+    <tr class="text-nowrap">
+        <th style="width:50px;">S.No</th>
+        <th>Employee</th>
+        <th>Code</th>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Created Date</th>
+        <th>Created By</th>
+        <th style="width:120px;">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for item in page_obj %}
+        <tr>
+            <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
+            <td>
+                <a href="#" title="View" onclick="OpenProfileUpdateRequestDetail({{ item.employee_profile_update_id }})">
+                    {{ item.employee.full_name }}
+                </a>
+            </td>
+            <td>
+                <span class="fw-medium" style="font-size:11px;">{{ item.employee.employee_code }}</span>
+            </td>
+            <td style="max-width:260px;">
+                <div style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                    {{ item.title }}
+                </div>
+            </td>
+            <td>
+                <span class="badge text-bg-{{ item.empRequestStatus.employee_request_status_css|default:'secondary' }}"
+                      style="font-size:11px;">
+                    {{ item.empRequestStatus.employee_request_status_name }}
+                </span>
+            </td>
+            <td style="font-size:12px;white-space:nowrap;">{{ item.created_date|date:"d M Y" }}</td>
+            <td style="font-size:12px;">{{ item.created_by.get_full_name|default:item.created_by.username }}</td>
+            <td class="text-nowrap">
+
+                {% if item.empRequestStatus.employee_request_status_name|lower == 'pending' and item.created_by_id == request.user.id %}
+                    <button class="badge bg-label-info rounded border-0" title="Edit"
+                            onclick="OpenProfileUpdateRequestForm({{ item.employee_profile_update_id }})">
+                        <i class="ti tabler-edit ti-md"></i>
+                    </button>
+                    <button class="badge bg-label-danger rounded border-0" title="Delete"
+                            onclick="DeleteProfileUpdateRequest({{ item.employee_profile_update_id }})">
+                        <i class="ti tabler-trash ti-md"></i>
+                    </button>
+                {% endif %}
+            </td>
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan="7" class="text-center py-5 text-muted">
+                <i class="ti tabler-file-off" style="font-size:36px;display:block;margin-bottom:8px;opacity:.4;"></i>
+                No profile update requests found.
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<!-- Pagination -->
+<div class="d-flex justify-content-between align-items-center px-3 py-3 border-top">
+    <small class="text-muted">
+        Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ paginator.count }} entries
+    </small>
+    <nav>
+        <ul class="pagination pagination-sm mb-0">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="loadPurTable(1); return false;">
+                        <i class="ti tabler-chevrons-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="loadPurTable({{ page_obj.previous_page_number }}); return false;">
+                        <i class="ti tabler-chevron-left"></i>
+                    </a>
+                </li>
+            {% endif %}
+            {% for num in paginator.page_range %}
+                {% if num == page_obj.number %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="loadPurTable({{ num }}); return false;">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="loadPurTable({{ page_obj.next_page_number }}); return false;">
+                        <i class="ti tabler-chevron-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="loadPurTable({{ paginator.num_pages }}); return false;">
+                        <i class="ti tabler-chevrons-right"></i>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>

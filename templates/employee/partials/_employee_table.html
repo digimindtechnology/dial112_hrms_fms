@@ -40,17 +40,10 @@
         <tr>
             <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
             <td>
-                {% if emp.empStatus_id != 3 %}
                     <a href="{% url 'employee-detail' emp.employee_unique_id %}"
                        class="badge bg-label-primary waves-effect rounded-pill" title="View detail">
                         {{ emp.employee_code|default:'-' }}
                     </a>
-                {% else %}
-                    <a href="{% url 'employee-view' emp.employee_unique_id %}"
-                       class="badge bg-label-primary waves-effect rounded-pill" title="View">
-                        {{ emp.employee_code|default:'-' }}
-                    </a>
-                {% endif %}
             </td>
             <td class="fw-medium">{{ emp.full_name }}</td>
             <td>{{ emp.mobile }}</td>
@@ -66,11 +59,13 @@
                 </span>
             </td>
             <td class="text-nowrap">
-                {% if emp.empStatus_id != 3 %}
-                    <a href="{% url 'employee-detail' emp.employee_unique_id %}"
+            <a href="{% url 'employee-detail' emp.employee_unique_id %}"
                        class="badge bg-label-secondary rounded" title="Detail">
                         <i class="ti tabler-eye ti-md"></i>
                     </a>
+
+                {% if emp.empStatus_id != 3 %}
+
                     <a href="{% url 'employee-edit' emp.employee_unique_id %}"
                        class="badge bg-label-info rounded" title="Edit">
                         <i class="ti tabler-edit ti-md"></i>
@@ -79,11 +74,7 @@
                             onclick="deleteEmployee({{ emp.employee_id }})">
                         <i class="ti tabler-trash ti-md"></i>
                     </button>
-                {% else %}
-                    <a href="{% url 'employee-view' emp.employee_unique_id %}"
-                       class="badge bg-label-info rounded" title="View">
-                        <i class="ti tabler-eye me-1"></i>View
-                    </a>
+
                 {% endif %}
             </td>
         </tr>

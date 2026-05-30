@@ -6,11 +6,13 @@ from django.urls import reverse
 
 from accounts.base import Base
 from accounts.helpers.basicUtility import UploadFileData, GetFileUrl
+from accounts.helpers.decorators import CheckRole
 from accounts.helpers.message_helper import send_sweetalert
 from approvalrules.models import ApprovalRule
 from employee.models import (EmployeeInfo, EmployeeStatus, EmployeeCaste, EmployeeEducation, EmployeeExperience,
                              EmployeeCertification, EmployeeLanguage, EmployeeFamilyDetail,
-                             EmployeeJobHistory, EmployeeDocument, EmployeeReportingManager, EmployeeDataApprover)
+                             EmployeeJobHistory, EmployeeDocument, EmployeeReportingManager, EmployeeDataApprover,
+                             EmployeeProfileUpdateRequest, EmployeeRequestStatus)
 from masters.models import Gender, District
 from setup.models import EmployeeType, EmployeeCategory
 from accounts.models import Profile
@@ -138,6 +140,7 @@ EMPLOYMENT_STATUS_CHOICES = ['Active', 'Inactive', 'Resigned', 'Terminated']
 
 
 @login_required
+@CheckRole(Base.Group.HomeGroup.value)
 def employee_list(request):
     empCatName = ''
     empCatId = request.GET.get('empcat')
@@ -161,7 +164,7 @@ def employee_list(request):
     ]
     emp_count_map = {item['employment_status']: item['count'] for item in base_qs.values('employment_status').annotate(count=Count('employee_id'))}
     employment_status_counts = {c: emp_count_map.get(c, 0) for c in EMPLOYMENT_STATUS_CHOICES}
-    return render(request, 'employee/employee_list.html', {
+    context = {
         'empCatId': empCatId,
         'empCatName': empCatName,
         'search_query': search_query,
@@ -170,7 +173,8 @@ def employee_list(request):
         'total_employees': total_employees,
         'empstatus_counts': empstatus_counts,
         'employment_status_counts': employment_status_counts,
-    })
+    }
+    return render(request, 'employee/employee_list.html', context)
 
 
 @login_required
@@ -192,16 +196,17 @@ def employee_list_partial(request):
     qs = qs.order_by('first_name', 'last_name')
     paginator = Paginator(qs, 25)
     page_obj = paginator.get_page(request.GET.get('page'))
-
-    return render(request, 'employee/partials/_employee_table.html', {
+    context = {
         'page_obj': page_obj,
         'paginator': paginator,
         'search_query': search_query,
         'emp_status_filter': emp_status_filter,
-    })
+    }
+    return render(request, 'employee/partials/_employee_table.html', context)
 
 
 @login_required
+@CheckRole(Base.Group.HomeGroup.value)
 def employee_add(request):
     fd = {}
     empCatId = request.GET.get('empcat', '')
@@ -235,6 +240,7 @@ def employee_add(request):
 
 
 @login_required
+@CheckRole(Base.Group.HomeGroup.value)
 def employee_update(request, emp_unique_id=''):
     obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
     if request.method == 'POST':
@@ -271,6 +277,7 @@ def employee_update(request, emp_unique_id=''):
 
 
 @login_required
+@CheckRole(Base.Group.HomeGroup.value)
 def employee_detail(request, emp_unique_id):
     next_approver = None
     can_show_btn = False
@@ -282,18 +289,20 @@ def employee_detail(request, emp_unique_id):
         next_approver = empApprovalRuleList.filter(approverStatus_id=Base.ApproverStatus.Pending.value, sequence=min_pending_seq, approver_id=request.user.id).first()
         can_show_btn = next_approver is not None
 
-    return render(request, 'employee/employee_detail.html', {'obj': obj,
-                                                             'picture_url': GetFileUrl(obj.picture),
-                                                             'showApproveRejectBtn': can_show_btn,
-                                                             'empApprovalRuleList': empApprovalRuleList,
-                                                             })
+    context = {
+        'obj': obj,
+        'picture_url': GetFileUrl(obj.picture),
+        'showApproveRejectBtn': can_show_btn,
+        'empApprovalRuleList': empApprovalRuleList,
+    }
+    return render(request, 'employee/employee_detail.html', context)
 
 
 @login_required
+@CheckRole(Base.Group.HomeGroup.value)
 def employee_view_profile(request, emp_unique_id):
-    obj = get_object_or_404(EmployeeInfo.objects.select_related('gender', 'empType', 'empCategory', 'empStatus', 'caste', 'district', 'tenantProfile'),
-                            employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID, )
-    return render(request, 'employee/employee_view.html', {
+    obj = get_object_or_404(EmployeeInfo.objects.select_related('gender', 'empType', 'empCategory', 'empStatus', 'caste', 'district', 'tenantProfile'), employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID, )
+    context = {
         'obj': obj,
         'picture_url': GetFileUrl(obj.picture),
         'educations': obj.educations.order_by('-passing_year'),
@@ -304,7 +313,8 @@ def employee_view_profile(request, emp_unique_id):
         'job_histories': obj.job_history.order_by('-joining_date'),
         'documents': obj.employee_documents.order_by('-issue_date'),
         'managers': obj.employee_reporting_managers.select_related('reporting_manager').order_by('-is_current'),
-    })
+    }
+    return render(request, 'employee/employee_view.html', context)
 
 
 @login_required
@@ -320,7 +330,8 @@ def employee_delete(request):
 def education_list(request, emp_unique_id):
     obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
     educations = obj.educations.order_by('-passing_year')
-    return render(request, 'employee/partials/_education_list.html', {'obj': obj, 'educations': educations})
+    context = {'obj': obj, 'educations': educations}
+    return render(request, 'employee/partials/_education_list.html', context)
 
 
 @login_required
@@ -331,7 +342,8 @@ def education_form(request, emp_unique_id, pk=0):
     if pk:
         edu = get_object_or_404(EmployeeEducation, employee_education_id=pk, employee=obj)
         cert_url = GetFileUrl(edu.certificate_file)
-    return render(request, 'employee/partials/_education_form.html', {'obj': obj, 'edu': edu, 'cert_url': cert_url})
+    context = {'obj': obj, 'edu': edu, 'cert_url': cert_url}
+    return render(request, 'employee/partials/_education_form.html', context)
 
 
 @login_required
@@ -381,7 +393,8 @@ def education_delete(request):
 def experience_list(request, emp_unique_id):
     obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
     experiences = obj.experiences.order_by('-start_date')
-    return render(request, 'employee/partials/_experience_list.html', {'obj': obj, 'experiences': experiences})
+    context = {'obj': obj, 'experiences': experiences}
+    return render(request, 'employee/partials/_experience_list.html', context)
 
 
 @login_required
@@ -390,7 +403,8 @@ def experience_form(request, emp_unique_id, pk=0):
     obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
     if pk:
         exp = get_object_or_404(EmployeeExperience, employee_experience_id=pk, employee=obj)
-    return render(request, 'employee/partials/_experience_form.html', {'obj': obj, 'exp': exp})
+    context = {'obj': obj, 'exp': exp}
+    return render(request, 'employee/partials/_experience_form.html', context)
 
 
 @login_required
@@ -494,7 +508,8 @@ def employee_check_duplicate(request):
 def certification_list(request, emp_unique_id):
     obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
     certifications = obj.certifications.order_by('-issue_date')
-    return render(request, 'employee/partials/_certification_list.html', {'obj': obj, 'certifications': certifications})
+    context = {'obj': obj, 'certifications': certifications}
+    return render(request, 'employee/partials/_certification_list.html', context)
 
 
 @login_required
@@ -505,7 +520,8 @@ def certification_form(request, emp_unique_id, pk=0):
     if pk:
         cert = get_object_or_404(EmployeeCertification, employee_certification_id=pk, employee=obj)
         cert_url = GetFileUrl(cert.certificate_file)
-    return render(request, 'employee/partials/_certification_form.html', {'obj': obj, 'cert': cert, 'cert_url': cert_url})
+    context = {'obj': obj, 'cert': cert, 'cert_url': cert_url}
+    return render(request, 'employee/partials/_certification_form.html', context)
 
 
 @login_required
@@ -556,7 +572,8 @@ def certification_delete(request):
 def language_list(request, emp_unique_id):
     obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
     languages = obj.languages.order_by('-is_mother_tongue', 'language_name')
-    return render(request, 'employee/partials/_language_list.html', {'obj': obj, 'languages': languages})
+    context = {'obj': obj, 'languages': languages}
+    return render(request, 'employee/partials/_language_list.html', context)
 
 
 @login_required
@@ -565,7 +582,8 @@ def language_form(request, emp_unique_id, pk=0):
     obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
     if pk:
         lang = get_object_or_404(EmployeeLanguage, employee_language_id=pk, employee=obj)
-    return render(request, 'employee/partials/_language_form.html', {'obj': obj, 'lang': lang})
+    context = {'obj': obj, 'lang': lang}
+    return render(request, 'employee/partials/_language_form.html', context)
 
 
 @login_required
@@ -611,7 +629,8 @@ def language_delete(request):
 def family_list(request, emp_unique_id):
     obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
     family_details = obj.family_details.select_related('gender').order_by('family_member_name')
-    return render(request, 'employee/partials/_family_list.html', {'obj': obj, 'family_details': family_details})
+    context = {'obj': obj, 'family_details': family_details}
+    return render(request, 'employee/partials/_family_list.html', context)
 
 
 @login_required
@@ -620,12 +639,13 @@ def family_form(request, emp_unique_id, pk=0):
     obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
     if pk:
         member = get_object_or_404(EmployeeFamilyDetail, employee_family_detail_id=pk, employee=obj)
-    return render(request, 'employee/partials/_family_form.html', {
+    context = {
         'obj': obj,
         'member': member,
         'relation_choices': EmployeeFamilyDetail.RELATION_CHOICES,
         'genders': Gender.objects.filter(is_active=True),
-    })
+    }
+    return render(request, 'employee/partials/_family_form.html', context)
 
 
 @login_required
@@ -674,7 +694,8 @@ def family_delete(request):
 def job_history_list(request, emp_unique_id):
     obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
     job_histories = obj.job_history.order_by('-joining_date')
-    return render(request, 'employee/partials/_job_history_list.html', {'obj': obj, 'job_histories': job_histories})
+    context = {'obj': obj, 'job_histories': job_histories}
+    return render(request, 'employee/partials/_job_history_list.html', context)
 
 
 @login_required
@@ -683,7 +704,8 @@ def job_history_form(request, emp_unique_id, pk=0):
     obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
     if pk:
         job = get_object_or_404(EmployeeJobHistory, employee_job_history_id=pk, employee=obj)
-    return render(request, 'employee/partials/_job_history_form.html', {'obj': obj, 'job': job})
+    context = {'obj': obj, 'job': job}
+    return render(request, 'employee/partials/_job_history_form.html', context)
 
 
 @login_required
@@ -729,7 +751,8 @@ def job_history_delete(request):
 def document_list(request, emp_unique_id):
     obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
     documents = obj.employee_documents.order_by('-issue_date')
-    return render(request, 'employee/partials/_document_list.html', {'obj': obj, 'documents': documents})
+    context = {'obj': obj, 'documents': documents}
+    return render(request, 'employee/partials/_document_list.html', context)
 
 
 @login_required
@@ -740,7 +763,8 @@ def document_form(request, emp_unique_id, pk=0):
     if pk:
         doc = get_object_or_404(EmployeeDocument, employee_document_id=pk, employee=obj)
         file_url = GetFileUrl(doc.file_doc)
-    return render(request, 'employee/partials/_document_form.html', {'obj': obj, 'doc': doc, 'file_url': file_url})
+    context = {'obj': obj, 'doc': doc, 'file_url': file_url}
+    return render(request, 'employee/partials/_document_form.html', context)
 
 
 @login_required
@@ -790,7 +814,8 @@ def document_delete(request):
 def reporting_manager_list(request, emp_unique_id):
     obj = get_object_or_404(EmployeeInfo, employee_unique_id=emp_unique_id, tenantProfile_id=request.tenantID)
     managers = obj.employee_reporting_managers.select_related('reporting_manager').order_by('-is_current', 'employee_reporting_manager_id')
-    return render(request, 'employee/partials/_reporting_manager_list.html', {'obj': obj, 'managers': managers})
+    context = {'obj': obj, 'managers': managers}
+    return render(request, 'employee/partials/_reporting_manager_list.html', context)
 
 
 @login_required
@@ -800,7 +825,8 @@ def reporting_manager_form(request, emp_unique_id, pk=0):
     if pk:
         manager = get_object_or_404(EmployeeReportingManager, employee_reporting_manager_id=pk, employee=obj)
     users = Profile.objects.filter(tenantProfile_id=request.tenantID).select_related('user').order_by('user__first_name', 'user__last_name')
-    return render(request, 'employee/partials/_reporting_manager_form.html', {'obj': obj, 'manager': manager, 'users': users})
+    context = {'obj': obj, 'manager': manager, 'users': users}
+    return render(request, 'employee/partials/_reporting_manager_form.html', context)
 
 
 @login_required
@@ -924,5 +950,191 @@ def employee_approval_action(request):
 
         action = 'approved' if status_id == Base.ApproverStatus.Approved.value else 'rejected'
         return JsonResponse({'success': True, 'message': f'Employee profile {action} successfully.'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+# ── Profile Update Request ─────────────────────────────────
+
+@login_required
+@CheckRole(Base.Group.HomeGroup.value)
+def profile_update_request_list(request):
+    base_qs = EmployeeProfileUpdateRequest.objects.filter(tenantProfile_id=request.tenantID)
+    if request.role == 'Employee':
+        base_qs = base_qs.filter(created_by_id=request.user.id)
+    total = base_qs.count()
+    status_count_map = dict(base_qs.values('empRequestStatus_id').annotate(count=Count('employee_profile_update_id')).values_list('empRequestStatus_id', 'count'))
+    statuses = EmployeeRequestStatus.objects.filter(is_active=True)
+    status_counts = [
+        {
+            'employee_request_status_id': s.employee_request_status_id,
+            'employee_request_status_name': s.employee_request_status_name,
+            'employee_request_status_css': s.employee_request_status_css or 'bg-label-secondary',
+            'count': status_count_map.get(s.employee_request_status_id, 0),
+        }
+        for s in statuses
+    ]
+
+    context = {
+        'statuses': statuses,
+        'total': total,
+        'status_counts': status_counts,
+    }
+    return render(request, 'employee/profile_update_request_list.html', context)
+
+
+@login_required
+def profile_update_request_list_partial(request):
+    search = request.GET.get('search', '').strip()
+    status_filter = request.GET.get('status', '').strip()
+    qs = EmployeeProfileUpdateRequest.objects.filter(tenantProfile_id=request.tenantID).select_related('employee', 'empRequestStatus', 'created_by')
+    if request.role == 'Employee':
+        qs = qs.filter(created_by_id=request.user.id)
+    if search:
+        qs = qs.filter(Q(title__icontains=search) | Q(employee__first_name__icontains=search) | Q(employee__last_name__icontains=search))
+    if status_filter:
+        qs = qs.filter(empRequestStatus_id=status_filter)
+    qs = qs.order_by('-employee_profile_update_id')
+    paginator = Paginator(qs, 25)
+    page_obj = paginator.get_page(request.GET.get('page'))
+    context = {
+        'page_obj': page_obj,
+        'paginator': paginator,
+        'search': search,
+        'status_filter': status_filter,
+    }
+    return render(request, 'employee/partials/_profile_update_request_table.html', context)
+
+
+@login_required
+def profile_update_request_form(request, pk=0):
+    req = None
+    if pk:
+        req = get_object_or_404(EmployeeProfileUpdateRequest, employee_profile_update_id=pk, tenantProfile_id=request.tenantID)
+    employees = EmployeeInfo.objects.filter(tenantProfile_id=request.tenantID, is_active=True).order_by('first_name', 'last_name')
+    context = {
+        'req': req,
+        'employees': employees,
+    }
+    return render(request, 'employee/partials/_profile_update_request_form.html', context)
+
+
+@login_required
+def profile_update_request_save(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'})
+    p = request.POST
+    pk = p.get('pk', '').strip()
+    try:
+        fields = dict(title=p.get('title', '').strip(), change_request_description=p.get('change_request_description', '').strip(), employee_id=p.get('employee_id', '').strip() or None, )
+        empApprovalRule = ApprovalRule.objects.filter(approval_type__name=Base.ApprovalRules.EmployeeProfileUpdateApproval.value, tenantProfile_id=request.tenantID, is_active=True).order_by('sequence')
+        if pk:
+            req = get_object_or_404(EmployeeProfileUpdateRequest, employee_profile_update_id=pk, tenantProfile_id=request.tenantID)
+            for attr, val in fields.items():
+                setattr(req, attr, val)
+            req.save()
+        else:
+            if not empApprovalRule:
+                return JsonResponse({'success': False, 'error': 'Employee Profile Update Approval Not Set'})
+
+            EmployeeProfileUpdateRequest.objects.create(**fields, tenantProfile_id=request.tenantID, created_by=request.user)
+            ## Add Employee Approval Rule
+            for ar in empApprovalRule:
+                EmployeeDataApprover.objects.create(approverType_id=ar.approval_type_id, employee_id=fields.get('employee_id'), sequence=ar.sequence, approver_id=ar.approver_id,
+                                                    approver_role_id=ar.role_id, tenantProfile_id=request.tenantID, created_by=request.user)
+            ## Add Employee Approval Rule
+
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+def profile_update_request_delete(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False})
+    pk = request.POST.get('pk')
+    EmployeeProfileUpdateRequest.objects.filter(employee_profile_update_id=pk, tenantProfile_id=request.tenantID).delete()
+    return JsonResponse({'success': True})
+
+
+@login_required
+def profile_update_request_detail(request, pk):
+    req = get_object_or_404(EmployeeProfileUpdateRequest.objects.select_related('employee', 'empRequestStatus', 'created_by', 'approved_rejected_created_by'), employee_profile_update_id=pk, tenantProfile_id=request.tenantID)
+
+    can_show_btn = False
+    empApprovalRuleList = EmployeeDataApprover.objects.filter(employee_id=req.employee_id, approverType__name=Base.ApprovalRules.EmployeeProfileUpdateApproval.value).order_by('sequence')
+    min_pending_seq = empApprovalRuleList.filter(approverStatus_id=Base.ApproverStatus.Pending.value).aggregate(min_seq=Min('sequence'))['min_seq']
+    if min_pending_seq is not None:
+        next_approver = empApprovalRuleList.filter(approverStatus_id=Base.ApproverStatus.Pending.value, sequence=min_pending_seq, approver_id=request.user.id).first()
+        can_show_btn = next_approver is not None
+    context = {'req': req, 'can_show_btn': can_show_btn}
+    return render(request, 'employee/partials/_profile_update_request_detail.html', context)
+
+
+@login_required
+@CheckRole(Base.Group.HomeGroup.value)
+def profile_update_request_process(request, pk):
+    pur = get_object_or_404(EmployeeProfileUpdateRequest.objects.select_related('employee', 'empRequestStatus', 'created_by'), employee_profile_update_id=pk, tenantProfile_id=request.tenantID)
+    emp = pur.employee
+    ctx = _form_context(request, emp)
+    ctx['form_data'] = _obj_to_fd(emp)
+    ctx['picture_url'] = GetFileUrl(emp.picture)
+    ctx['pur'] = pur
+    return render(request, 'employee/profile_update_request_process.html', ctx)
+
+
+@login_required
+def profile_update_request_process_save(request, pk):
+    if request.method != 'POST':
+        return redirect('profile-update-request-list')
+    pur = get_object_or_404(EmployeeProfileUpdateRequest.objects.select_related('employee'), employee_profile_update_id=pk, tenantProfile_id=request.tenantID)
+    emp = pur.employee
+    p = request.POST
+    try:
+        for attr, val in _post_to_fields(p).items():
+            setattr(emp, attr, val)
+        emp.updated_by = request.user
+        emp.is_active = emp.employment_status in ('Active', 'active')
+        emp.save()
+
+        picture = request.FILES.get('picture')
+        if picture:
+            path = UploadFileData(request.tenantID, f'employees/{emp.employee_id}', picture)
+            if path:
+                emp.picture = path
+                emp.save(update_fields=['picture'])
+
+        completed_status = EmployeeRequestStatus.objects.filter(employee_request_status_name__icontains='complet', is_active=True).first()
+        if completed_status:
+            pur.empRequestStatus = completed_status
+        pur.approved_rejected_date = date.today()
+        pur.approved_rejected_created_by = request.user
+        pur.save()
+
+        send_sweetalert(request, 'success', f'Employee {emp.full_name} updated. Request marked as Completed.')
+        return redirect('profile-update-request-list')
+    except Exception as e:
+        send_sweetalert(request, 'error', str(e))
+        return redirect('profile-update-request-process', pk=pk)
+
+
+@login_required
+def profile_update_request_reject(request, pk):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'})
+    pur = get_object_or_404(EmployeeProfileUpdateRequest, employee_profile_update_id=pk, tenantProfile_id=request.tenantID)
+    remark = request.POST.get('remark', '').strip()
+    if not remark:
+        return JsonResponse({'success': False, 'error': 'Rejection remark is required.'})
+    try:
+        rejected_status = EmployeeRequestStatus.objects.filter(employee_request_status_name__icontains='reject', is_active=True).first()
+        if rejected_status:
+            pur.empRequestStatus = rejected_status
+        pur.approved_rejected_date = date.today()
+        pur.approved_rejected_remark = remark
+        pur.approved_rejected_created_by = request.user
+        pur.save()
+        return JsonResponse({'success': True})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})

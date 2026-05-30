@@ -63,4 +63,15 @@ urlpatterns = [
 
     # Approval Action
     path('approval-action/', views.employee_approval_action, name='employee-approval-action'),
+
+    # Profile Update Request
+    path('profile-update-request/', views.profile_update_request_list, name='profile-update-request-list'),
+    path('profile-update-request/list/partial/', views.profile_update_request_list_partial, name='profile-update-request-list-partial'),
+    path('profile-update-request/form/<int:pk>/', views.profile_update_request_form, name='profile-update-request-form'),
+    path('profile-update-request/save/', views.profile_update_request_save, name='profile-update-request-save'),
+    path('profile-update-request/delete/', views.profile_update_request_delete, name='profile-update-request-delete'),
+    path('profile-update-request/<int:pk>/detail/', views.profile_update_request_detail, name='profile-update-request-detail'),
+    path('profile-update-request/<int:pk>/process/', views.profile_update_request_process, name='profile-update-request-process'),
+    path('profile-update-request/<int:pk>/process/save/', views.profile_update_request_process_save, name='profile-update-request-process-save'),
+    path('profile-update-request/<int:pk>/reject/', views.profile_update_request_reject, name='profile-update-request-reject'),
 ]
