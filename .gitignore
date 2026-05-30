@@ -216,3 +216,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+.DS_Store
+ApplicationDocs/Client_Doc/~$T_HRMS_FMS.docx
+ApplicationDocs/RHQ_Data/~$Master_Data.xlsx
+migrations/
