@@ -3,8 +3,13 @@ from django.http import JsonResponse
 from django.db.models import Q
 from accounts.models import Profile
 from employee.models import EmployeeInfo
+from frv.models import FRV
 
 SEARCH_REGISTRY = []
+
+
+
+
 
 
 def register(label, icon, model, fields, url, limit=5, tenant_filter=False, display_fn=None, url_fn=None):
@@ -17,6 +22,25 @@ register('Employees', 'tabler-user-minus', EmployeeInfo, ['employee_unique_id', 
          '', tenant_filter=True, limit=2,
          display_fn=lambda o: f"{o.first_name} {o.last_name}".strip() + f" ({o.email})",
          url_fn=lambda o: f"/employee/{o.employee_unique_id}/detail/")
+
+register('FRV', 'tabler-car', FRV, ['frv_unique_id', 'chassis_number', 'engine_number', 'registration_number'],
+         '', tenant_filter=True, limit=2,
+         display_fn=lambda o: f"{o.registration_number} {o.chassis_number}".strip() + f" ({o.engine_number})",
+         url_fn=lambda o: f"/f-r-v/{o.frv_unique_id}/detail/")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 @login_required
