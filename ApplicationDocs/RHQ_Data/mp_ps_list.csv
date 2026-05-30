@@ -1,0 +1,975 @@
+﻿S.no,Police_Station,District
+1,Agar,Agar Malwa
+2,Barod,Agar Malwa
+3,Kanad,Agar Malwa
+4,Nalkheda,Agar Malwa
+5,Soyat,Agar Malwa
+6,Susner,Agar Malwa
+7,Alirajpur,Alirajpur
+8,Ambua,Alirajpur
+9,Azad Nagar Alirajpur,Alirajpur
+10,Bakhatgarh,Alirajpur
+11,Bori,Alirajpur
+12,Chandpur,Alirajpur
+13,Jobat,Alirajpur
+14,Kathiwara,Alirajpur
+15,Nanpur,Alirajpur
+16,Sondwa,Alirajpur
+17,Sorwa,Alirajpur
+18,Udaigarh,Alirajpur
+19,Amarkantak,Anuppur
+20,Anuppur,Anuppur
+21,Bhalumada,Anuppur
+22,Bijuri,Anuppur
+23,Chachai,Anuppur
+24,Jethari,Anuppur
+25,Karanpathar,Anuppur
+26,Kotma,Anuppur
+27,Rajendragram,Anuppur
+28,Ramnagar Anuppur,Anuppur
+29,Bahadurpur,Ashok Nagar
+30,Chanderi,Ashok Nagar
+31,Dehat Ashok Nagar,Ashok Nagar
+32,Isagarh,Ashok Nagar
+33,Kachnar,Ashok Nagar
+34,Kadwaya,Ashok Nagar
+35,Kotwali Ashok Nagar,Ashok Nagar
+36,Mungawali,Ashok Nagar
+37,Naisarai,Ashok Nagar
+38,Piprai,Ashok Nagar
+39,Sadora,Ashok Nagar
+40,Saharai,Ashok Nagar
+41,Bahela,Balaghat
+42,Baihar,Balaghat
+43,Bharveli,Balaghat
+44,Birsa,Balaghat
+45,Changotola,Balaghat
+46,Garhi,Balaghat
+47,Hatta Balaghat,Balaghat
+48,Katangi Balaghat,Balaghat
+49,Kherlauji,Balaghat
+50,Kirnapur,Balaghat
+51,Kotwali Balaghat,Balaghat
+52,Lalburra,Balaghat
+53,Lamta,Balaghat
+54,Lanji,Balaghat
+55,Malazkhand,Balaghat
+56,Navegaon (Gramin),Balaghat
+57,Paraswara,Balaghat
+58,Rampayali,Balaghat
+59,Rupjhar,Balaghat
+60,Tirodi,Balaghat
+61,Waraseoni,Balaghat
+62,Anjad,Barwani
+63,Barwani,Barwani
+64,Dehat Sendhwa,Barwani
+65,Julwaniya,Barwani
+66,Khetia,Barwani
+67,Nagalwadi,Barwani
+68,Niwali,Barwani
+69,Palsood,Barwani
+70,Pansemal,Barwani
+71,Pati,Barwani
+72,Rajpur,Barwani
+73,Sendhwa City,Barwani
+74,Silawad,Barwani
+75,Thikri,Barwani
+76,Warla,Barwani
+77,Amla,Betul
+78,Athner,Betul
+79,Betul,Betul
+80,Betul Bazar,Betul
+81,Bhainsdehi,Betul
+82,Bijadehi,Betul
+83,Bordehi,Betul
+84,Chicholi,Betul
+85,Chopna,Betul
+86,Ganj,Betul
+87,Jhallar,Betul
+88,Mohda,Betul
+89,Multai,Betul
+90,Ranipur,Betul
+91,Saikhera Betul,Betul
+92,Sarni,Betul
+93,Shahpur Betul,Betul
+94,Alampur,Bhind
+95,Amayan,Bhind
+96,Aswar,Bhind
+97,Ater,Bhind
+98,Baraso,Bhind
+99,Barohi,Bhind
+100,Bharoli,Bhind
+101,Daboh,Bhind
+102,Dehat Bhind,Bhind
+103,Endori,Bhind
+104,Gohad,Bhind
+105,Gohad Chauraha,Bhind
+106,Gormi,Bhind
+107,Kotwali Bhind,Bhind
+108,Lahar,Bhind
+109,Mahgawan,Bhind
+110,Malanpur,Bhind
+111,Mihona,Bhind
+112,Mow,Bhind
+113,Nayagaon Bhind,Bhind
+114,Pawai Bhind,Bhind
+115,Phooph,Bhind
+116,Rawatpura Sarkar,Bhind
+117,Ronn,Bhind
+118,Surpura,Bhind
+119,Umari,Bhind
+120,Aishbag,Bhopal
+121,Arera Hills,Bhopal
+122,Ashoka Garden,Bhopal
+123,Awadhpuri,Bhopal
+124,Ayodhya Nagar,Bhopal
+125,Bag Sevaniya,Bhopal
+126,Bairagarh,Bhopal
+127,Berasia,Bhopal
+128,Bilkhiria,Bhopal
+129,Chhola Mandir,Bhopal
+130,Choona Bhatti,Bhopal
+131,Eitkhedi,Bhopal
+132,Gandhi Nagar Bhopal,Bhopal
+133,Gautam Nagar,Bhopal
+134,Govindpura,Bhopal
+135,Gunga,Bhopal
+136,Habibganj,Bhopal
+137,Hanumanganj,Bhopal
+138,Jahangirabad,Bhopal
+139,Kajli Kheda,Bhopal
+140,Kamala Nagar,Bhopal
+141,Katara Hills,Bhopal
+142,Khajuri Sadak,Bhopal
+143,Kohefiza,Bhopal
+144,Kolar,Bhopal
+145,Kotwali Bhopal,Bhopal
+146,Mangalwara,Bhopal
+147,Misrod,Bhopal
+148,MP Nagar,Bhopal
+149,Nazirabad,Bhopal
+150,Nishatpura,Bhopal
+151,Parvaliya Sadak,Bhopal
+152,Piplani,Bhopal
+153,Ratibad,Bhopal
+154,Shahjahanabad,Bhopal
+155,Shahpura Bhopal,Bhopal
+156,Shyamla Hills,Bhopal
+157,Sookhi Sewania,Bhopal
+158,Station Bajaria,Bhopal
+159,Talaiya,Bhopal
+160,Tila Jamalpura,Bhopal
+161,TT Nagar,Bhopal
+162,Ganpati Naka,Burhanpur
+163,Khaknar,Burhanpur
+164,Kotwali Burhanpur,Burhanpur
+165,Lalbag,Burhanpur
+166,Nepanagar,Burhanpur
+167,Nimbola,Burhanpur
+168,Shahpur Burhanpur,Burhanpur
+169,Shikarpura,Burhanpur
+170,Alipura,Chhatarpur
+171,Bajna,Chhatarpur
+172,Bamitha,Chhatarpur
+173,Bamnora,Chhatarpur
+174,Bansiya,Chhatarpur
+175,Bara Malhara,Chhatarpur
+176,Bhagwa,Chhatarpur
+177,Bijawar,Chhatarpur
+178,Buxwaha,Chhatarpur
+179,Chandla,Chhatarpur
+180,Civil Lines Chhatarpur,Chhatarpur
+181,Garhi Malahra,Chhatarpur
+182,Gavarihar,Chhatarpur
+183,Goyara,Chhatarpur
+184,Gulganj,Chhatarpur
+185,Harpalpur,Chhatarpur
+186,Hinota,Chhatarpur
+187,Isanagar,Chhatarpur
+188,Jujhar Nagar,Chhatarpur
+189,Khajuraho,Chhatarpur
+190,Kishangarh,Chhatarpur
+191,Kotwali Chhatarpur,Chhatarpur
+192,Lavkush Nagar,Chhatarpur
+193,Maharajpur Chhatarpur,Chhatarpur
+194,Matguwan,Chhatarpur
+195,Nowgaon Chhatarpur,Chhatarpur
+196,Orchha Road,Chhatarpur
+197,Pipat Panagar,Chhatarpur
+198,Prakash Bamori,Chhatarpur
+199,Rajnagar,Chhatarpur
+200,Sarwai,Chhatarpur
+201,Satai,Chhatarpur
+202,Shahgarh,Chhatarpur
+203,Amarwara,Chhindwara
+204,Batkakhapa,Chhindwara
+205,Bichhua,Chhindwara
+206,Chand,Chhindwara
+207,Chandameta,Chhindwara
+208,Chaurai,Chhindwara
+209,Chhindwara,Chhindwara
+210,Damua,Chhindwara
+211,Dehat Chhindwara,Chhindwara
+212,Harrai,Chhindwara
+213,Junnardeo,Chhindwara
+214,Kundipura,Chhindwara
+215,Lawaghoghri,Chhindwara
+216,Mahuljhir,Chhindwara
+217,Mohkhed,Chhindwara
+218,Navegaon Chhindwara,Chhindwara
+219,Parasia,Chhindwara
+220,Rawanbara Shivpuri,Chhindwara
+221,Tamia,Chhindwara
+222,Umreth,Chhindwara
+223,Batiagarh,Damoh
+224,Dehat Damoh,Damoh
+225,Gaisabad,Damoh
+226,Hatta Damoh,Damoh
+227,Hindoria,Damoh
+228,Jabera,Damoh
+229,Kotwali Damoh,Damoh
+230,Kumhari,Damoh
+231,Madiadon,Damoh
+232,Magron,Damoh
+233,Nohta,Damoh
+234,Patera,Damoh
+235,Patharia Damoh,Damoh
+236,Rajpura,Damoh
+237,Raneh,Damoh
+238,Taradehi,Damoh
+239,Tejgarh,Damoh
+240,Tendukhera Damoh,Damoh
+241,Atreta,Datia
+242,Badoni,Datia
+243,Basai,Datia
+244,Bhagwapura,Datia
+245,Bhander,Datia
+246,Chirula,Datia
+247,Civil Lines Datia,Datia
+248,Dhirpura,Datia
+249,Dirolipar,Datia
+250,Dursara,Datia
+251,Gaundan,Datia
+252,Goraghat,Datia
+253,Indergarh,Datia
+254,Jigna,Datia
+255,Kotwali Datia,Datia
+256,Launch,Datia
+257,Pandokhar,Datia
+258,Sarsai,Datia
+259,Seonda,Datia
+260,Sinawal,Datia
+261,Tharet,Datia
+262,Unao,Datia
+263,Bagli,Dewas
+264,Bank Note Press,Dewas
+265,Bharotha,Dewas
+266,Bhonrasa,Dewas
+267,Civil Lines Dewas,Dewas
+268,Harangaon,Dewas
+269,Hatpiplya,Dewas
+270,Industrial Area,Dewas
+271,Kamalapur,Dewas
+272,Kannod,Dewas
+273,Kantaphor,Dewas
+274,Khategaon,Dewas
+275,Kotwali Dewas,Dewas
+276,Nahar Darwaja,Dewas
+277,Nemawar,Dewas
+278,Pipalrawan,Dewas
+279,Satwas,Dewas
+280,Sonkachha,Dewas
+281,Tonk Khurd,Dewas
+282,Udainagar,Dewas
+283,Vijayaganj Mandi,Dewas
+284,Amjhera,Dhar
+285,Badnawar,Dhar
+286,Bagh,Dhar
+287,Dahi,Dhar
+288,Dhamnod,Dhar
+289,Dharampuri,Dhar
+290,Gandhwani,Dhar
+291,Kanwan,Dhar
+292,Kotwali Dhar,Dhar
+293,Kukshi,Dhar
+294,Manawar,Dhar
+295,Mandav,Dhar
+296,Nalchha,Dhar
+297,Nowgaon Dhar,Dhar
+298,Pithampur,Dhar
+299,Rajgarh Dhar,Dhar
+300,Rajod,Dhar
+301,Sadalpur,Dhar
+302,Sagore,Dhar
+303,Sardarpur,Dhar
+304,Sector no. 1 Pithampur,Dhar
+305,Tanda,Dhar
+306,Tirla,Dhar
+307,Bazag,Dindori
+308,Dindori,Dindori
+309,Garha Sarai,Dindori
+310,Karanjiya,Dindori
+311,Mehandwani,Dindori
+312,Samnapur,Dindori
+313,Shahpur Dindori,Dindori
+314,Shahpura Dindori,Dindori
+315,Aron Guna,Guna
+316,Bajarang Garh,Guna
+317,Bamori,Guna
+318,Cantt Guna,Guna
+319,Chachora,Guna
+320,Dharnavada,Guna
+321,Fatehgarh,Guna
+322,Jamner,Guna
+323,Kotwali Guna,Guna
+324,Kumbharaj,Guna
+325,Makusdan Garh,Guna
+326,Mrigwas,Guna
+327,Myana,Guna
+328,Raghogarh,Guna
+329,Sirshi,Guna
+330,Vijaipur,Guna
+331,Antri,Gwalior
+332,Aron Gwalior,Gwalior
+333,Bahodapur,Gwalior
+334,Bailghra,Gwalior
+335,Behat,Gwalior
+336,Bhawarpura,Gwalior
+337,Bhitarwar,Gwalior
+338,Bijoli,Gwalior
+339,Billaua,Gwalior
+340,Chinor,Gwalior
+341,Dabra,Gwalior
+342,Dehat Dabra,Gwalior
+343,Ghatigaon,Gwalior
+344,Gijorra,Gwalior
+345,Girwai,Gwalior
+346,Gola Ka Mandir,Gwalior
+347,Gwalior,Gwalior
+348,Hajira,Gwalior
+349,Hastinapur,Gwalior
+350,Inderganj,Gwalior
+351,Janakganj,Gwalior
+352,Jhansi Road,Gwalior
+353,Kampoo,Gwalior
+354,Karhiya,Gwalior
+355,Kotwali Gwalior,Gwalior
+356,Madhavganj,Gwalior
+357,Maharajpur Gwalior,Gwalior
+358,Mohna,Gwalior
+359,Morar,Gwalior
+360,Padao,Gwalior
+361,Panihar,Gwalior
+362,Pichore,Gwalior
+363,Purani Chhawani,Gwalior
+364,Sirol,Gwalior
+365,Thatipur,Gwalior
+366,Tighra,Gwalior
+367,University Gwalior,Gwalior
+368,Utila,Gwalior
+369,Chhipawar,Harda
+370,Civil Line Harda,Harda
+371,Handia,Harda
+372,Harda,Harda
+373,Rehatgaon,Harda
+374,Sirali,Harda
+375,Timarni,Harda
+376,Aerodrome,Indore
+377,Annapurna,Indore
+378,Azad Nagar Indore,Indore
+379,Badgonda,Indore
+380,Banganga,Indore
+381,Betma,Indore
+382,Bhanwarkuan,Indore
+383,Chandan Nagar,Indore
+384,Chandavati Ganj,Indore
+385,Chhatripura,Indore
+386,Chhoti Gwaltoli,Indore
+387,Depalpur,Indore
+388,Dwarka Puri,Indore
+389,Gandhi Nagar Indore,Indore
+390,Gautampura,Indore
+391,Hatod,Indore
+392,Hiranagar,Indore
+393,Juni Indore,Indore
+394,Kanadiya,Indore
+395,Khajrana,Indore
+396,Khudel,Indore
+397,Kishanganj,Indore
+398,Kotwali Indore,Indore
+399,Kshipra,Indore
+400,Lasuriya,Indore
+401,Malharganj,Indore
+402,Manpur Indore,Indore
+403,MG Road,Indore
+404,Mhow,Indore
+405,MIG Thana,Indore
+406,Palasiya,Indore
+407,Pandrinath,Indore
+408,Pardeshipura,Indore
+409,Rajendranagar,Indore
+410,Raoji Bazar,Indore
+411,Rau,Indore
+412,Sadarbazar,Indore
+413,Sanwer,Indore
+414,Sanyogitaganj,Indore
+415,Sarafa,Indore
+416,Simrol,Indore
+417,Tejaji Nagar,Indore
+418,Tilak Nagar,Indore
+419,Tukoganj,Indore
+420,Vijay Nagar Indore,Indore
+421,Adhartal,Jabalpur
+422,Barela,Jabalpur
+423,Bargi,Jabalpur
+424,Belbag,Jabalpur
+425,Belkheda,Jabalpur
+426,Bhedaghat,Jabalpur
+427,Cantt Jabalpur,Jabalpur
+428,Chargawan,Jabalpur
+429,Civil Lines Jabalpur,Jabalpur
+430,Garha,Jabalpur
+431,Ghamapur,Jabalpur
+432,Gohalpur,Jabalpur
+433,Gora Bazar,Jabalpur
+434,Gorakhpur,Jabalpur
+435,Goshalpur,Jabalpur
+436,Gwarighat,Jabalpur
+437,Hanumantal,Jabalpur
+438,Katangi Jabalpur,Jabalpur
+439,Khamaria,Jabalpur
+440,Khitola,Jabalpur
+441,Kotwali Jabalpur,Jabalpur
+442,Kundam,Jabalpur
+443,Lordganj,Jabalpur
+444,Madan Mahal,Jabalpur
+445,Madhatal,Jabalpur
+446,Majhgawan Jabalpur,Jabalpur
+447,Majholi,Jabalpur
+448,Omti,Jabalpur
+449,Panagar,Jabalpur
+450,Patan,Jabalpur
+451,Ranjhi,Jabalpur
+452,Sanjivani Nagar,Jabalpur
+453,Shahpura Jabalpur,Jabalpur
+454,Sihora,Jabalpur
+455,Tilwara,Jabalpur
+456,Vijay Nagar Jabalpur,Jabalpur
+457,Jhabua,Jhabua
+458,Kakanwani,Jhabua
+459,Kalidevi,Jhabua
+460,Kalyanpura,Jhabua
+461,Meghnagar,Jhabua
+462,Petlawad,Jhabua
+463,Raipuriya,Jhabua
+464,Ranapur,Jhabua
+465,Thandla,Jhabua
+466,Badwara,Katni
+467,Bahoriband,Katni
+468,Bakal,Katni
+469,Barahi,Katni
+470,Dhimarkheda,Katni
+471,Kotwali Katni,Katni
+472,Kuthla,Katni
+473,Kymore,Katni
+474,Madhavnagar Katni,Katni
+475,New Katni Junction,Katni
+476,Rangnath Nagar,Katni
+477,Rithi,Katni
+478,Salimnabad,Katni
+479,Umariapan,Katni
+480,Vijayaraghavgarh,Katni
+481,Chhaigaon Makhan,Khandhwa
+482,Dhangaon,Khandhwa
+483,Harsud,Khandhwa
+484,Jawar Khandwa,Khandhwa
+485,Khalwa,Khandhwa
+486,Killod,Khandhwa
+487,Kotwali Khandwa,Khandhwa
+488,Mandhata,Khandhwa
+489,Moghat Road,Khandhwa
+490,Mundi,Khandhwa
+491,Narmada Nagar,Khandhwa
+492,Padam Nagar,Khandhwa
+493,Pandhana,Khandhwa
+494,Piplod,Khandhwa
+495,Balakwara,Khargone
+496,Balwara,Khargone
+497,Barud,Khargone
+498,Barwah,Khargone
+499,Bedia,Khargone
+500,Bhagwanpura,Khargone
+501,Bhikangaon,Khargone
+502,Bistan,Khargone
+503,Chainpur,Khargone
+504,Gogawan,Khargone
+505,Jaitapur,Khargone
+506,Karhi,Khargone
+507,Kasrawad,Khargone
+508,Kotwali Khargone,Khargone
+509,Maheshwar,Khargone
+510,Mandaleshwar,Khargone
+511,Mangaon,Khargone
+512,Oon,Khargone
+513,Sanawad,Khargone
+514,Amarpatan,Maihar
+515,Amdara,Maihar
+516,Badera,Maihar
+517,Dehat Maihar,Maihar
+518,Maihar,Maihar
+519,Ramnagar Maihar,Maihar
+520,Tala,Maihar
+521,Bamhani,Mandla
+522,Bichhiya Mandla,Mandla
+523,Bijadandi,Mandla
+524,Ghughri,Mandla
+525,Khatiya,Mandla
+526,Kotwali Mandla,Mandla
+527,Maharajpur Mandla,Mandla
+528,Mawai,Mandla
+529,Mohgaon Mandla,Mandla
+530,Motinala,Mandla
+531,Nainpur,Mandla
+532,Niwas,Mandla
+533,Tikariya,Mandla
+534,Afzalpur,Mandsaur
+535,Bhanpura,Mandsaur
+536,Bhawgarh,Mandsaur
+537,Daloda,Mandsaur
+538,Gandhi Sagar,Mandsaur
+539,Garoth,Mandsaur
+540,Kotwali Mandsaur,Mandsaur
+541,Malhargarh,Mandsaur
+542,Nahargarh,Mandsaur
+543,Nai Abadi,Mandsaur
+544,Narayangarh,Mandsaur
+545,Pipliya Mandi,Mandsaur
+546,Shamgarh,Mandsaur
+547,Sitamau,Mandsaur
+548,Suwasra,Mandsaur
+549,YD Nagar,Mandsaur
+550,Hanumana,Mauganj
+551,Laur,Mauganj
+552,Mauganj,Mauganj
+553,Naigarhi,Mauganj
+554,Shahpur Mauganj,Mauganj
+555,Ambah,Morena
+556,Bagchini,Morena
+557,Bamore,Morena
+558,Chinnoni,Morena
+559,Civil Lines Morena,Morena
+560,Devgarh,Morena
+561,Dimni,Morena
+562,Jaora Morena,Morena
+563,Kailaras,Morena
+564,Kotwali Morena,Morena
+565,Mahua,Morena
+566,Matabasaiya,Morena
+567,Nagra,Morena
+568,Nirar,Morena
+569,Noorabad,Morena
+570,Pahadgarh,Morena
+571,Porsa,Morena
+572,Rampur,Morena
+573,Rithora,Morena
+574,Sabalgarh,Morena
+575,Saraichhola,Morena
+576,Sihonia,Morena
+577,Station Road Morena,Morena
+578,Sumaoli,Morena
+579,Tentra,Morena
+580,Bankhedi,Narmada puram
+581,Dehat Narmadapuram,Narmada puram
+582,Dolaria,Narmada puram
+583,Itarsi City,Narmada puram
+584,Kesla,Narmada puram
+585,Makhan Nagar,Narmada puram
+586,Narmadapuram,Narmada puram
+587,Pachmarhi,Narmada puram
+588,Pathrota,Narmada puram
+589,Pipariya,Narmada puram
+590,Rampur Gurra,Narmada puram
+591,Seoni Malwa,Narmada puram
+592,Sheopur,Narmada puram
+593,Sohagpur Narmadapuram,Narmada puram
+594,Station road pipariya,Narmada puram
+595,Tawanagar,Narmada puram
+596,Cheechli,Narsinghpur
+597,Dongargaon,Narsinghpur
+598,Gadarwara,Narsinghpur
+599,Gotegaon,Narsinghpur
+600,Kareli,Narsinghpur
+601,Mungwani,Narsinghpur
+602,Narsinghpur,Narsinghpur
+603,Paloha,Narsinghpur
+604,Saikhera Narsinghpur,Narsinghpur
+605,Station Ganj,Narsinghpur
+606,Suatala,Narsinghpur
+607,Tendukhera Narsinghpur,Narsinghpur
+608,Themi,Narsinghpur
+609,Baghana,Neemuch
+610,Jawad,Neemuch
+611,Jeeran,Neemuch
+612,Kukreshwar,Neemuch
+613,Manasa,Neemuch
+614,Neemuch Cant,Neemuch
+615,Neemuch City,Neemuch
+616,Rampura,Neemuch
+617,Ratangarh,Neemuch
+618,Singoli,Neemuch
+619,Jeron,Niwari
+620,Niwari,Niwari
+621,Orchha,Niwari
+622,Prithvipur,Niwari
+623,Sendri,Niwari
+624,Simra,Niwari
+625,Teharka,Niwari
+626,Lodikhera,Pandhurna
+627,Mohgaon,Pandhurna
+628,Pandhurna,Pandhurna
+629,Saunsar,Pandhurna
+630,Ajaigarh,Panna
+631,Amanganj,Panna
+632,Brijpur,Panna
+633,Devendranagar,Panna
+634,Dharampura,Panna
+635,Gunnor,Panna
+636,Kotwali Panna,Panna
+637,Madla,Panna
+638,Pawai Panna,Panna
+639,Raipura,Panna
+640,Saleha,Panna
+641,Shahnagar,Panna
+642,Simariya,Panna
+643,Sunwani,Panna
+644,Badi,Raisen
+645,Bamhori Raisen,Raisen
+646,Bareli,Raisen
+647,Begumganj,Raisen
+648,Bharkachchh,Raisen
+649,Dehgaon,Raisen
+650,Deori Raisen,Raisen
+651,Gairat Ganj,Raisen
+652,Goharganj,Raisen
+653,Mandideep,Raisen
+654,Noorganj,Raisen
+655,Obedullahganj,Raisen
+656,Raisen,Raisen
+657,Salamatpur,Raisen
+658,Sanchi,Raisen
+659,Satlapur Industrial Area,Raisen
+660,Silwani,Raisen
+661,Sultanganj,Raisen
+662,Sultanpur,Raisen
+663,Udaipura,Raisen
+664,Umraoganj,Raisen
+665,Bhojpur,Rajgarh
+666,Biaora,Rajgarh
+667,Chhapiheda,Rajgarh
+668,Dehat Biora,Rajgarh
+669,Kalipith,Rajgarh
+670,Karanwas,Rajgarh
+671,Khilchipur,Rajgarh
+672,Khujner,Rajgarh
+673,Kurawar,Rajgarh
+674,Lima Chouhan,Rajgarh
+675,Machalpur,Rajgarh
+676,Malawar,Rajgarh
+677,Narsinghgarh,Rajgarh
+678,Pachor,Rajgarh
+679,Rajgarh Kotwali,Rajgarh
+680,Sarangpur,Rajgarh
+681,Suthalia,Rajgarh
+682,Talen,Rajgarh
+683,Voda,Rajgarh
+684,Zirapur,Rajgarh
+685,Alot,Ratlam
+686,Badawada,Ratlam
+687,Bajna Ratlam,Ratlam
+688,Barkheda,Ratlam
+689,Bilpank,Ratlam
+690,Deendayal Nagar,Ratlam
+691,Industrial Area Jaora,Ratlam
+692,Industrial Area Ratlam,Ratlam
+693,Jaora Ratlam,Ratlam
+694,Kalukhera,Ratlam
+695,Manak Chowk,Ratlam
+696,Namli,Ratlam
+697,Piploda,Ratlam
+698,Raoti,Ratlam
+699,Ringnod,Ratlam
+700,Sailana,Ratlam
+701,Sarwan,Ratlam
+702,Shivgarh,Ratlam
+703,Station Road Ratlam,Ratlam
+704,Taal,Ratlam
+705,Amahiya,Rewa
+706,Atraila,Rewa
+707,Baikunthpur,Rewa
+708,Bichhiya Rewa,Rewa
+709,Chakghat,Rewa
+710,Chorahta,Rewa
+711,Civil Lines Rewa,Rewa
+712,Dabhaura,Rewa
+713,Garh,Rewa
+714,Govindgarh,Rewa
+715,Gurh,Rewa
+716,Janeh,Rewa
+717,Jawa,Rewa
+718,Kotwali Rewa,Rewa
+719,Mangawan,Rewa
+720,Panwar,Rewa
+721,Raipur Karchulian,Rewa
+722,Sagra,Rewa
+723,Saman,Rewa
+724,Semariya Rewa,Rewa
+725,Sirmaur,Rewa
+726,Suhagi,Rewa
+727,University Rewa,Rewa
+728,Agasoud,Sagar
+729,Baheria,Sagar
+730,Bahrol,Sagar
+731,Banda,Sagar
+732,Bandri,Sagar
+733,Baretha,Sagar
+734,Bhangarh,Sagar
+735,Bina,Sagar
+736,Binaika,Sagar
+737,Cantt Sagar,Sagar
+738,Chhanbeela,Sagar
+739,Civil Lines Sagar,Sagar
+740,Deori Sagar,Sagar
+741,Garhakota,Sagar
+742,Gaurjhamar,Sagar
+743,Gopalganj,Sagar
+744,Jaisinagar,Sagar
+745,Kesli,Sagar
+746,Khimlasa,Sagar
+747,Khurai,Sagar
+748,Khurai (Gramin),Sagar
+749,Kotwali Sagar,Sagar
+750,Maharajpur Sagar,Sagar
+751,Makroniya,Sagar
+752,Malthone,Sagar
+753,Motinagar,Sagar
+754,Naryawali,Sagar
+755,Rahatgarh,Sagar
+756,Rehli,Sagar
+757,Sanodha,Sagar
+758,Shahgarh Sagar,Sagar
+759,Surkhi,Sagar
+760,Baraundha,Satna
+761,Civil Lines Satna,Satna
+762,Dharkundi,Satna
+763,Jaitwara,Satna
+764,Jasso,Satna
+765,Kolgawana,Satna
+766,Kotar,Satna
+767,Kothi,Satna
+768,Kotwali Satna,Satna
+769,Majhgawan Satna,Satna
+770,Nagod,Satna
+771,Nayagaon Satna,Satna
+772,Raigao,Satna
+773,Rampur Baghelan,Satna
+774,Sabhapur,Satna
+775,Singhpur Satna,Satna
+776,Uchehra,Satna
+777,Ahmadpur,Sehore
+778,Ashta,Sehore
+779,Bilkishganj,Sehore
+780,Budni,Sehore
+781,Doraha,Sehore
+782,Gopalpur Sehore,Sehore
+783,Ichhawar,Sehore
+784,Jawar Sehore,Sehore
+785,Kotwali Sehore,Sehore
+786,Mandi,Sehore
+787,Nasrullaganj,Sehore
+788,Parvati,Sehore
+789,Rehti,Sehore
+790,Shahganj,Sehore
+791,Shyampur,Sehore
+792,Siddiqiganj,Sehore
+793,Adegaon,Seoni
+794,Ari,Seoni
+795,Bandol,Seoni
+796,Barghat,Seoni
+797,Chhapra,Seoni
+798,Dhanaura,Seoni
+799,Dhuma,Seoni
+800,Dunda Seoni Grameen,Seoni
+801,Ghansor,Seoni
+802,Kanhiwara,Seoni
+803,Keolari,Seoni
+804,Kindarai,Seoni
+805,Kotwali Seoni,Seoni
+806,Kurai,Seoni
+807,Lakhanwara,Seoni
+808,Lakhnadon,Seoni
+809,Ugli,Seoni
+810,Amlai,Shahdol
+811,Beohari,Shahdol
+812,Budhar,Shahdol
+813,Deolond,Shahdol
+814,Dhanpuri,Shahdol
+815,Gohparoo,Shahdol
+816,Jaisinghnagar,Shahdol
+817,Jaithpur,Shahdol
+818,Kheraha,Shahdol
+819,Kotwali Shahdol,Shahdol
+820,Papondh,Shahdol
+821,Sidhi,Shahdol
+822,Singhpur Shahdol,Shahdol
+823,Sohagpur Shahdol,Shahdol
+824,Akodiya,Shajapur
+825,Avantipur Barodiya,Shajapur
+826,Berchha,Shajapur
+827,Kala Pipal,Shajapur
+828,Kotwali Shajapur,Shajapur
+829,Lalghati,Shajapur
+830,Maksi,Shajapur
+831,Moman Barodiya,Shajapur
+832,Salsalai,Shajapur
+833,Shujalpur,Shajapur
+834,Shujalpur Mandi,Shajapur
+835,Sundarsi,Shajapur
+836,Sunera,Shajapur
+837,Agra,Sheopur
+838,Awda,Sheopur
+839,Bargawan,Sheopur
+840,Baroda,Sheopur
+841,Chilwani,Sheopur
+842,Dhondhr,Sheopur
+843,Gaswani,Sheopur
+844,Karhal,Sheopur
+845,Kotwali Sheopur,Sheopur
+846,Magarda,Sheopur
+847,Manpur Sheopur,Sheopur
+848,Ochhapura (Nayagaon),Sheopur
+849,Raghunathpur,Sheopur
+850,Sesaipura (Palpur),Sheopur
+851,Sheopur Dehat,Sheopur
+852,Vijaipur Sheopur,Sheopur
+853,Virpur,Sheopur
+854,Amola,Shivpuri
+855,Badarwas,Shivpuri
+856,Bamhori Shivpuri,Shivpuri
+857,Bamor Kala,Shivpuri
+858,Berad,Shivpuri
+859,Bhaunti,Shivpuri
+860,Charch,Shivpuri
+861,Dinara,Shivpuri
+862,Gobardhan,Shivpuri
+863,Gopalpur,Shivpuri
+864,Indar,Shivpuri
+865,Karera,Shivpuri
+866,Khaniadhana,Shivpuri
+867,Kolaras,Shivpuri
+868,Kotwali Shivpuri,Shivpuri
+869,Mayapur,Shivpuri
+870,Narwar,Shivpuri
+871,Physical,Shivpuri
+872,Pichhor,Shivpuri
+873,Pohri,Shivpuri
+874,Purani Shivpuri,Shivpuri
+875,Rannod,Shivpuri
+876,Satanwara,Shivpuri
+877,Sehor,Shivpuri
+878,Sirsod,Shivpuri
+879,Subhash Pura,Shivpuri
+880,Surwaya,Shivpuri
+881,Tendua,Shivpuri
+882,Amiliya,Sidhi
+883,Bahari,Sidhi
+884,Bhuimadh,Sidhi
+885,Churhat,Sidhi
+886,Jamodi,Sidhi
+887,Kamarji,Sidhi
+888,Kotwali Sidhi,Sidhi
+889,Kusmi,Sidhi
+890,Madwas,Sidhi
+891,Majhauli,Sidhi
+892,Rampur Naikin,Sidhi
+893,Semariya Sidhi,Sidhi
+894,Bargawan Singrauli,Singrauli
+895,Chitrangi,Singrauli
+896,Deosar,Singrauli
+897,Garhva,Singrauli
+898,Langadol,Singrauli
+899,Mada,Singrauli
+900,Morwa,Singrauli
+901,Navanagar,Singrauli
+902,Sarai,Singrauli
+903,Vindhya Nagar,Singrauli
+904,Waidhan,Singrauli
+905,Baldeogarh,Tikamgarh
+906,Bamori Kala,Tikamgarh
+907,Baragaon,Tikamgarh
+908,Budera,Tikamgarh
+909,Chandera,Tikamgarh
+910,Dehat Tikamgarh,Tikamgarh
+911,Digora,Tikamgarh
+912,Jatara,Tikamgarh
+913,Khargapur,Tikamgarh
+914,Kotwali Tikamgarh,Tikamgarh
+915,Kudila,Tikamgarh
+916,Lidhora,Tikamgarh
+917,Mohangarh,Tikamgarh
+918,Palera,Tikamgarh
+919,Badnagar,Ujjain
+920,Bhat Pachlana,Ujjain
+921,Bherawgarh,Ujjain
+922,Birlagram,Ujjain
+923,Chimanganj,Ujjain
+924,Dewasgate,Ujjain
+925,Chintaman Ganesh,Ujjain
+926,Ghatia,Ujjain
+927,Ingoria,Ujjain
+928,Jharda,Ujjain
+929,Jiwajiganj,Ujjain
+930,Kayatha,Ujjain
+931,Khachrod,Ujjain
+932,Kharakuan,Ujjain
+933,Kotwali Ujjain,Ujjain
+934,Madhav Nagar Ujjain,Ujjain
+935,Mahakal,Ujjain
+936,Mahidpur,Ujjain
+937,Mahidpur Road,Ujjain
+938,Makdon,Ujjain
+939,Naagjhiri,Ujjain
+940,Nagda,Ujjain
+941,Nanakheda,Ujjain
+942,Narwar Ujjain,Ujjain
+943,Neelganga,Ujjain
+944,Panvasa,Ujjain
+945,Raghawi,Ujjain
+946,Tarana,Ujjain
+947,Unhel,Ujjain
+948,Chandia,Umaria
+949,Indwar,Umaria
+950,Manpur Umaria,Umaria
+951,Naurojabad,Umaria
+952,Pali,Umaria
+953,Umaria,Umaria
+954,Anandpur,Vidisha
+955,Civil Lines Vidisha,Vidisha
+956,Deepna Kheda,Vidisha
+957,Dehat Basoda,Vidisha
+958,Ganj Basoda,Vidisha
+959,Gulabganj,Vidisha
+960,Gyaraspur,Vidisha
+961,Haidargarh,Vidisha
+962,Kararia,Vidisha
+963,Kotwali Vidisha,Vidisha
+964,Kurwai,Vidisha
+965,Lateri,Vidisha
+966,Mugalsarai,Vidisha
+967,Murwas,Vidisha
+968,Nateran,Vidisha
+969,Pathari,Vidisha
+970,Patharia Vidisha,Vidisha
+971,Shamshabad,Vidisha
+972,Sironj,Vidisha
+973,Teonda,Vidisha
+974,Unarsi Kalan,Vidisha
